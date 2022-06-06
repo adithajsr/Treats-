@@ -23,6 +23,7 @@ const data_base = {
             auth_id: '1'
             is_public: true
             start: '0'
+            message: 'Hello world"
         }
     ]
 }

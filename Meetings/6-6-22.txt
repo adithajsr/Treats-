@@ -1,0 +1,13 @@
+We divided the work of creating stubbed functions; two for each person.
+Jack has authLoginV1 and authRegisterV1
+Caitlyn has channelsCreateV1 and channelslistV1
+Rachel has channelsListallV1 and channelDetailsV1
+Joseph has channelJoinV1 and channelInviteV1
+Aditha has channelMessagesV1 and the Gym ;)
+
+We also discussed and decided on the data structures required for our "UNSW Treats"
+by catgeorising the data into infomration related to a user and to a channel, utilising snake_case.
+
+Joseph, Aditha, Rachel, Caitlyn and Jack were present,
+it was held in the Ainsworth level 3 labs from 14:06 - 15:17,
+and a 15 minute video-call meeting also took place with tutor Joseph.

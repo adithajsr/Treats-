@@ -1,8 +1,3 @@
-function channelJoinV1(auth_id, channel_id) {
-  return "join";
+function channelJoinV1( authUserId, channelId ) {
+  return 'authUserId' + 'channelId';
 }
-
-function channelInviteV1(auth_id, channel_id, user_id) {
-  return "invited";
-}
-

@@ -6,6 +6,6 @@ function channelInviteV1(authUserId, channelId, uId) {
   return 'authUserId' + 'channelId'+ 'uId';
 }
 
-function channelsListAllV1(authUserId) {
-  return authUserId;
+function channelDetailsV1(authUserId, channelId) {
+  return authUserId + channelId;
 }

@@ -4,11 +4,11 @@
 const data_base = {
     user: [
         {
-            user_id: 10,
+            uId: 10,
             email: 'student@unsw.com',
             password: 'password',
-            first_name: 'John',
-            last_name: 'Doe',
+            nameFirst: 'John',
+            nameLast: 'Doe',
             // possible usage of handle variable
             // handle_name: 'a handle'
         }
@@ -16,12 +16,12 @@ const data_base = {
 
     channel: [
         {
-            channel_id: 999,
-            channel_name: 'channel',
+            channelId: 999,
+            channelName: 'channel',
             // predicting we might need to make auth_id an array of auth_ids
             // i.e. auth_id: [1, 3, 6, 9, 12]
-            auth_id: 1,
-            is_public: true,
+            authId: 1,
+            isPublic: true,
             start: 0,
             message: 'Hello world",
         }

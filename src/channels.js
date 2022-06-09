@@ -6,6 +6,6 @@ function channelsListallV1 (authUserId) {
     return 'authUserId';
 }
 
-function channelslistV1 (authUserId) {
+function channelsListV1 (authUserId) {
     return 'authUserId';
 }

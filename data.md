@@ -1,4 +1,4 @@
-// In the database, there are arrays of object user, and arrays of object channel
+// In the database, there are arrays of object user, and arrays of object channel//
 
 const data = {
     user: [{
@@ -8,6 +8,7 @@ const data = {
         nameFirst: 'John',
         nameLast: 'Doe',
         handle: 'JohnD123'
+        global_perms: 'global'
     }]
 
     channel: [{
@@ -17,7 +18,7 @@ const data = {
         start: 0,
         members: [{
                 uId: -999,
-                permissions: 'owner',
+                channel_perms: 'owner',
             }],
         messages: [{
                 channelId: 999,
@@ -26,5 +27,4 @@ const data = {
                 message: 'Hello world",
             }]
     }]
-
 }

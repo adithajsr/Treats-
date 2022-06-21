@@ -1,6 +1,6 @@
 // In the database, there are arrays of object user, and arrays of object channel
 
-const data_base = {
+const data = {
     user: [{
         uId: 10,
         email: 'student@unsw.com',
@@ -21,7 +21,7 @@ const data_base = {
             }],
         messages: [{
                 channelId: 999,
-                Uid: ‘-999’
+                uId: ‘-999’
                 timestamp: '001'
                 message: 'Hello world",
             }]

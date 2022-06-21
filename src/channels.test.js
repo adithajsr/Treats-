@@ -18,7 +18,7 @@ describe('channels capabilities', () => {
     // Parameters: { authUserId (integer) }
     // e.g. channelsListV1( 12 )
 
-    // Return type if no error: { channels (???) }
+    // Return type if no error: { channels }
     // i.e. array of objects, where each object contains types { channelId, name }
     /* e.g.
     [
@@ -35,25 +35,30 @@ describe('channels capabilities', () => {
 
     test('test successful list channels', () => {
 
-      // TODO:
+      const result = channelsListV1( 12 );
 
-      // let result = channelsCreateV1( 12, 'publicChannel', true );
-      // expect(uuidValidate(String(result.channelId))).toBe(true);
+      for (const channel of result) {
 
-      // result = channelsCreateV1( 12345, 'privateChannel', false );
-      // expect(uuidValidate(String(result.channelId))).toBe(true);
+        expect(channel).toStrictEqual(
+          expect.objectContaining({
+            channelId: expect.any(Number),
+            name: expect.any(String),
+          })
+        );
+
+      }
+
+      // FIXME: check if channelId is a valid UUID?
+      // check if name is between 1 and 20 characters?
       
     });
 
     test('test invalid list channels', () => {
-
-      // TODO: invalid authUserId
-      // assume: returns object {error: 'error'} 
-
-      // length of name is less than 1 character
-      // expect(channelsCreateV1( 12, '', true )).toStrictEqual({ error: 'error' });
-      // expect(channelsCreateV1( 12345, '', false )).toStrictEqual({ error: 'error' });
       
+      // invalid authUserId
+      // assume: returns object {error: 'error'} 
+      expect(channelsListV1( 'not a UUID' )).toStrictEqual({ error: 'error' });
+
     });
 
   });

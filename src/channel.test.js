@@ -27,26 +27,24 @@ describe (channelDetailsV1 check) {
     
     test('test error returned on invalid channel', () => {
 
-        let result = channelDetailsV1()
-
+        let result = channelDetailsV1(123, "");
+        expect(result).toStrictEqual({ error: 'error' });
 
     });
 
-    test('test error returned on non-member authorised user', () => {
+    test('test error returned on valid channel but non-member authorised user', () => {
 
-        let result = channelDetailsV1()
-
+        expect(channelDetailsV1('not a UUID')).toStrictEqual({ error: 'error' });
 
     });
 
     test('test successful return', () => {
 
         let result = channelDetailsV1()
-
+        expect().toEqual();
 
     });
 
 
-  
 
 }

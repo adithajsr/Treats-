@@ -8,7 +8,7 @@ const data = {
         nameFirst: 'John',
         nameLast: 'Doe',
         handle: 'JohnD123'
-        global_perms: 'global'
+        globalPerms: 'global'
     }]
 
     channel: [{
@@ -18,10 +18,9 @@ const data = {
         start: 0,
         members: [{
                 uId: -999,
-                channel_perms: 'owner',
+                channelPerms: 'owner',
             }],
         messages: [{
-                channelId: 999,
                 uId: ‘-999’
                 timestamp: '001'
                 message: 'Hello world",

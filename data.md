@@ -1,4 +1,4 @@
-// In the database, there are arrays of object user, and arrays of object channel//
+// In the database, there are arrays of object user, and arrays of object channel
 
 const data = {
     user: [{

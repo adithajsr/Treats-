@@ -3,11 +3,6 @@ import { clearV1 } from './other';
 import { validate as uuidValidate } from 'uuid';
 import { v4 } from "uuid";
 
-// return type if no error: name, isPublic, ownerMembers, allMembers
-
-// channelDetailsV1
-// Given a channel with ID channelId that the authorised user is a member of, provide basic details about the channel.
-
 describe (channelDetailsV1 check) {
 
     beforeEach(() => {
@@ -27,11 +22,32 @@ describe (channelDetailsV1 check) {
 
     });
 
+
+    for (const channel of result) {
+
+        expect(channel).toStrictEqual(
+          expect.objectContaining({
+            channelId: expect.any(Number),
+            name: expect.any(String),
+          })
+        );
+
+      }
+
+
     test('test successful return', () => {
         let authUserId = v4();
         let result = channelDetailsV1(authUserId, );
-        expect(result).toEqual();
-
+        for (const channel of result) {
+            expect(channel).toStrictEqual(
+                expect.objectContaining({
+                    name: expect.any(String);
+                    isPublic: expect.any(Boolean);
+                    ownerMembers: expect.any(Array);
+                    allMembers: expect.any(Array);
+                })
+            );
+        }
     });
 
 

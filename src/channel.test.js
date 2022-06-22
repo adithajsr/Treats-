@@ -22,22 +22,9 @@ describe (channelDetailsV1 check) {
 
     });
 
-
-    for (const channel of result) {
-
-        expect(channel).toStrictEqual(
-          expect.objectContaining({
-            channelId: expect.any(Number),
-            name: expect.any(String),
-          })
-        );
-
-      }
-
-
     test('test successful return', () => {
         let authUserId = v4();
-        let result = channelDetailsV1(authUserId, );
+        let result = channelDetailsV1(authUserId, 1);
         for (const channel of result) {
             expect(channel).toStrictEqual(
                 expect.objectContaining({

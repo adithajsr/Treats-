@@ -23,12 +23,64 @@ describe('channelDetailsV1 check', () => {
 
     test('test successful return', () => {
         let authUserId = v4();
-        let channelInfo = {channelId: 1, name: 'apple', isPublic: false, ownerMembers: [1, 2], allMembers: [1, 2, 3, 4]}
+        let channelInfo = {
+            channelId: 1, 
+            name: 'apple', 
+            isPublic: false, 
+            ownerMembers: [
+                {
+                uId: 20,
+                email: 'johndoe@unsw.com',
+                nameFirst: 'john',
+                nameLast: 'doe',
+                handleStr: 'johnDoe0'
+                }
+            ], 
+            allMembers: [
+                {
+                uId: 20,
+                email: 'johndoe@unsw.com',
+                nameFirst: 'john',
+                nameLast: 'doe',
+                handleStr: 'johnDoe0'
+                },
+                {
+                uId: 50,
+                email: 'janedoe@unsw.com',
+                nameFirst: 'jane',
+                nameLast: 'doe',
+                handleStr: 'janeDoe0'
+                }
+            ]
+        }
         expect(channelDetailsV1(authUserId, 1)).toStrictEqual({
             name: 'apple', 
             isPublic: false,
-            ownerMembers: [1, 2],
-            allMembers: [1, 2, 3, 4],
+            ownerMembers: [
+                {
+                uId: 20,
+                email: 'johndoe@unsw.com',
+                nameFirst: 'john',
+                nameLast: 'doe',
+                handleStr: 'johnDoe0'
+                }
+            ], 
+            allMembers: [
+                {
+                uId: 20,
+                email: 'johndoe@unsw.com',
+                nameFirst: 'john',
+                nameLast: 'doe',
+                handleStr: 'johnDoe0'
+                },
+                {
+                uId: 50,
+                email: 'janedoe@unsw.com',
+                nameFirst: 'jane',
+                nameLast: 'doe',
+                handleStr: 'janeDoe0'
+                }
+            ]
         });
     });
 

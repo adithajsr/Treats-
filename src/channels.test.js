@@ -15,14 +15,14 @@ describe ('channelsListallV1 test', () => {
     });
 
     test('no channels in database', () => {
-
+        // double check
         let authUserId = v4();
         expect(channelsListallV1(authUserId)).toStrictEqual({ error: 'error' });
 
     });
 
     test('return one channel', () => {
-        
+        // necessary?
         let authUserId = v4();
         let channelInfo = {channelId: 1, name: 'apple', isPublic: false, ownerMembers: [1], allMembers: [1, 2, 3, 4]}
         expect(channelsListallV1(authUserId)).toStrictEqual({
@@ -31,6 +31,7 @@ describe ('channelsListallV1 test', () => {
     });
 
     test('return multiple channels', () => {
+        // to fix
         let authUserId = v4();
         
     });

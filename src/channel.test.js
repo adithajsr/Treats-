@@ -1,9 +1,9 @@
-import { channelJoinV1, channelInviteV1, channelDetailsV1, channelMessagesV1 } from './channel';
-import { clearV1 } from './other';
+import { channelJoinV1, channelInviteV1, channelDetailsV1, channelMessagesV1 } from './channel.js';
+import { clearV1 } from './other.js';
 import { validate as uuidValidate } from 'uuid';
 import { v4 } from "uuid";
 
-describe (channelDetailsV1 check) {
+describe('channelDetailsV1 check', () => {
 
     beforeEach(() => {
         clearV1();
@@ -28,14 +28,14 @@ describe (channelDetailsV1 check) {
         for (const channel of result) {
             expect(channel).toStrictEqual(
                 expect.objectContaining({
-                    name: expect.any(String);
-                    isPublic: expect.any(Boolean);
-                    ownerMembers: expect.any(Array);
-                    allMembers: expect.any(Array);
+                    name: expect.any(String),
+                    isPublic: expect.any(Boolean),
+                    ownerMembers: expect.any(Array),
+                    allMembers: expect.any(Array),
                 })
             );
         }
     });
 
 
-}
+});

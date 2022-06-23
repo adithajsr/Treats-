@@ -1,5 +1,6 @@
 import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid, isUuidInUse, doesEmailExist } from './auth';
 import { clearV1 } from './other';
+import { v4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
 var validator = require('validator');

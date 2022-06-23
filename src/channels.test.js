@@ -1,15 +1,37 @@
-import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels';
+import { channelsCreateV1 } from './channels';
+import { authRegisterV1 } from './auth';
 import { clearV1 } from './other';
-import { validate as uuidValidate } from 'uuid';
 
+beforeEach(() => {
+  clearV1();
+});
 
 describe('channels capabilities', () => {
 
-  describe('channelsCreateV1', () => {
+  const createTestUser = (email, password, nameFirst, nameLast) => {
+    // authRegisterV1 returns { authUserId }
+    // FIXME: can probably remove a few of these return values if not needed
+    return { email, password, nameFirst, nameLast, ...authRegisterV1(email, password, nameFirst, nameLast) };
+  };
 
-    beforeEach(() => {
-      clearV1();
-    });
+  const createTestChannel = (authUserId, name, isPublic) => {
+    // channelsCreateV1 returns { channelId }
+    // FIXME: can probably remove a few of these return values if not needed
+    return { authUserId, name, isPublic, ...channelsCreateV1(authUserId, name, isPublic) };
+  };
+
+  let testUser;
+  let testChannel;
+  
+  beforeEach(() => {
+    testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    expect(testUser.authUserId).not.toStrictEqual({ error: 'error' });
+
+    testChannel = createTestChannel(testUser.authUserId, 'channelName', true);
+    expect(testChannel.channelId).not.toStrictEqual({ error: 'error' });
+  });
+  
+  describe('channelsCreateV1', () => {
 
     // TODO: Remove below comment before submitting
 
@@ -21,30 +43,38 @@ describe('channels capabilities', () => {
     // e.g. channelsCreateV1( 12, 'M13A_AERO', false )
 
     // Return type if no error: { channelId (integer) }
-    /*  e.g.  return {
-                channelId: 1,
-              }; */
+    // e.g.  return {
+    //         channelId: 1,
+    //       };
 
-    test('test successful channel creation', () => {
-
-      let result = channelsCreateV1( 12, 'publicChannel', true );
-      expect(uuidValidate(String(result.channelId))).toBe(true);
-
-      result = channelsCreateV1( 12345, 'privateChannel', false );
-      expect(uuidValidate(String(result.channelId))).toBe(true);
-      
+    test('Invalid authUserId', () => {
+      expect(channelsCreateV1(testUser.authUserId + 1, 'channelName', true)).toStrictEqual({ error: 'error' });
     });
 
-    test('test invalid channel creation', () => {
+    test.each([
+      // length of name is less than 1 or more than 20 characters
+      { name: '' },
+      { name: 'moreThanTwentyCharacters' },
+    ])("Invalid channel name: '$name'", ({ name }) => {
+      expect(channelsCreateV1(testUser.authUserId, name, true)).toStrictEqual({ error: 'error' });
+    });
 
-      // length of name is less than 1 character
-      expect(channelsCreateV1( 12, '', true )).toStrictEqual({ error: 'error' });
-      expect(channelsCreateV1( 12345, '', false )).toStrictEqual({ error: 'error' });
+    const channelsCreateObject = expect.objectContaining({
+      channelId: expect.any(Number),
+    });
 
-      // length of name is more than 20 characters
-      expect(channelsCreateV1( 12, 'moreThanTwentyCharacters', true )).toStrictEqual({ error: 'error' });
-      expect(channelsCreateV1( 12345, 'veryVeryLongChannelName', false )).toStrictEqual({ error: 'error' });
-      
+    test('Containing the right keys', () => {
+      expect(channelsCreateV1(testUser.authUserId, 'channelName', true)).toEqual(channelsCreateObject);
+    });
+
+    // FIXME: not sure if this test is necessary
+    // I think this tests that channelsCreateV1 creates different channelId's?
+    test('Can register same channel name, same publicness', () => {
+      const c1 = channelsCreateV1(testUser.authUserId, 'channelName', true);
+      const c2 = channelsCreateV1(testUser.authUserId, 'channelName', true);
+      expect(c1).toStrictEqual(channelsCreateObject);
+      expect(c2).toStrictEqual(channelsCreateObject);
+      expect(c1).not.toStrictEqual(c2);
     });
 
   });

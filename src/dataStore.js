@@ -1,5 +1,22 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data = {};
+let data = {
+  user: [
+  ],
+  channel: [
+    {
+      channelId: 999,
+      channelName: 'one',
+    },
+    // {
+    //   channelId: 999,
+    //   channelName: 'two',
+    // },
+    // {
+    //   channelId: 999,
+    //   channelName: 'three',
+    // }
+  ]
+};
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 

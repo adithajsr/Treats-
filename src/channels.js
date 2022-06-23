@@ -17,7 +17,7 @@ function channelsListallV1(authUserId) {
   let foundChannels = [];
 
   // invalid authUserId
-  if (isNaN(authUserId) === true) {
+  if (isNaN(authUserId) === true || authUserId === '') {
     return { error: 'error' }
   }
 
@@ -34,5 +34,14 @@ function channelsListallV1(authUserId) {
     channels: foundChannels // see interface for contents
   };
 }
+// function channelsListallV1(authUserId){
+//   //probs needs to check whether authUserId is valid. IDK wasn't clear from documentation.
+//   let data = getData();
+//   const {channel} = data; // extracts channel array from data
+//   //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
+//   const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
+//   return { channels: result }; //an array of channel information containing keys channelId and channelName
+// }
+
   
 export { channelsCreateV1, channelsListV1, channelsListallV1 };

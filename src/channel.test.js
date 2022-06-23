@@ -26,12 +26,13 @@ describe('channelDetailsV1 check', () => {
     });
 
     test('test error returned on valid channel but authorised user is not a member of the channel', () => {
+
         const c1 = channelsCreateV1(12345, 'channelone', true); 
         expect(channelDetailsV1(999999, c1)).toStrictEqual({ error: 'error' });
 
     });
 
-    test('test successful return - one channel,', () => {
+    test('test successful return', () => {
 
         const c1 = channelsCreateV1(12345, 'channelone', true); 
         const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe')
@@ -42,8 +43,8 @@ describe('channelDetailsV1 check', () => {
             ownerMembers: c1.ownerMembers,
             allMembers: c1.allMembers,
         });
-
     });
 
+    
 
 });

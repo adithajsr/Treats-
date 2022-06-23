@@ -6,21 +6,21 @@ import { getData, setData } from './dataStore';
 // authRegisterV1 and clearV1 have been fully implemented and
 // merged into master & this branch
 
+
+/*
+Creates a new channel with the given name that is either a public
+or private channel
+
+Arguments:
+    authUserId (integer)    - user ID of the user who is creating the channel
+    name (string)           - name of new channel
+    isPublic (boolean)      - publicness of new channel
+
+Return Value:
+    Returns { channelId } if no error
+    Returns { error: 'error' } on invalid channel name
+*/
 function channelsCreateV1(authUserId, name, isPublic) {
-
-  // TODO: Remove below comment before submitting
-
-  // Creates a new channel with the given name that is either a public
-  // or private channel.
-  // The user who created it automatically joins the channel.
-
-  // Parameters: { authUserId (integer), name (string), isPublic (boolean) }
-  // e.g. channelsCreateV1( 12, 'M13A_AERO', false )
-
-  // Return type if no error: { channelId (integer) }
-  // e.g.  return {
-  //         channelId: 1,
-  //       };
 
   let data = getData();
 

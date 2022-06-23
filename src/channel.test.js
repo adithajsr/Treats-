@@ -7,6 +7,23 @@ function getData() {
 function setData(newData) {
   data = newData;
 }
+
+/*Description: Returns the details of a requested user.
+Arguments:
+    <uId> (<integer>)    - <The uId of the user thats being checked.>
+
+Return Value:
+    Returns <search> on <uId is a user, search is an object that contains user details>
+    Returns <invalid> on <uId was not found.>
+  */
+
+function userDetails(uId) {
+  let data = getData();
+  const {user} = data;
+  const search = user.find(data => data.uId === uId);
+  return (search != null) ? search : "invalid";
+}
+
 //Functions being tested
 /*Description: Checks whether a Uid is a member of a channel
 Arguments:
@@ -61,7 +78,7 @@ function channelPermissions(channelId, uId) {
     const {members} = channel_search;
     var uid_search = members.find(data => data.uId === uId);
   }
-  return (uid_search != null) ? uid_search.channel_perms : "invalid";
+  return (uid_search != null) ? uid_search.channelPerms : "invalid";
 }
 
 
@@ -77,7 +94,7 @@ function globalPermissions(uId) {
   let data = getData();
   const {user} = data;
   const search = user.find(data => data.uId === uId);
-  return (search != null) ? search.global_perms : "invalid";
+  return (search != null) ? search.globalPerms : "invalid";
 }
 
 
@@ -110,13 +127,13 @@ Return Value:
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
 function channelJoinV1(authUserId, channelId) {
-  if (channelExists(channelId) == 'false' ||
+  if (channelExists(channelId) == "false" ||
     memberExists(channelId, authUserId) == "true" ||
-    (channelPublic(channelId) == 'false' && globalPermissions(uId) != "global")) {
-    return {error: 'error'};
+    (channelPublic(channelId) == "false" && globalPermissions(uId) != "global")) {
+    return {error: "error"};
   } else {
     let data = getData();
-    const new_user = {uId: authUserId,permissions: 'member'};
+    const new_user = { ...userDetails(authUserId), ...{channelPerms: "member"}};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);
@@ -136,14 +153,14 @@ Return Value:
 */  
 function channelInviteV1(authUserId, channelId, uId) {
   if (channelExists(channelId) === "false" ||
-      uuidValidate(uId) === 'false' ||
+      uuidValidateV4(uId) === "false" ||
       memberExists(channelId, uId) === "true" ||
       memberExists(channelId, authUserId) === "false")
   {
-    return {error: 'error'};
+    return {error: "error"};
   } else {
     let data = getData();
-    const new_user = {uId: uId,permissions: 'member'};
+    const new_user = { ...userDetails(uId), ...{channelPerms: "member"}};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);
@@ -152,9 +169,12 @@ function channelInviteV1(authUserId, channelId, uId) {
 }
 
 function channelsListallV1(authUserId){
+  //probs needs to check whether authUserId is valid. IDK wasn't clear from documentation.
   let data = getData();
-  const {channel} = data;
-  return channel;
+  const {channel} = data; // extracts channel array from data
+  //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
+  const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
+  return result; //an array of channel information containing keys channelId and channelName
 }
 
 function channelDetailsV1(authUserId, channelId) {
@@ -166,16 +186,25 @@ function channelDetailsV1(authUserId, channelId) {
     const {channel} = data; // extracts channel array from data
     let i = data.channel.findIndex(data => data.channelId === channelId); // find index in the array of the channel being checked.
     const {members} = channel[i]; //extracts members array from selected channel
+    const owners = members.filter(data => data.channelPerms === 'owner'); // creates a new array holding any user that has permissions owner.
     const details = {
       name: channel[i].channelName,
       isPublic: channel[i].isPublic,
-      // creates a new array holding any user that has permissions owner.
-      ownerMembers: members.filter(data => data.channelPermissions === 'owner'),
-      allMembers: members // array with all members.
+      ownerMembers: owners.map(owners => ({uId: owners.uId,
+                                             email: owners.email,
+                                             nameFirst: owners.nameFirst,
+                                             nameLast: owners.nameLast,
+                                             handleStr: owners.handleStr})),
+      allMembers:   members.map(members => ({uId: members.uId,
+                                             email: members.email,
+                                             nameFirst: members.nameFirst,
+                                             nameLast: members.nameLast,
+                                             handleStr: members.handleStr}))
     }
-    return details;
+    return details; //an object
   }
 }
+
 
 
 describe('Testing of channel functions', () => {
@@ -184,71 +213,151 @@ describe('Testing of channel functions', () => {
     var test_user2 = 75646;
     var test_channel = 999;
     const database = {
-        user: [{
-            uId: 34546,
-            email: 'student@unsw.com',
-            password: 'password',
-            nameFirst: 'John',
-            nameLast: 'Doe',
-            handle: 'JohnD123',
-            global_perms: "global"
-        }],
-    
-        channel: [{
-            channelId: 999,
-            channelName: 'channel',
-            isPublic: true,
-            start: 0,
-            members: [{
-                    uId: 34546,
-                    channel_perms: 'owner',
-                },
-    {
-                    uId: 75646,
-                    channel_perms: 'member',
-                }],
-            messages: [{
-                    uId: "75646",
-                    timestamp: '001',
-                    message: "Hello world",
-                }]
-        },
-        {
-          channelId: 654,
-          channelName: 'channel 2',
-          isPublic: false,
+      user: [{
+          uId: 34546,
+          email: 'student@unsw.com',
+          password: 'password',
+          nameFirst: 'John',
+          nameLast: 'Doe',
+          handleStr: 'JohnD123',
+          globalPerms: 'global',
+      },{
+          uId: 75646,
+                  email: 'student@unsw.com',
+                  password: 'password',
+                  nameFirst: 'Jack',
+                  nameLast: 'Smith',
+                  handleStr: 'Jacksmith5',
+                  globalPerms: 'global',
+      },{
+          uId: 37383,
+                email: 'student@unsw.com',
+                password: 'password',
+                nameFirst: 'Grace',
+                nameLast: 'Shim',
+                handleStr: 'Graceshim0',
+                globalPerms: 'global',
+                channelPerms: 'owner',
+      },{
+          uId: 34526,
+                email: 'student@unsw.com',
+                password: 'password',
+                nameFirst: 'Nathan',
+                nameLast: 'Fawkes',
+                handleStr: 'Nathanfawkes3',
+                globalPerms: 'global',
+                channelPerms: 'member',
+      },{
+          uId: 74623,
+              email: 'student@unsw.com',
+              password: 'password',
+              nameFirst: 'Dylan',
+              nameLast: 'Shadbolt',
+              handleStr: 'Dylanshadbolt3',
+              globalPerms: 'global',
+              channelPerms: 'member',
+      },{
+          uId: 54728,
+              email: 'student@unsw.com',
+              password: 'password',
+              nameFirst: 'Alice',
+              nameLast: 'Jones',
+              handleStr: 'Alicejones2',
+              globalPerms: 'global',
+              channelPerms: 'member',
+      }],
+  
+      channel: [{
+          channelId: 999,
+          channelName: 'channel',
+          isPublic: true,
           start: 0,
           members: [{
-                  uId: 37383,
-                  channel_perms: 'owner',
+                  uId: 34546,
+                  email: 'student@unsw.com',
+                  password: 'password',
+                  nameFirst: 'John',
+                  nameLast: 'Doe',
+                  handleStr: 'JohnD123',
+                  globalPerms: 'global',
+                  channelPerms: 'owner',
               },
-              {
-                  uId: 34526,
-                  channel_perms: 'member',
-              },
-              {
-                uId: 74623,
-                channel_perms: 'member',
-              },
-              {
-                uId: 54728,
-                pchannel_perms: 'member',
-              }
-            ],
+  {
+                  uId: 75646,
+                  email: 'student@unsw.com',
+                  password: 'password',
+                  nameFirst: 'Jack',
+                  nameLast: 'Smith',
+                  handleStr: 'Jacksmith5',
+                  globalPerms: 'global',
+                  channelPerms: 'member',
+              }],
           messages: [{
                   uId: "75646",
                   timestamp: '001',
                   message: "Hello world",
-              },
-              {
-                uId: "63783",
-                timestamp: '013',
-                message: "Hello world 2",
+              }]
+      },
+      {
+        channelId: 654,
+        channelName: 'channel 2',
+        isPublic: false,
+        start: 0,
+        members: [{
+                uId: 37383,
+                email: 'student@unsw.com',
+                password: 'password',
+                nameFirst: 'Grace',
+                nameLast: 'Shim',
+                handleStr: 'Graceshim0',
+                globalPerms: 'global',
+                channelPerms: 'owner',
+            },
+            {
+                uId: 34526,
+                email: 'student@unsw.com',
+                password: 'password',
+                nameFirst: 'Nathan',
+                nameLast: 'Fawkes',
+                handleStr: 'Nathanfawkes3',
+                globalPerms: 'global',
+                channelPerms: 'member',
+            },
+            {
+              uId: 74623,
+              email: 'student@unsw.com',
+              password: 'password',
+              nameFirst: 'Dylan',
+              nameLast: 'Shadbolt',
+              handleStr: 'Dylanshadbolt3',
+              globalPerms: 'global',
+              channelPerms: 'member',
+            },
+            {
+              uId: 54728,
+              email: 'student@unsw.com',
+              password: 'password',
+              nameFirst: 'Alice',
+              nameLast: 'Jones',
+              handleStr: 'Alicejones2',
+              globalPerms: 'global',
+              channelPerms: 'member',
             }
-            ]
-      }]
-    }
-
+          ],
+        messages: [{
+                uId: "75646",
+                timestamp: '001',
+                message: "Hello world",
+            },
+            {
+              uId: "63783",
+              timestamp: '013',
+              message: "Hello world 2",
+          }
+          ]
+    }]
+  }
+  
  
 setData(database);
 

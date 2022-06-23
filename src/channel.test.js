@@ -9,9 +9,6 @@ describe('channelDetailsV1 check', () => {
     beforeEach(() => {
         clearV1();
     });
-
-    // channelDetailsV1 { authUserId, channelId }
-    // returns { name, isPublic, ownerMembers, allMembers }
     
     test('test error returned on invalid channel - empty string', () => {
 

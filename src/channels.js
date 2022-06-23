@@ -12,7 +12,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   
   function channelsListallV1(authUserId) {
     return {
-      channels: [] // see interface for contents
+      channels: [{channelId: 123456, name: 'alphabet'}] // see interface for contents
     };
   }
   

@@ -1,6 +1,7 @@
 import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels';
 import { clearV1 } from './other';
 import { validate as uuidValidate, v4 } from 'uuid';
+import { getData, setData } from './dataStore';
 
 describe ('channelsListallV1 test', () => {
 
@@ -15,20 +16,18 @@ describe ('channelsListallV1 test', () => {
     });
 
     test('no channels in database', () => {
-        // double check
-        let authUserId = v4();
-        expect(channelsListallV1(authUserId)).toStrictEqual([]);
+        
+        expect(channelsListallV1(123)).toStrictEqual([]);
 
     });
 
-    test('return one channel', () => {
-        let authUserId = 99;
-        const channel1 = channelsCreateV1(99, 'one', true);
+    test('return one channel', () => {       
+        const c1 = channelsCreateV1(12345, 'apple', true);
         expect(channelsListallV1(1)).toStrictEqual({
             channels: [
                 {
-                    channelId: 1, 
-                    name: 'one'
+                    channelId: c1, 
+                    name: 'apple',
                 }
             ]
         });
@@ -36,22 +35,21 @@ describe ('channelsListallV1 test', () => {
     });
 
     test('return multiple channels', () => {
-        let authUserId = 99;
-        const channel1 = channelsCreateV1(99, 'one', true);
-        const channel2 = channelsCreateV1(99, 'two', false);
-        const channel3 = channelsCreateV1(99, 'three', true);
+        const c1 = channelsCreateV1(123, 'apple', true);
+        const c2 = channelsCreateV1(456, 'banana', false);
+        const c3 = channelsCreateV1(789, 'carrot', true);
         const expected = new Set([
             {
-                channelId: expect.any(Number),
-                name: 'one',
+                channelId: c1,
+                name: 'apple',
             },
             {
-                channelId: expect.any(Number),
-                name: 'two',
+                channelId: c2,
+                name: 'banana',
             },
             {
-                channelId: expect.any(Number),
-                name: 'three',
+                channelId: c3,
+                name: 'carrot',
             }
         ]);
         const received = new Set(channelsListallV1(99).channels);

@@ -1,11 +1,3 @@
-function channelJoinV1( authUserId, channelId ) {
-  return 'authUserId' + 'channelId';
-}
-
-function channelInviteV1(authUserId, channelId, uId) {
-  return 'authUserId' + 'channelId'+ 'uId';
-}
-
 function channelDetailsV1(authUserId, channelId) {
   return {
     name: 'secret candy crush team', 
@@ -15,10 +7,20 @@ function channelDetailsV1(authUserId, channelId) {
   };
 }
 
+function channelJoinV1(authUserId, channelId) {
+  return {};
+}
+
+function channelInviteV1(authUserId, channelId, uId) {
+  return {};
+}
 
 function channelMessagesV1(authUserId, channelId, start) {
-  return 'authUserId' + 'channelId' + 'start'
+  return {
+    messages: [],
+    start: 0,
+    end: -1,
+  };
 }
 
 export { channelDetailsV1, channelJoinV1, channelInviteV1, channelMessagesV1 };
-

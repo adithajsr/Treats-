@@ -1,46 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
-/*
-let data = {
-
-  users: [
-    {
-      uId: 10,
-      email: 'student@unsw.com',
-      password: 'password',
-      nameFirst: 'John',
-      nameLast: 'Doe',
-      handleStr: 'johndoe0',
-      globalPerms: 1,
-    },
-  ],
-  
-  channels: [
-    {
-      channelId: 999,
-      name: 'channel',
-      isPublic: true,
-      start: 0,
-      members: [
-        {
-          uId: -999,
-          channelPerms: 2,
-        }
-      ],
-      messages: [
-        {
-          messageId: 5,
-          uId: -999,
-          message: 'Hello world',
-          timeSent: 1656000513,
-        }
-      ],
-    }
-  ],
-
-}
-*/
+// FIXME: testing and implementation has mostly been completed for
+// channelsCreateV1, which can be properly tested after
+// authRegisterV1 and clearV1 have been fully implemented and
+// merged into master & this branch
 
 function channelsCreateV1(authUserId, name, isPublic) {
 

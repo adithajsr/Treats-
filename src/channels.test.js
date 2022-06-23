@@ -6,6 +6,11 @@ beforeEach(() => {
   clearV1();
 });
 
+// FIXME: testing and implementation has mostly been completed for
+// channelsCreateV1, which can be properly tested after
+// authRegisterV1 and clearV1 have been fully implemented and
+// merged into master & this branch
+
 describe('channels capabilities', () => {
 
   const createTestUser = (email, password, nameFirst, nameLast) => {

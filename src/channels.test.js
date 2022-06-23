@@ -1,6 +1,5 @@
 import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels';
 import { clearV1 } from './other';
-import { validate as uuidValidate, v4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
 describe ('channelsListallV1 test', () => {
@@ -9,9 +8,15 @@ describe ('channelsListallV1 test', () => {
         clearV1();
       });
 
-    test('authid is invalid', () => {
+    test('invalid authid input - empty string', () => {
 
-        expect(channelsListallV1('not a UUID')).toStrictEqual({ error: 'error' });
+        expect(channelsListallV1('')).toStrictEqual({ error: 'error' });
+
+    });
+
+    test('authid is invalid - not a number', () => {
+
+        expect(channelsListallV1('abcde')).toStrictEqual({ error: 'error' });
 
     });
 

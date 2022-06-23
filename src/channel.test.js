@@ -33,8 +33,8 @@ describe('channelDetailsV1 check', () => {
 
         const c1 = channelsCreateV1(12345, 'channelone', true); 
         const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe')
-        channelJoin(a1, c1);
-        expect(channelDetailsV1(a1, c1)).toStrictEqual({
+        channelJoinV1(a1, c1);
+        expect(channelDetailsV1(37383, 123)).toStrictEqual({
             name: c1.channelName,
             isPublic: c1.isPublic,
             ownerMembers: c1.ownerMembers,

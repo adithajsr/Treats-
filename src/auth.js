@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+const { v4: uuidv4 } = require('uuid');
 import { getData, setData } from './dataStore';
 
 var validator = require('validator');
@@ -68,9 +68,9 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	}
 
 	// CREATE UUID
-	let newUserId = v4();
+	let newUserId = uuidv4();
 	while (!isUuidValid(newUserId) || isUuidInUse(newUserId)) {
-		newUserId = v4();
+		newUserId = uuidv4();
 	}
 
 	// MAKE HANDLE

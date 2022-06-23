@@ -1,18 +1,13 @@
-import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid } from './auth';
+import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid, isUuidInUse, doesEmailExist } from './auth';
 import { clearV1 } from './other';
 import { validator } from 'validator';
 import { getData, setData } from './dataStore';
 
-describe('Testing for authRegisterV1', () => {
-    beforeEach(() => {
-      clearV1();
-      dataSet = getData();
-    });
-  
-    afterAll(() => {
-      clearV1();
-    });
-  
+let dataSet = getData();
+
+// ======================================== authRegisterV1 Testing ========================================
+
+describe('Testing for authRegisterV1', () => {  
     test('Test 1 affirmitive', () => {
       // all should be well
         testUserEmail = 'who.is.joe@is.the.question.com';
@@ -26,6 +21,7 @@ describe('Testing for authRegisterV1', () => {
         expect(data.user[0].password).toBe('yourmumma');
         expect(data.user[0].nameFirst).toBe('John');
         expect(data.user[0].nameLast).toBe('Smith');
+        expect(data.user[0].globalPerms).toBe('owner');
     });
 
     test('Test 2 invalid email', () => {
@@ -72,3 +68,40 @@ describe('Testing for authRegisterV1', () => {
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
 });
+
+// ======================================== authLoginV1 Testing ========================================
+
+describe('Testing for authLoginV1', () => {
+  test('Test 1 affirmitive', () => {
+    // all should be well
+      testUserEmail = 'who.is.joe@is.the.question.com';
+      testUserPw = 'yourmumma'
+      testUserId = authLoginV1(testUserEmail, testUserPw);
+      expect(isUuidValid(testUserId)).toBe(true);
+      expect(isUuidInUse(testUserId, user)).toBe(true);
+      expect(doesEmailExist(testUserEmail)).toBe(true);
+      expect(data.user[0].email).toBe('who.is.joe@is.the.question.com');
+      expect(data.user[0].password).toBe('yourmumma');
+  });
+
+  test('Test 2 invalid email', () => {
+    // invalid email - no existing email
+      testUserEmail = 'z5420895@ad.unsw.edu.au';
+      testUserPw = 'myrealpassword'
+      testUserId = authLoginV1(testUserEmail, testUserPw);
+      expect(testUserId).toBe({ error: 'error'});
+      expect(doesEmailExist(testUserEmail)).toBe(false);
+  });
+
+  test('Test 3 invalid password', () => {
+    // invalid password - wrong password with associated email
+      testUserEmail = 'who.is.joe@is.the.question.com';
+      testUserPw = 'yourdad'
+      testUserId = authLoginV1(testUserEmail, testUserPw);
+      expect(testUserId).toBe({ error: 'error'});
+      expect(validator.isEmail(testUserEmail)).toBe(true);
+      expect(doesEmailExist(testUserEmail)).toBe(true);
+  });
+});
+
+clearV1();

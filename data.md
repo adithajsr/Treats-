@@ -17,8 +17,14 @@ const data = {
         isPublic: true,
         start: 0,
         members: [{
-                uId: -999,
-                channelPerms: 'owner',
+                    uId: 10,
+                    email: 'student@unsw.com',
+                    password: 'password',
+                    nameFirst: 'John',
+                    nameLast: 'Doe',
+                    handleStr: 'JohnD123'
+                    globalPerms: 'global'
+                    channelPerms: 'owner',
             }],
         messages: [{
                 uId: ‘-999’
@@ -27,3 +33,5 @@ const data = {
             }]
     }]
 }
+
+uId, email, nameFirst, nameLast, handleStr

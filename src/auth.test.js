@@ -1,7 +1,9 @@
 import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid, isUuidInUse, doesEmailExist } from './auth';
 import { clearV1 } from './other';
-import { validator } from 'validator';
 import { getData, setData } from './dataStore';
+
+var validator = require('validator');
+validator.isEmail('foo@bar.com'); //=> true
 
 let dataSet = getData();
 
@@ -16,12 +18,12 @@ describe('Testing for authRegisterV1', () => {
         let testUserLN = 'Smith';
         let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(isUuidValid(testUserId)).toBe(true);
-        expect(isHandleValid(data.user[0].handle)).toBe(true);
-        expect(validator.isEmail(data.user[0].email)).toBe(true);
-        expect(data.user[0].password).toBe('yourmumma');
-        expect(data.user[0].nameFirst).toBe('John');
-        expect(data.user[0].nameLast).toBe('Smith');
-        expect(data.user[0].globalPerms).toBe('owner');
+        expect(isHandleValid(dataSet.user[0].handle)).toBe(true);
+        expect(validator.isEmail(dataSet.user[0].email)).toBe(true);
+        expect(dataSet.user[0].password).toBe('yourmumma');
+        expect(dataSet.user[0].nameFirst).toBe('John');
+        expect(dataSet.user[0].nameLast).toBe('Smith');
+        expect(dataSet.user[0].globalPerms).toBe('owner');
     });
 
     test('Test 2 invalid email', () => {
@@ -78,10 +80,10 @@ describe('Testing for authLoginV1', () => {
     let testUserPw = 'yourmumma'
     let testUserId = authLoginV1(testUserEmail, testUserPw);
       expect(isUuidValid(testUserId)).toBe(true);
-      expect(isUuidInUse(testUserId, user)).toBe(true);
+      expect(isUuidInUse(testUserId)).toBe(true);
       expect(doesEmailExist(testUserEmail)).toBe(true);
-      expect(data.user[0].email).toBe('who.is.joe@is.the.question.com');
-      expect(data.user[0].password).toBe('yourmumma');
+      expect(dataSet.user[0].email).toBe('who.is.joe@is.the.question.com');
+      expect(dataSet.user[0].password).toBe('yourmumma');
   });
 
   test('Test 2 invalid email', () => {

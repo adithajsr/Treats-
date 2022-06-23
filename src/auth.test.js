@@ -2,7 +2,6 @@ import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid, isUuidInUse, d
 import { clearV1 } from './other';
 import { getData, setData } from './dataStore';
 
-const { v4: uuidv4 } = require('uuid');
 var validator = require('validator');
 validator.isEmail('foo@bar.com'); //=> true
 

@@ -1,15 +1,16 @@
 import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid } from './auth';
-// import { clearV1 } from './other';
+import { clearV1 } from './other';
 import { validator } from 'validator';
+import { getData, setData } from './dataStore';
 
 describe('Testing for authRegisterV1', () => {
     beforeEach(() => {
-      // clearV1();
+      clearV1();
       dataSet = getData();
     });
   
     afterAll(() => {
-      // clearV1();
+      clearV1();
     });
   
     test('Test 1 affirmitive', () => {
@@ -25,10 +26,14 @@ describe('Testing for authRegisterV1', () => {
         expect(data.user[0].nameLast).not.toBe(null);
     });
 
-    test('Test 1', () => {
-        //
-        expect(authRegisterV1(email, password)).toStrictEqual({ error: 'error' });
-        });
+    test('Test 2 invalid email', () => {
+      // all should be well
+        testUserEmail = 'z5420895$ad.unsw.edu.au';
+        testUserPw = 'myrealpassword'
+        testUserId = authRegisterV1(testUserEmail, testUserPw);
+        expect(testUserId).toBe({ error: 'error'});
+        expect(validator.isEmail(testUserEmail)).toBe(false);
+    });
 
     test('Test 1', () => {
       //

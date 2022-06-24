@@ -15,7 +15,7 @@ function channelInviteV1(authUserId, channelId, uId) {
   return {};
 }
 
-//ASSUMPTION: comparing authUserId to uId?? Should we have an authUserId in channel.members array??
+
 function channelMessagesV1(authUserId, channelId, start) {
 	for (let element in data.channel) {
 		if (channelId = data.channel[element].channelId) {

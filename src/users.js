@@ -1,5 +1,19 @@
+
+//This function returns the important information about a user's profile. 
+/*
+	<authUserId> This function checks whether a valid authUserId is calling the function
+
+	<uId> This is the uId that is searched for to return the user's profile
+
+	Return Value: 
+		{error: 'error'} if the authUserId or uId are invalid
+		{info} if the authUserId and uId are valid, returns important info about a 
+		user's profile
+
+*/
+
 import {getData} from './dataStore.js'
-function userProfileV1(authUserId, uId) {
+export function userProfileV1(authUserId, uId) {
 	let data = getData();
 
 	//Determining whether authUserId is valid 
@@ -20,10 +34,16 @@ function userProfileV1(authUserId, uId) {
 	//Searching for the uId
 	for (const element in data.user) {
 		if (uId === data.user[element].uId) {
-			return data.user[element];
+			return {
+				uId: data.user[element].uId, 
+				email: data.user[element].email, 
+				nameFirst: data.user[element].nameFirst, 
+				nameLast: data.user[element].nameLast,
+				handle: data.user[element].handle
 		}
 	}
 	//If uId doesn't match any uId in data object
 	return {error: 'error'};
+	}
 }
-export { userProfileV1 }
+

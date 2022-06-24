@@ -1,6 +1,6 @@
-import { v4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
+const { v4 } = require('uuid');
 var validator = require('validator');
 validator.isEmail('foo@bar.com'); //=> true
 

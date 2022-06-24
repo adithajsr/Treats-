@@ -1,5 +1,6 @@
 function userProfileV1(authUserId, uId) {
-	
+	let data = getData();
+
 	//Determining whether authUserId is valid 
 	let count = 0;
 	for (const element in data.user) {

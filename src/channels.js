@@ -23,24 +23,13 @@ function channelsCreateV1(authUserId, name, isPublic) {
 
   let data = getData();
 
-  // FIXME:
-  console.log(data);
-  console.log(authUserId);
-
   // Invalid authUserId
-  if (!(data.user.find(a => a.uId === authUserId))) {
-    console.log('invalid authUserId');
+  if (data.user.find(a => a.uId === authUserId) === undefined) {
     return { error: 'error' };
   }
 
-  // // Invalid authUserId
-  // if (data.user.find(a => a.uId === authUserId) === undefined) {
-  //   return { error: 'error' };
-  // }
-
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
-    console.log('invalid channel name');
     return { error: 'error' };
   }
 

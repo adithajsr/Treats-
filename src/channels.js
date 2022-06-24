@@ -20,7 +20,7 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
->>>>>>> 11d0bc2917eaf08f8d4a8c6a4a3f9c74cf421874
+
 function channelsCreateV1(authUserId, name, isPublic) {
 
   let data = getData();
@@ -47,7 +47,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   // Create a new channel
   data.channel.push({
     channelId: newChannelId,
-    channelName: name,
+    name: name,
     isPublic: isPublic,
     members: [channelOwner],
   });
@@ -80,8 +80,6 @@ Return Value:
 
 function channelsListallV1(authUserId) {
 
-  Object
-
   const data = getData();
   let foundChannels = [];
 
@@ -95,14 +93,14 @@ function channelsListallV1(authUserId) {
     return { error: 'error' };
   }
 
-  // for (const i in data.channel) {
-  //   foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].name});
-  // }
+  for (const i in data.channel) {
+    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].name});
+  }
 
-  const {channel} = data; // extracts channel array from data
-  //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
-  return { channels: result } ;
+  // const {channel} = data; // extracts channel array from data
+  // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
+  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.name}));
+  // return { channels: result } ;
 
 
 

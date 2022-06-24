@@ -2,6 +2,7 @@
 //Written by Aditha Jayasuriya, started on 16/06/2022
 
 import {channelMessagesV1} from './channelMessages.js';
+import {authRegisterV1} from './channel.js'
 
 //Testing if the given channel is valid 
 test('Testing channel validity', () => {
@@ -11,7 +12,7 @@ test('Testing channel validity', () => {
 
 	let returnValue = channelMessagesV1(danielId, danielChannel - 1, 0);
 	expect(returnValue).toMatchObject({error: 'error'});
-} 
+}) 
 
 //Testing if the member is a part of the given channel 
 test('Testing user access', () => {
@@ -30,7 +31,7 @@ test('Testing user access', () => {
 	let returnValue = channelMessagesV1(samuelId, danielChannel, 0);
 	expect(returnValue).toMatchObject({error: 'error'});
 	
-}
+})
 
 //Testing when start is > no. of messages in given channelId
 test('Invalid start argument', () => {
@@ -45,7 +46,7 @@ test('Invalid start argument', () => {
 	let returnValue = channelMessagesV1(danielId, danielChannel, 26);
 	expect(returnValue).toMatchObject({error: 'error'});
 
-}
+})
 
 //Testing default case
 test('Default case', () => {
@@ -63,7 +64,7 @@ test('Default case', () => {
 	
 
 
-}
+})
 
 //Testing when start + 50 is greater than the amount of messages in the channel
 test('When end is greater than final message', () => {
@@ -76,4 +77,4 @@ test('When end is greater than final message', () => {
 
 	let returnValue = channelMessagesV1(danielId, danielChannel, 35);
 	expect(returnValue[3]).toBe(-1);
-}
+})

@@ -71,7 +71,7 @@ describe('channels capabilities', () => {
         channels: [
           {
             channelId: testChannel1.channelId,
-            name : testChannel1.name,
+            name : testChannel1.channelName,
           }
         ]
       });
@@ -93,19 +93,19 @@ describe('channels capabilities', () => {
       const expected = new Set([
         {
           channelId: testChannel1.channelId,
-          name: testChannel1.name,
+          name: testChannel1.channelName,
         },
         {
           channelId: c1A.channelId,
-          name: c1A.name,
+          name: c1A.channelName,
         },
         {
           channelId: c1B.channelId,
-          name: c1B.name,
+          name: c1B.channelName,
         },
         {
           channelId: c1C.channelId,
-          name: c1C.name,
+          name: c1C.channelName,
         },
       ]);
       const received = new Set(channelsListV1(testUser1.authUserId).channels);
@@ -121,11 +121,11 @@ describe('channels capabilities', () => {
       const expected = new Set([
         {
           channelId: testChannel1.channelId,
-          name: testChannel1.name,
+          name: testChannel1.channelName,
         },
         {
           channelId: c1A.channelId,
-          name: c1A.name,
+          name: c1A.channelName,
         },
       ]);
       const received = new Set(channelsListV1(testUser1.authUserId).channels);

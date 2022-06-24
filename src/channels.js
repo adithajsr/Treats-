@@ -47,7 +47,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   // Create a new channel
   data.channel.push({
     channelId: newChannelId,
-    name: name,
+    name: channelName,
     isPublic: isPublic,
     members: [channelOwner],
   });

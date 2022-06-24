@@ -62,9 +62,9 @@ describe ( 'channels functions testing', () => {
 
         test('return multiple channels', () => {
             let testUser3 = authRegisterV1('who@questin.com', 'youumma', 'Jon', 'Smih');
-            const c1A = createTestChannel(testUser3.authUserId, 'channel1AName', false);
-            const c1B = createTestChannel(testUser3.authUserId, 'channel1BName', true);
-            const c1C = createTestChannel(testUser3.authUserId, 'channel1CName', false);
+            let c1A = createTestChannel(testUser3.authUserId, 'channel1AName', false);
+            let c1B = createTestChannel(testUser3.authUserId, 'channel1BName', true);
+            let c1C = createTestChannel(testUser3.authUserId, 'channel1CName', false);
 
             const expected = new Set([
                 {

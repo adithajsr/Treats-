@@ -97,8 +97,8 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	let highestIndex = 0;
 	let isDupplicate = false;
 	for (const item of dataSet.user) {
-		if (item[handle].search(newHandle) === 0) {
-			if (item[handle].search(/[0-9]{1,}$/) === -1) {
+		if (item.handle.search(newHandle) === 0) {
+			if (item.handle.search(/[0-9]{1,}$/) === -1) {
 				newHandle = newHandle + '0';
 			} else {
 				isDupplicate = true;

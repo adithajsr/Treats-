@@ -1,5 +1,4 @@
-import { getData, setData } from './dataStore.js';
-
+import { getData, setData } from './dataStore';
 
 
 /*
@@ -15,7 +14,6 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-
 function channelsCreateV1(authUserId, name, isPublic) {
 
   let data = getData();
@@ -42,7 +40,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   // Create a new channel
   data.channel.push({
     channelId: newChannelId,
-    name: channelName,
+    channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
   });
@@ -97,6 +95,8 @@ function channelsListV1(authUserId) {
   };
 }
 
+
+
 {/* <channelsListallV1 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
@@ -107,6 +107,7 @@ Return Value:
     Returns <[{channel}]> on <authUserId was valid and there were channels in data>
     Returns <[]> on <no channels in data>  
     Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
+
 
 function channelsListallV1(authUserId) {
 
@@ -124,15 +125,13 @@ function channelsListallV1(authUserId) {
   }
 
   for (const i in data.channel) {
-    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].name});
+    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
   }
 
   // const {channel} = data; // extracts channel array from data
   // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.name}));
+  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
   // return { channels: result } ;
-
-
 
   return {
     channels: foundChannels 

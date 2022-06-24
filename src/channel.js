@@ -1,4 +1,5 @@
-import { validate as uuidValidate } from 'uuid';
+//Defined numbers.
+const GLOBAL = 1;
 
 //Functions being tested
 /*Description: Checks whether a Uid is a member of a channel
@@ -34,6 +35,20 @@ function channelExists(channelId) {
   const {channel} = data;
   const search = channel.find(data => data.channelId === channelId);
   return (search != null) ? "true" : "false";
+}
+
+/*Description: Checks whether a user  exists in the database
+Arguments:
+  <uId> (integer)    - <The uId of the user thats being checked.>
+Return Value:
+  Returns <true> on <uId is found.>
+  Returns <false> on <uId was not found.>
+*/
+function uIdExists(uId) {
+    let data = getData();
+    const {user} = data;
+    const search = user.find(data => data.uId === uId);
+    return (search != null) ? "true" : "false";
 }
 
 /*Description: Checks what the channel permissions are of a user
@@ -73,8 +88,6 @@ function globalPermissions(uId) {
   return (search != null) ? search.globalPerms : "invalid";
 }
 
-
-
 /*Description: Checks whether the channel is private or public.
 Arguments:
   <channelId> (integer)    - <The channelId of the channel whose state is being queried.>
@@ -91,8 +104,6 @@ function channelPublic(channelId) {
   return (search != null) ? "true" : "false";
 }
 
-
-
 /*Description: Adds a user to a channel
 Arguments:
   <authUserId> (integer)    - <The authUserId is the user who initates the function>
@@ -105,9 +116,9 @@ Return Value:
 //Add a check to test whether authUserId is valid.
 function channelJoinV1(authUserId, channelId) {
   if (channelExists(channelId) == "false" ||
-      uuidValidateV4(authUserId) === "false" ||
+    uIdExists(authUserId) === "false" ||
     memberExists(channelId, authUserId) == "true" ||
-    (channelPublic(channelId) == "false" && globalPermissions(authUserId) != "global")) {
+    (channelPublic(channelId) == "false" && globalPermissions(authUserId) != GLOBAL)) {
     return {error: "error"};
   } else {
     let data = getData();
@@ -118,6 +129,7 @@ function channelJoinV1(authUserId, channelId) {
     return {};
   }
 }
+
 
 /*Description: Invites user to the channel
 Arguments:
@@ -131,7 +143,7 @@ Return Value:
 */  
 function channelInviteV1(authUserId, channelId, uId) {
   if (channelExists(channelId) === "false" ||
-      uuidValidateV4(uId) === "false" ||
+      uIdExists(uId) === "false" ||
       memberExists(channelId, uId) === "true" ||
       memberExists(channelId, authUserId) === "false")
   {

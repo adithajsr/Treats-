@@ -28,18 +28,7 @@ describe('channelDetailsV1 check', () => {
 
     });
 
-    test('test successful return', () => {
 
-        const c1 = channelsCreateV1(12345, 'channelone', true); 
-        const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe')
-        channelJoinV1(a1, c1);
-        expect(channelDetailsV1(37383, 123)).toStrictEqual({
-            name: c1.channelName,
-            isPublic: c1.isPublic,
-            ownerMembers: c1.ownerMembers,
-            allMembers: c1.allMembers,
-        });
-    });
 
     
 

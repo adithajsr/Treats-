@@ -3,23 +3,25 @@
 //Written by Aditha Jayasuriya, started on 17/06/2022
 
 import {clearV1} from './other.js'
-import {authRegisterV1} from './js'
+import {authRegisterV1} from './auth.js'
+import {userProfileV1} from './users.js'
 
 
 test('Testing clearing users', () => {
+	clearV1();
 
 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 	let samuelId = authRegisterV1('samSchreyer@gmail.com', 'password1', 'Samuel', 'Schreyer');
 	let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
 	let maiyaId = authRegisterV1('maiyaTaylor@gmail.com', 'password3', 'Maiya', 'Taylor');
 
-	clear();
+	clearV1();
 
-	expect(data.user.length).toBe(0);
-	expect(data.channels.length).toBe(0);
+	expect(userProfileV1(danielId, danielId)).toMatchObject({error: 'error'});
+
 })
 
-
+/*
 test('Testing clearing four channels with one user in each of them', () => {
 
 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
@@ -66,6 +68,8 @@ test('Testing clearing two channels with multiple users in each of them', () => 
 	
 	expect(data.user.length).toBe(0);
 	expect(data.channels.length).toBe(0);
+	
 
 })
+*/
 

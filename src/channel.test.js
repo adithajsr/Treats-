@@ -29,7 +29,4 @@ describe('channelDetailsV1 check', () => {
     });
 
 
-
-    
-
 });

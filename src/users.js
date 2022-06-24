@@ -1,3 +1,4 @@
+import {getData} from './dataStore.js'
 function userProfileV1(authUserId, uId) {
 	let data = getData();
 
@@ -11,13 +12,15 @@ function userProfileV1(authUserId, uId) {
 	}
 
 	//If invalid authUserId
-	if (count === 0) return {error: 'error'}
+	if (count === 0) {
+		return {error: 'error'};
+	}
 
 
 	//Searching for the uId
 	for (const element in data.user) {
 		if (uId === data.user[element].uId) {
-			return user;
+			return data.user[element];
 		}
 	}
 	//If uId doesn't match any uId in data object

@@ -118,9 +118,9 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	// PEFORM RETURN & UPDATE "dataStore"
 	let globalPermissions = undefined;
 	if (setData.user === undefined) {
-		globalPermissions = 'owner';
+		globalPermissions = 1; //owner
 	} else {
-		globalPermissions = 'member';
+		globalPermissions = 2; //memeber
 	}
 
 	dataSet.user.push({

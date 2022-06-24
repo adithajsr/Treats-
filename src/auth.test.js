@@ -17,7 +17,7 @@ describe('Testing for authRegisterV1', () => {
         nameFirst: 'John',
         nameLast: 'Smith',
         handle: 'johnsmith',
-        globalPerms: 'owner',
+        globalPerms: 1,
       }
       expect(isHandleValid(userProfileV1(testUserId, testUserId).handle)).toBe(true);
       expect(validator.isEmail(userProfileV1(testUserId, testUserId).email)).toBe(true);
@@ -82,7 +82,7 @@ describe('Testing for authLoginV1', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handle: 'johnsmith',
-      globalPerms: 'owner',
+      globalPerms: 1,
     }
       expect(doesEmailExist(userProfileV1(testUserId, testUserId).email)).toBe(true);
       expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);

@@ -121,3 +121,5 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	setData(dataSet);
 	return newUserId;
 }
+
+return;

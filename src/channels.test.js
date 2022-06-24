@@ -53,7 +53,7 @@ describe('channels capabilities', () => {
     //       };
 
     test('Invalid authUserId', () => {
-      expect(channelsCreateV1(testUser.authUserId + 1, 'channelName', true)).toStrictEqual({ error: 'error' });
+      expect(channelsCreateV1('notANumber', 'channelName', true)).toStrictEqual({ error: 'error' });
     });
 
     test.each([

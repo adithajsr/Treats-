@@ -23,27 +23,39 @@ function channelsCreateV1(authUserId, name, isPublic) {
 
   let data = getData();
 
+  // FIXME:
+  console.log(data);
+  console.log(authUserId);
+
   // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  if (!(data.user.find(a => a.uId === authUserId))) {
+    console.log('invalid authUserId');
     return { error: 'error' };
   }
+
+  // // Invalid authUserId
+  // if (data.user.find(a => a.uId === authUserId) === undefined) {
+  //   return { error: 'error' };
+  // }
+
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
+    console.log('invalid channel name');
     return { error: 'error' };
   }
 
   // Generate channeId
-  const channelId = data.channel.length;
+  const newChannelId = data.channel.length + 1;
 
   // The user who created it automatically joins the channel
   const channelOwner = {
     uId: authUserId,
-    channelPerms: 'owner',
+    channelPerms: 1,
   };
 
   // Create a new channel
   data.channel.push({
-    channelId: channelId,
+    channelId: newChannelId,
     channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
@@ -52,7 +64,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   setData(data);
 
   return {
-    channelId: channelId,
+    channelId: newChannelId,
   };
 }
 

@@ -30,7 +30,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'myrealpassword'
       let testUserFN = 'Jonathan';
       let testUserLN = 'Schmidt';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN).authUserId;
+      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(false);
     });
@@ -41,7 +41,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'this5'
       let testUserFN = 'Jean';
       let testUserLN = 'McQueen';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN).authUserId;
+      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
@@ -52,7 +52,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'thispasswordislongenough'
       let testUserFN = '';
       let testUserLN = 'Tou';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN).authUserId;
+      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
@@ -63,7 +63,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'thispasswordismorethanlongenough'
       let testUserFN = 'Tim';
       let testUserLN = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'; // 52 characters long
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN).authUserId;
+      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
@@ -92,7 +92,7 @@ describe('Testing for authLoginV1', () => {
     // invalid email - no existing email
     let testUserEmail = 'z5420895@ad.unsw.edu.au';
     let testUserPw = 'myrealpassword'
-    let testUserId = authLoginV1(testUserEmail, testUserPw).authUserId;
+    let testUserId = authLoginV1(testUserEmail, testUserPw);
       expect(testUserId).toStrictEqual({ error: 'error'});
       expect(doesEmailExist(testUserEmail)).toBe(false);
   });
@@ -101,7 +101,7 @@ describe('Testing for authLoginV1', () => {
     // invalid password - wrong password with associated email
     let testUserEmail = 'who.is.joe@is.the.question.com';
     let testUserPw = 'yourdad'
-    let testUserId = authLoginV1(testUserEmail, testUserPw).authUserId;
+    let testUserId = authLoginV1(testUserEmail, testUserPw);
       expect(testUserId).toStrictEqual({ error: 'error'});
       expect(validator.isEmail(testUserEmail)).toBe(true);
       expect(doesEmailExist(testUserEmail)).toBe(true);

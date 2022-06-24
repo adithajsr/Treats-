@@ -1,29 +1,27 @@
-import { authLoginV1, authRegisterV1, isHandleValid, isUuidValid, isUuidInUse, doesEmailExist } from './auth';
+import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
 import { clearV1 } from './other';
-import { getData, setData } from './dataStore';
+import { userProfileV1 } from './users';
 
 var validator = require('validator');
-validator.isEmail('foo@bar.com'); //=> true
-
-let dataSet = getData();
 
 // ======================================== authRegisterV1 Testing ========================================
 
 describe('Testing for authRegisterV1', () => {  
     test('Test 1 affirmitive', () => {
       // all should be well
-        let testUserEmail = 'who.is.joe@is.the.question.com';
-        let testUserPw = 'yourmumma'
-        let testUserFN = 'John';
-        let testUserLN = 'Smith';
-        let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
-        expect(isUuidValid(testUserId)).toBe(true);
-        expect(isHandleValid(dataSet.user[0].handle)).toBe(true);
-        expect(validator.isEmail(dataSet.user[0].email)).toBe(true);
-        expect(dataSet.user[0].password).toBe('yourmumma');
-        expect(dataSet.user[0].nameFirst).toBe('John');
-        expect(dataSet.user[0].nameLast).toBe('Smith');
-        expect(dataSet.user[0].globalPerms).toBe('owner');
+      let testUserId = authRegisterV1('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+      let testUserObject = {
+        uId: testUserId,
+        email: 'who.is.joe@is.the.question.com',
+        password: 'yourmumma',
+        nameFirst: 'John',
+        nameLast: 'Smith',
+        handle: 'johnsmith',
+        globalPerms: 'owner',
+      }
+      expect(isHandleValid(userProfileV1(testUserId, testUserId).handle)).toBe(true);
+      expect(validator.isEmail(userProfileV1(testUserId, testUserId).email)).toBe(true);
+      expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);
     });
 
     test('Test 2 invalid email', () => {
@@ -76,14 +74,18 @@ describe('Testing for authRegisterV1', () => {
 describe('Testing for authLoginV1', () => {
   test('Test 1 affirmitive', () => {
     // all should be well
-    let testUserEmail = 'who.is.joe@is.the.question.com';
-    let testUserPw = 'yourmumma'
-    let testUserId = authLoginV1(testUserEmail, testUserPw);
-      expect(isUuidValid(testUserId)).toBe(true);
-      expect(isUuidInUse(testUserId)).toBe(true);
-      expect(doesEmailExist(testUserEmail)).toBe(true);
-      expect(dataSet.user[0].email).toBe('who.is.joe@is.the.question.com');
-      expect(dataSet.user[0].password).toBe('yourmumma');
+    let testUserId = authLoginV1('who.is.joe@is.the.question.com', 'yourmumma');
+    let testUserObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      password: 'yourmumma',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handle: 'johnsmith',
+      globalPerms: 'owner',
+    }
+      expect(doesEmailExist(userProfileV1(testUserId, testUserId).email)).toBe(true);
+      expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);
   });
 
   test('Test 2 invalid email', () => {

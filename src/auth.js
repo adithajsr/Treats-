@@ -1,29 +1,28 @@
-import { v4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
 var validator = require('validator');
 
-let dataSet = getData();
+/* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
 
+Arguments:
+    handle (string) - <minimum length 2, with posibility of >
+Return Value:
+    Returns <true> on <handle meeting requirements>
+	Returns <false> on <handle not meeting requirements> */
 export function isHandleValid(handle) {
 	const regex = /^[a-z]{0,20}$[0-9]*/;
 	return regex.test(handle);
 }
 
-export function isUuidValid(Id) {
-	return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(Id);
-}
+/* <Checks if a email is already used by another user>
 
-export function isUuidInUse(Id) {
-	for (const item of dataSet.user) {
-		if (item.uId === Id) {
-			return true;
-		}
-	}
-	return false;
-}
-
+Arguments:
+    email (string) - <any>
+Return Value:
+    Returns <true> on <email is valid>
+	Returns <false> on <email is invalid> */
 export function doesEmailExist(email) {
+	let dataSet = getData();
     for(const item of dataSet.user) {
       if (item.email === email) {
         return true;
@@ -32,7 +31,15 @@ export function doesEmailExist(email) {
     return false;
   }
 
+/* <Authorises a user to >
+
+Arguments:
+    email (string) - <any>
+Return Value:
+    Returns <true> on <email is valid>
+	Returns <false> on <email is invalid> */
 export function authLoginV1 (email, password) {
+	let dataSet = getData();
 	for (const item of dataSet.user) {
 		if (item.email === email) {
 			if (item.password === password) {
@@ -48,7 +55,18 @@ export function authLoginV1 (email, password) {
 	return { error: 'error'};
 }
 
+/* <Creates a new user and fills out their details and puts it into "dataStore.js">
+
+Arguments:
+    email (string) - <any>
+	password (string) - <greater than 5 characters long>
+	nameFirst (string) - <1-50 characters long>
+	nameLast (string) - <1-50 characters long>
+Return Value:
+    Returns <{ error: 'error' }> on <in valid arguments being inputted or already existing email>
+	Returns <uID> on <if all arguments are valid and a user is created and store> */
 export function authRegisterV1 (email, password, nameFirst, nameLast) {
+	let dataSet = getData();
 	// TEST DETAILS
 	if (password.length < 6) {
 		return { error: 'error'};
@@ -66,11 +84,8 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 		return { error: 'error'};
 	}
 
-	// CREATE UUID
-	let newUserId = v4();
-	while (!isUuidValid(newUserId) || isUuidInUse(newUserId)) {
-		newUserId = v4();
-	}
+	// CREATE user Id
+	let newUserId = dataSet.user.length + 1;
 
 	// MAKE HANDLE
 	let fullName = nameFirst + nameLast;
@@ -84,7 +99,7 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	for (const item of dataSet.user) {
 		if (item[handle].search(newHandle) === 0) {
 			if (item[handle].search(/[0-9]{1,}$/) === -1) {
-				newHandle = newHandle + '1';
+				newHandle = newHandle + '0';
 			} else {
 				isDupplicate = true;
 				let strDigit = newHandle.replace(/^[a-z]{0,20}/,/^$/);

@@ -157,36 +157,3 @@ function channelInviteV1(authUserId, channelId, uId) {
     return {};
   }
 }
-
-
-
- function channelDetailsV1(authUserId, channelId) {
-    if (channelExists(channelId) === "false" ||
-      memberExists(channelId, authUserId) === "false") {
-      return {error: 'error'};
-    } else {
-      let data = getData();
-      const {channel} = data;
-      const {user} = data;
-      let i = data.channel.findIndex(data => data.channelId === channelId);
-      const {members} = channel[i];
-      let searchId = members.map(a => a.uId);
-      userInfo = user.filter(({uId}) => searchId.includes(uId));
-      const owners = userInfo.filter(data => data.channelPerms === 'owner');
-      const details = {
-        name: channel[i].channelName,
-        isPublic: channel[i].isPublic,
-        ownerMembers: owners.map(owners => ({uId: owners.uId,
-                                               email: owners.email,
-                                               nameFirst: owners.nameFirst,
-                                               nameLast: owners.nameLast,
-                                               handleStr: owners.handleStr})),
-        allMembers:   userInfo.map(userInfo => ({uId: userInfo.uId,
-                                               email: userInfo.email,
-                                               nameFirst: userInfo.nameFirst,
-                                               nameLast: userInfo.nameLast,
-                                               handleStr: userInfo.handleStr}))
-      }
-      return details;
-    }
-  }

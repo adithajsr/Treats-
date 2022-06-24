@@ -21,16 +21,18 @@ function channelExists(channelId) {
 
 
 function channelDetailsV1(authUserId, channelId) {
-
   if (channelExists(channelId) === "false" ||
     memberExists(channelId, authUserId) === "false") {
     return {error: 'error'};
   } else {
     let data = getData();
-    const {channel} = data; // extracts channel array from data
-    let i = data.channel.findIndex(data => data.channelId === channelId); // find index in the array of the channel being checked.
-    const {members} = channel[i]; //extracts members array from selected channel
-    const owners = members.filter(data => data.channelPerms === 'owner'); // creates a new array holding any user that has permissions owner.
+    const {channel} = data;
+    const {user} = data;
+    let i = data.channel.findIndex(data => data.channelId === channelId);
+    const {members} = channel[i];
+    let searchId = members.map(a => a.uId);
+    let userInfo = user.filter(({uId}) => searchId.includes(uId));
+    const owners = userInfo.filter(data => data.channelPerms === 'owner');
     const details = {
       name: channel[i].channelName,
       isPublic: channel[i].isPublic,
@@ -39,15 +41,16 @@ function channelDetailsV1(authUserId, channelId) {
                                              nameFirst: owners.nameFirst,
                                              nameLast: owners.nameLast,
                                              handleStr: owners.handleStr})),
-      allMembers:   members.map(members => ({uId: members.uId,
-                                             email: members.email,
-                                             nameFirst: members.nameFirst,
-                                             nameLast: members.nameLast,
-                                             handleStr: members.handleStr}))
+      allMembers:   userInfo.map(userInfo => ({uId: userInfo.uId,
+                                             email: userInfo.email,
+                                             nameFirst: userInfo.nameFirst,
+                                             nameLast: userInfo.nameLast,
+                                             handleStr: userInfo.handleStr}))
     }
-    return details; //an object
+    return details;
   }
 }
+
 
 function channelJoinV1(authUserId, channelId) {
   return {};

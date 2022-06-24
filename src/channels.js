@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import { getData, setData } from './dataStore';
 
 // FIXME: testing and implementation has mostly been completed for
@@ -34,7 +33,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
   }
 
   // Generate channeId
-  const channelId = uuidv4();
+  const channelId = data.channel.length;
 
   // The user who created it automatically joins the channel
   const channelOwner = {

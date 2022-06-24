@@ -9,6 +9,7 @@ beforeEach(() => {
 
 describe ( 'channels functions testing', () => {
 
+
     const createTestUser = (email, password, nameFirst, nameLast) => {
         // authRegisterV1 returns { authUserId }
         return { email, password, nameFirst, nameLast, ...authRegisterV1(email, password, nameFirst, nameLast) };
@@ -20,22 +21,6 @@ describe ( 'channels functions testing', () => {
     };
     
     describe ('channelsListallV1 test', () => {
-
-        let testUser1;
-        let testUser2;
-        let testChannel1;
-        
-        beforeEach(() => {
-            testUser1 = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-            expect(testUser1.authUserId).not.toStrictEqual({ error: 'error' });
-
-            testUser2 = createTestUser('student@unsw.com', 'password', 'Jane', 'Schmoe');
-            expect(testUser2.authUserId).not.toStrictEqual({ error: 'error' });
-        
-            // testUser1 created testChannel so they automatically join it
-            testChannel1 = createTestChannel(testUser1.authUserId, 'channelName', true);
-            expect(testChannel1.channelId).not.toStrictEqual({ error: 'error' });
-        });
 
         test('invalid authid input - empty string', () => {
 
@@ -56,13 +41,14 @@ describe ( 'channels functions testing', () => {
         });
 
         test('no channels in database', () => {
-            // const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe');
-            expect(channelsListallV1(testUser1)).toStrictEqual([]);
-
+            let testUser1 = authRegisterV1('who@question.com', 'yourmumma', 'John', 'Smith');
+            expect(channelsListallV1(testUser1.authUserId)).toStrictEqual({"channels": []});
         });
 
-        test('return one channel', () => {       
-            expect(channelsListallV1(testUser1.authUserId)).toStrictEqual({
+        test('return one channel', () => { 
+            let testUser2 = authRegisterV1('whom@question.com', 'youmumma', 'Joh', 'Smit');
+            let testChannel1 = createTestChannel(testUser2.authUserId, 'channelName', true);
+            expect(channelsListallV1(testUser2.authUserId)).toStrictEqual({
                 channels: [
                   {
                     channelId: testChannel1.channelId,
@@ -74,15 +60,12 @@ describe ( 'channels functions testing', () => {
         });
 
         test('return multiple channels', () => {
-            const c1A = createTestChannel(testUser1.authUserId, 'channel1AName', false);
-            const c1B = createTestChannel(testUser1.authUserId, 'channel1BName', true);
-            const c1C = createTestChannel(testUser1.authUserId, 'channel1CName', false);
+            let testUser3 = authRegisterV1('who@questin.com', 'youumma', 'Jon', 'Smih');
+            const c1A = createTestChannel(testUser3.authUserId, 'channel1AName', false);
+            const c1B = createTestChannel(testUser3.authUserId, 'channel1BName', true);
+            const c1C = createTestChannel(testUser3.authUserId, 'channel1CName', false);
 
             const expected = new Set([
-                {
-                channelId: testChannel1.channelId,
-                name: testChannel1.name,
-                },
                 {
                 channelId: c1A.channelId,
                 name: c1A.name,
@@ -96,7 +79,7 @@ describe ( 'channels functions testing', () => {
                 name: c1C.name,
                 },
             ]);
-            const received = new Set(channelsListallV1(testUser1.authUserId).channels);
+            const received = new Set(channelsListallV1(testUser3.authUserId).channel);
             expect(received).toStrictEqual(expected);
         });
 

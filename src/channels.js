@@ -25,6 +25,9 @@ Return Value:
 
 
 function channelsListallV1(authUserId) {
+
+  Object
+
   const data = getData();
   let foundChannels = [];
 
@@ -38,25 +41,16 @@ function channelsListallV1(authUserId) {
     return { error: 'error' };
   }
 
-  // check if any channels in data
-  if (data.channel.length <= 0) {
-    return foundChannels;
-  }
-
-  // const {channel} = data;
-  // if (channel.length <= 0) {
-  //   return foundChannels;
+  // for (const i in data.channel) {
+  //   foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].name});
   // }
 
-  // let data = getData();
-  // const {channel} = data; // extracts channel array from data
-  // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.name}));
-  // return { channels: result }; //an array of channel information containing keys channelId and channelName
+  const {channel} = data; // extracts channel array from data
+  //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
+  const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
+  return { channels: result } ;
 
-  for (const i in data.channel) {
-    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].name});
-  }
+
 
   return {
     channels: foundChannels 

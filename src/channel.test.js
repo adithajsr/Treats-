@@ -7,22 +7,8 @@ function getData() {
 function setData(newData) {
   data = newData;
 }
-
-/*Description: Returns the details of a requested user.
-Arguments:
-    <uId> (<integer>)    - <The uId of the user thats being checked.>
-
-Return Value:
-    Returns <search> on <uId is a user, search is an object that contains user details>
-    Returns <invalid> on <uId was not found.>
-  */
-
-function userDetails(uId) {
-  let data = getData();
-  const {user} = data;
-  const search = user.find(data => data.uId === uId);
-  return (search != null) ? search : "invalid";
-}
+//Defined numbers.
+const GLOBAL = 1;
 
 //Functions being tested
 /*Description: Checks whether a Uid is a member of a channel
@@ -58,6 +44,20 @@ function channelExists(channelId) {
   const {channel} = data;
   const search = channel.find(data => data.channelId === channelId);
   return (search != null) ? "true" : "false";
+}
+
+/*Description: Checks whether a user  exists in the database
+Arguments:
+  <uId> (integer)    - <The uId of the user thats being checked.>
+Return Value:
+  Returns <true> on <uId is found.>
+  Returns <false> on <uId was not found.>
+*/
+function uIdExists(uId) {
+    let data = getData();
+    const {user} = data;
+    const search = user.find(data => data.uId === uId);
+    return (search != null) ? "true" : "false";
 }
 
 /*Description: Checks what the channel permissions are of a user
@@ -97,8 +97,6 @@ function globalPermissions(uId) {
   return (search != null) ? search.globalPerms : "invalid";
 }
 
-
-
 /*Description: Checks whether the channel is private or public.
 Arguments:
   <channelId> (integer)    - <The channelId of the channel whose state is being queried.>
@@ -115,8 +113,6 @@ function channelPublic(channelId) {
   return (search != null) ? "true" : "false";
 }
 
-
-
 /*Description: Adds a user to a channel
 Arguments:
   <authUserId> (integer)    - <The authUserId is the user who initates the function>
@@ -126,20 +122,23 @@ Return Value:
   Returns <{}> on <successfully added user to channel>
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
+//Add a check to test whether authUserId is valid.
 function channelJoinV1(authUserId, channelId) {
   if (channelExists(channelId) == "false" ||
+    uIdExists(authUserId) === "false" ||
     memberExists(channelId, authUserId) == "true" ||
-    (channelPublic(channelId) == "false" && globalPermissions(uId) != "global")) {
+    (channelPublic(channelId) == "false" && globalPermissions(authUserId) != GLOBAL)) {
     return {error: "error"};
   } else {
     let data = getData();
-    const new_user = { ...userDetails(authUserId), ...{channelPerms: "member"}};
+    const new_user = {uId: authUserId,channelPerms: 'member'};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);
     return {};
   }
 }
+
 
 /*Description: Invites user to the channel
 Arguments:
@@ -153,55 +152,18 @@ Return Value:
 */  
 function channelInviteV1(authUserId, channelId, uId) {
   if (channelExists(channelId) === "false" ||
-      uuidValidateV4(uId) === "false" ||
+      uIdExists(uId) === "false" ||
       memberExists(channelId, uId) === "true" ||
       memberExists(channelId, authUserId) === "false")
   {
     return {error: "error"};
   } else {
     let data = getData();
-    const new_user = { ...userDetails(uId), ...{channelPerms: "member"}};
+    const new_user = {uId: uId,channelPerms: 'member'};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);
     return {};
-  }
-}
-
-function channelsListallV1(authUserId){
-  //probs needs to check whether authUserId is valid. IDK wasn't clear from documentation.
-  let data = getData();
-  const {channel} = data; // extracts channel array from data
-  //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
-  return result; //an array of channel information containing keys channelId and channelName
-}
-
-function channelDetailsV1(authUserId, channelId) {
-  if (channelExists(channelId) === "false" ||
-    memberExists(channelId, authUserId) === "false") {
-    return {error: 'error'};
-  } else {
-    let data = getData();
-    const {channel} = data; // extracts channel array from data
-    let i = data.channel.findIndex(data => data.channelId === channelId); // find index in the array of the channel being checked.
-    const {members} = channel[i]; //extracts members array from selected channel
-    const owners = members.filter(data => data.channelPerms === 'owner'); // creates a new array holding any user that has permissions owner.
-    const details = {
-      name: channel[i].channelName,
-      isPublic: channel[i].isPublic,
-      ownerMembers: owners.map(owners => ({uId: owners.uId,
-                                             email: owners.email,
-                                             nameFirst: owners.nameFirst,
-                                             nameLast: owners.nameLast,
-                                             handleStr: owners.handleStr})),
-      allMembers:   members.map(members => ({uId: members.uId,
-                                             email: members.email,
-                                             nameFirst: members.nameFirst,
-                                             nameLast: members.nameLast,
-                                             handleStr: members.handleStr}))
-    }
-    return details; //an object
   }
 }
 

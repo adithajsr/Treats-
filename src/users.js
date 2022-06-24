@@ -1,3 +1,5 @@
+
+import {getData} from './dataStore.js'
 function userProfileV1(authUserId, uId) {
 	let data = getData();
 

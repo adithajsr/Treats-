@@ -5,6 +5,7 @@
 import {clearV1} from './other.js'
 import {authRegisterV1} from './auth.js'
 import {userProfileV1} from './users.js'
+import {channelsCreateV1} from './channels.js'
 
 
 test('Testing clearing users', () => {
@@ -18,10 +19,13 @@ test('Testing clearing users', () => {
 	clearV1();
 
 	expect(userProfileV1(danielId, danielId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(samuelId, samuelId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maddyId,  maddyId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maiyaId, maiyaId)).toMatchObject({error: 'error'});
 
 })
 
-/*
+
 test('Testing clearing four channels with one user in each of them', () => {
 
 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
@@ -36,10 +40,13 @@ test('Testing clearing four channels with one user in each of them', () => {
 	let maiyaId = authRegisterV1('maiyaTaylor@gmail.com', 'password3', 'Maiya', 'Taylor');
 	channelsCreateV1(maiyaId, 'testName3', 0);
 
-	clear();
+	clearV1();
 
-	expect(data.user.length).toBe(0);
-	expect(data.channels.length).toBe(0);
+	expect(userProfileV1(danielId, danielId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(samuelId, samuelId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maddyId,  maddyId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maiyaId, maiyaId)).toMatchObject({error: 'error'});
+	expect(channelsListallV1).toMatchObject([]);
 
 
 })
@@ -66,10 +73,13 @@ test('Testing clearing two channels with multiple users in each of them', () => 
 	//Testing clear function
 	clear();
 	
-	expect(data.user.length).toBe(0);
-	expect(data.channels.length).toBe(0);
+	expect(userProfileV1(danielId, danielId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(samuelId, samuelId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maddyId,  maddyId)).toMatchObject({error: 'error'});
+	expect(userProfileV1(maiyaId, maiyaId)).toMatchObject({error: 'error'});
+	expect(channelsListallV1).toMatchObject([]);
 	
 
 })
-*/
+
 

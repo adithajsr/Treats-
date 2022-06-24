@@ -125,7 +125,7 @@ Return Value:
 //Add a check to test whether authUserId is valid.
 function channelJoinV1(authUserId, channelId) {
   if (channelExists(channelId) == "false" ||
-    uIdExists(authUserId) === "false" ||
+    uIdExists(authUserId) === "true" ||
     memberExists(channelId, authUserId) == "true" ||
     (channelPublic(channelId) == "false" && globalPermissions(authUserId) != GLOBAL)) {
     return {error: "error"};

@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 
+
 /*
 Creates a new channel with the given name that is either a public
 or private channel
@@ -17,25 +18,6 @@ function channelsCreateV1(authUserId, name, isPublic) {
 
   let data = getData();
 
-  // FIXME:
-  console.log(data);
-  console.log(authUserId);
-
-  // Invalid authUserId
-  if (!(data.user.find(a => a.uId === authUserId))) {
-    console.log('invalid authUserId');
-    return { error: 'error' };
-  }
-
-  // // Invalid authUserId
-  // if (data.user.find(a => a.uId === authUserId) === undefined) {
-  //   return { error: 'error' };
-  // }
-
-  // Invalid channel name
-  if (name.length < 1 || name.length > 20) {
-    console.log('invalid channel name');
-
   // Invalid authUserId
   if (data.user.find(a => a.uId === authUserId) === undefined) {
     return { error: 'error' };
@@ -43,7 +25,6 @@ function channelsCreateV1(authUserId, name, isPublic) {
 
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
-
     return { error: 'error' };
   }
 
@@ -70,10 +51,6 @@ function channelsCreateV1(authUserId, name, isPublic) {
     channelId: newChannelId,
   };
 }
-}
-
-
-
 
 
 /*
@@ -119,10 +96,46 @@ function channelsListV1(authUserId) {
 }
 
 
+
+{/* <channelsListallV1 returns an array of all channels, regardless of whether they
+  are public or private, when initiated by a valid authUserId>
+
+Arguments:
+    <authUserId> (<integer>)    - <The authUserId is the user who initates the function>
+
+Return Value:
+    Returns <[{channel}]> on <authUserId was valid and there were channels in data>
+    Returns <[]> on <no channels in data>  
+    Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
+
+
 function channelsListallV1(authUserId) {
+
+  const data = getData();
+  let foundChannels = [];
+
+  // inappropriate authUserId
+  if (isNaN(authUserId) === true || authUserId === '') {
+    return { error: 'error' }
+  }
+
+  // user not in database
+  if (data.user.find(a => a.uId === authUserId) === undefined) {
+    return { error: 'error' };
+  }
+
+  for (const i in data.channel) {
+    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
+  }
+
+  // const {channel} = data; // extracts channel array from data
+  // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
+  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
+  // return { channels: result } ;
+
   return {
-    channels: [] // see interface for contents
+    channels: foundChannels 
   };
 }
-
+  
 export { channelsCreateV1, channelsListV1, channelsListallV1 };

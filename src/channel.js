@@ -104,14 +104,14 @@ Return Value:
 */
 //Add a check to test whether authUserId is valid.
 function channelJoinV1(authUserId, channelId) {
-  if (channelExists(channelId) == "false" || 
-    uuidValidateV4(authUserId) === "false"||
+  if (channelExists(channelId) == "false" ||
+      uuidValidateV4(authUserId) === "false" ||
     memberExists(channelId, authUserId) == "true" ||
-    (channelPublic(channelId) == "false" && globalPermissions(uId) != "global")) {
+    (channelPublic(channelId) == "false" && globalPermissions(authUserId) != "global")) {
     return {error: "error"};
   } else {
     let data = getData();
-    const new_user = {uId: authUserId,permissions: 'member'};
+    const new_user = {uId: authUserId,channelPerms: 'member'};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);
@@ -138,7 +138,7 @@ function channelInviteV1(authUserId, channelId, uId) {
     return {error: "error"};
   } else {
     let data = getData();
-    const new_user = {uId: uId,permissions: 'member'};
+    const new_user = {uId: uId,channelPerms: 'member'};
     let i = data.channel.findIndex(data => data.channelId === channelId);
     data.channel[i].members.push(new_user);
     setData(data);

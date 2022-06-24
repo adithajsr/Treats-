@@ -44,7 +44,7 @@ export function authLoginV1 (email, password) {
 		if (item.email === email) {
 			if (item.password === password) {
 				// If both arguments match an account
-				return item.uId;
+				return { authUserId: item.uId};
 			} else {
 				// If password doesn't match the email's
 				return { error: 'error'};
@@ -97,8 +97,8 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	let highestIndex = 0;
 	let isDupplicate = false;
 	for (const item of dataSet.user) {
-		if (item[handle].search(newHandle) === 0) {
-			if (item[handle].search(/[0-9]{1,}$/) === -1) {
+		if (item.handle.search(newHandle) === 0) {
+			if (item.handle.search(/[0-9]{1,}$/) === -1) {
 				newHandle = newHandle + '0';
 			} else {
 				isDupplicate = true;
@@ -118,9 +118,9 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 	// PEFORM RETURN & UPDATE "dataStore"
 	let globalPermissions = undefined;
 	if (setData.user === undefined) {
-		globalPermissions = 'owner';
+		globalPermissions = 1; //owner
 	} else {
-		globalPermissions = 'member';
+		globalPermissions = 2; //memeber
 	}
 
 	dataSet.user.push({
@@ -133,5 +133,5 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
         globalPerms: globalPermissions,
 	});
 	setData(dataSet);
-	return newUserId;
+	return { authUserId: newUserId};
 }

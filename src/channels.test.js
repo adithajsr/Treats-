@@ -1,4 +1,4 @@
-import { channelsCreateV1, channelsListV1 } from './channels';
+import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels';
 import { authRegisterV1 } from './auth';
 import { clearV1 } from './other';
 
@@ -10,15 +10,58 @@ describe('channels capabilities', () => {
 
   const createTestUser = (email, password, nameFirst, nameLast) => {
     // authRegisterV1 returns { authUserId }
-    // FIXME: can probably remove a few of these return values if not needed
     return { email, password, nameFirst, nameLast, ...authRegisterV1(email, password, nameFirst, nameLast) };
   };
 
   const createTestChannel = (authUserId, name, isPublic) => {
     // channelsCreateV1 returns { channelId }
-    // FIXME: can probably remove a few of these return values if not needed
     return { authUserId, name, isPublic, ...channelsCreateV1(authUserId, name, isPublic) };
   };
+  
+
+  describe('channelsCreateV1', () => {
+
+    let testUser;
+    let testChannel;
+    
+    beforeEach(() => {
+      testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expect(testUser.authUserId).not.toStrictEqual({ error: 'error' });
+  
+      testChannel = createTestChannel(testUser.authUserId, 'channelName', true);
+      expect(testChannel.channelId).not.toStrictEqual({ error: 'error' });
+    });
+
+    test('Invalid authUserId', () => {
+      expect(channelsCreateV1('notANumber', 'channelName', true)).toStrictEqual({ error: 'error' });
+    });
+
+    test.each([
+      // length of name is less than 1 or more than 20 characters
+      { name: '' },
+      { name: 'moreThanTwentyCharacters' },
+    ])("Invalid channel name: '$name'", ({ name }) => {
+      expect(channelsCreateV1(testUser.authUserId, name, true)).toStrictEqual({ error: 'error' });
+    });
+
+    const channelsCreateObject = expect.objectContaining({
+      channelId: expect.any(Number),
+    });
+
+    test('Containing the right keys', () => {
+      expect(channelsCreateV1(testUser.authUserId, 'channelName', true)).toEqual(channelsCreateObject);
+    });
+
+    test('Can register same channel name, same publicness', () => {
+      const c1 = channelsCreateV1(testUser.authUserId, 'channelName', true);
+      const c2 = channelsCreateV1(testUser.authUserId, 'channelName', true);
+      expect(c1).toStrictEqual(channelsCreateObject);
+      expect(c2).toStrictEqual(channelsCreateObject);
+      expect(c1).not.toStrictEqual(c2);
+    });
+
+  });
+
 
   describe('channelsListV1', () => {
 
@@ -38,31 +81,8 @@ describe('channels capabilities', () => {
       expect(testChannel1.channelId).not.toStrictEqual({ error: 'error' });
     });
 
-    // TODO: Remove below comment before submitting
-
-    // Provide an array of all channels (and their associated details)
-    // that the authorised user is part of, regardless of publicness
-
-    // Parameters: { authUserId (integer) }
-    // e.g. channelsListV1( 12 )
-
-    // Return type if no error: { channels }
-    // i.e. array of objects, where each object contains types { channelId, name }
-    /* e.g.
-    channels: [
-      {
-        channelId: 1,
-        name: 'channel1',
-      },
-      {
-        channelId: 2,
-        name: 'channel2',
-      }
-    ]
-    */
-
     test('Invalid authUserId', () => {
-      expect(channelsListV1(testUser1.authUserId + 1)).toStrictEqual({ error: 'error' });
+      expect(channelsListV1('notANumber')).toStrictEqual({ error: 'error' });
     });
 
     test('One channel, authorised user is in channel', () => {
@@ -71,7 +91,7 @@ describe('channels capabilities', () => {
         channels: [
           {
             channelId: testChannel1.channelId,
-            name : testChannel1.channelName,
+            name : testChannel1.name,
           }
         ]
       });
@@ -93,19 +113,19 @@ describe('channels capabilities', () => {
       const expected = new Set([
         {
           channelId: testChannel1.channelId,
-          name: testChannel1.channelName,
+          name: testChannel1.name,
         },
         {
           channelId: c1A.channelId,
-          name: c1A.channelName,
+          name: c1A.name,
         },
         {
           channelId: c1B.channelId,
-          name: c1B.channelName,
+          name: c1B.name,
         },
         {
           channelId: c1C.channelId,
-          name: c1C.channelName,
+          name: c1C.name,
         },
       ]);
       const received = new Set(channelsListV1(testUser1.authUserId).channels);
@@ -121,11 +141,11 @@ describe('channels capabilities', () => {
       const expected = new Set([
         {
           channelId: testChannel1.channelId,
-          name: testChannel1.channelName,
+          name: testChannel1.name,
         },
         {
           channelId: c1A.channelId,
-          name: c1A.channelName,
+          name: c1A.name,
         },
       ]);
       const received = new Set(channelsListV1(testUser1.authUserId).channels);
@@ -145,5 +165,6 @@ describe('channels capabilities', () => {
     });
 
   });
+
 
 });

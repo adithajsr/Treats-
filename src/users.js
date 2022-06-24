@@ -1,4 +1,4 @@
-import { getData } from './dataStore';
+import {getData} from './dataStore.js'
 
 export function userProfileV1(authUserId, uId) {
   let data = getData();

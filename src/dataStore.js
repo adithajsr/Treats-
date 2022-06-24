@@ -1,25 +1,7 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
-  user:[{
-      uId: 37383,
-      email: 'student@unsw.com',
-      password: 'password',
-      nameFirst: 'Grace',
-      nameLast: 'Shim',
-      handleStr: 'Graceshim0',
-      globalPerms: 'global',
-  }], 
-  channel: [{
-    channelId: 123,
-    channelName: 'namedchannel',
-    isPublic: false,
-    members: [
-      {
-        uId: 37383,
-        channelPerms: 'owner',
-      }
-    ],
-  }]
+  user: [],
+  channel: [],
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1

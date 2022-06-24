@@ -1,4 +1,5 @@
 
+
 //This function returns the important information about a user's profile. 
 /*
 	<authUserId> This function checks whether a valid authUserId is calling the function

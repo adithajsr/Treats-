@@ -1,3 +1,4 @@
+import { getData, setData } from './dataStore';
 //Defined numbers.
 const GLOBAL = 1;
 

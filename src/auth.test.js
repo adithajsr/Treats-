@@ -7,6 +7,7 @@ var validator = require('validator');
 // ======================================== authRegisterV1 Testing ========================================
 
 describe('Testing for authRegisterV1', () => {  
+
     test('Test 1 affirmitive', () => {
       // all should be well
       let testUserId = authRegisterV1('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');

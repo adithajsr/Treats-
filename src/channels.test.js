@@ -1,7 +1,11 @@
 import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels.js';
 import { clearV1 } from './other.js';
 import { getData, setData } from './dataStore.js';
-import { authRegisterV1 } from './auth.js'
+import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
+
+beforeEach(() => {
+    clearV1();
+});  
 
 describe ( 'channels functions testing', () => {
 
@@ -33,11 +37,6 @@ describe ( 'channels functions testing', () => {
             expect(testChannel1.channelId).not.toStrictEqual({ error: 'error' });
         });
 
-
-        // beforeEach(() => {
-        //     clearV1();
-        // });
-
         test('invalid authid input - empty string', () => {
 
             expect(channelsListallV1('')).toStrictEqual({ error: 'error' });
@@ -63,15 +62,6 @@ describe ( 'channels functions testing', () => {
         });
 
         test('return one channel', () => {       
-            // const c1 = channelsCreateV1(12345, 'apple', true);
-            // expect(channelsListallV1(1)).toStrictEqual({
-            //     channels: [
-            //         {
-            //             channelId: c1, 
-            //             name: 'apple',
-            //         }
-            //     ]
-            // });
             expect(channelsListallV1(testUser1.authUserId)).toStrictEqual({
                 channels: [
                   {
@@ -108,27 +98,6 @@ describe ( 'channels functions testing', () => {
             ]);
             const received = new Set(channelsListallV1(testUser1.authUserId).channels);
             expect(received).toStrictEqual(expected);
-
-            // const c1 = channelsCreateV1(123, 'apple', true);
-            // const c2 = channelsCreateV1(456, 'banana', false);
-            // const c3 = channelsCreateV1(789, 'carrot', true);
-            // const expected = new Set([
-            //     {
-            //         channelId: c1,
-            //         name: 'apple',
-            //     },
-            //     {
-            //         channelId: c2,
-            //         name: 'banana',
-            //     },
-            //     {
-            //         channelId: c3,
-            //         name: 'carrot',
-            //     }
-            // ]);
-            // const received = new Set(channelsListallV1(99).channels);
-            // expect(received).toStrictEqual(expected);
-
         });
 
     });

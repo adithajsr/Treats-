@@ -1,16 +1,19 @@
-function channelJoinV1( authUserId, channelId ) {
-  return 'authUserId' + 'channelId';
+function channelDetailsV1(authUserId, channelId) {
+  return {
+    name: 'secret candy crush team', 
+    isPublic: true,
+    ownerMembers: [],
+    allMembers: [],
+  };
+}
+
+function channelJoinV1(authUserId, channelId) {
+  return {};
 }
 
 function channelInviteV1(authUserId, channelId, uId) {
-  return 'authUserId' + 'channelId'+ 'uId';
+  return {};
 }
-
-function channelDetailsV1(authUserId, channelId) {
-  return 'authUserId' + 'channelId';
-}
-
-function channelMessagesV1(authUserId, channelId, start) {
 
 //ASSUMPTION: comparing authUserId to uId?? Should we have an authUserId in channel.members array??
 function channelMessagesV1(authUserId, channelId, start) {
@@ -51,19 +54,7 @@ function channelMessagesV1(authUserId, channelId, start) {
 
 	//If channelId not found or authUserId not part of channelId valid members
 	return {error: 'error'};
-
-
 }
 
 
-
-
-
-
-
-
-
-
-
-}
-
+export { channelDetailsV1, channelJoinV1, channelInviteV1, channelMessagesV1 };

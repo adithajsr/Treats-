@@ -44,7 +44,7 @@ export function authLoginV1 (email, password) {
 		if (item.email === email) {
 			if (item.password === password) {
 				// If both arguments match an account
-				return item.uId;
+				return { authUserId: item.uId};
 			} else {
 				// If password doesn't match the email's
 				return { error: 'error'};
@@ -133,5 +133,5 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
         globalPerms: globalPermissions,
 	});
 	setData(dataSet);
-	return newUserId;
+	return { authUserId: newUserId};
 }

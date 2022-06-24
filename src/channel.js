@@ -1,12 +1,5 @@
 import { validate as uuidValidate } from 'uuid';
 
-function userDetails(uId) {
-  let data = getData();
-  const {user} = data;
-  const search = user.find(data => data.uId === uId);
-  return (search != null) ? search : "invalid";
-}
-
 //Functions being tested
 /*Description: Checks whether a Uid is a member of a channel
 Arguments:
@@ -111,7 +104,8 @@ Return Value:
 */
 //Add a check to test whether authUserId is valid.
 function channelJoinV1(authUserId, channelId) {
-  if (channelExists(channelId) == "false" || uuidValidateV4(authUserId) === "false"||
+  if (channelExists(channelId) == "false" || 
+    uuidValidateV4(authUserId) === "false"||
     memberExists(channelId, authUserId) == "true" ||
     (channelPublic(channelId) == "false" && globalPermissions(uId) != "global")) {
     return {error: "error"};

@@ -2,7 +2,6 @@ import { channelJoinV1, channelInviteV1, channelDetailsV1, channelMessagesV1 } f
 import { channelsCreateV1 } from './channels.js'
 import { authRegisterV1 } from './auth.js'
 import { clearV1 } from './other.js';
-import { validate as uuidValidate, v4 } from 'uuid';
 
 describe('channelDetailsV1 check', () => {
 

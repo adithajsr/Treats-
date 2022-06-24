@@ -2,7 +2,7 @@
 //A file to test the function clear for Iteration 1
 //Written by Aditha Jayasuriya, started on 17/06/2022
 
-import {clearV1} from './clear.js'
+import {clearV1} from './other.js'
 import {authRegisterV1} from './js'
 
 

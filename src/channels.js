@@ -2,11 +2,10 @@ import { getData, setData } from './dataStore.js';
 
 function channelsCreateV1(authUserId, name, isPublic) {
   return {
-    channelId: channelId,
+    channelId: 1,
   };
 }
 
-  
 function channelsListV1(authUserId) {
   return {
     channels: [] // see interface for contents

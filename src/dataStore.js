@@ -1,27 +1,7 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
-  user: [
-    // {
-    //   uId: 1,
-    // }
-  ],
-  channel: [
-    // {
-    //   channelId: 999,
-    //   channelName: 'one',
-    //   members:[{
-    //     uId: 12093812509,
-    //   }]
-    // },
-    // {
-    //   channelId: 999,
-    //   channelName: 'two',
-    // },
-    // {
-    //   channelId: 999,
-    //   channelName: 'three',
-    // }
-  ]
+  user: [],
+  channel: [],
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1

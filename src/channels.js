@@ -137,5 +137,5 @@ function channelsListallV1(authUserId) {
     channels: foundChannels 
   };
 }
-  
+
 export { channelsCreateV1, channelsListV1, channelsListallV1 };

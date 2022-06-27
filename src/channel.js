@@ -1,4 +1,65 @@
-import { getData, setData } from './dataStore';
+import { getData, setData } from './dataStore'
+
+
+function channelDetailsV1(authUserId, channelId) {
+  if (channelExists(channelId) === "false" ||
+    memberExists(channelId, authUserId) === "false") {
+    return {error: 'error'};
+  } else {
+    let data = getData();
+    const {channel} = data;
+    const {user} = data;
+    let i = data.channel.findIndex(data => data.channelId === channelId);
+    const {members} = channel[i];
+    let searchId = members.map(a => a.uId);
+    let userInfo = user.filter(({uId}) => searchId.includes(uId));
+    const owners = userInfo.filter(data => data.channelPerms === 1);
+    const details = {
+      name: channel[i].channelName,
+      isPublic: channel[i].isPublic,
+      ownerMembers: owners.map(owners => ({uId: owners.uId,
+                                             email: owners.email,
+                                             nameFirst: owners.nameFirst,
+                                             nameLast: owners.nameLast,
+                                             handleStr: owners.handleStr})),
+      allMembers:   userInfo.map(userInfo => ({uId: userInfo.uId,
+                                             email: userInfo.email,
+                                             nameFirst: userInfo.nameFirst,
+                                             nameLast: userInfo.nameLast,
+                                             handleStr: userInfo.handleStr}))
+    }
+    return details;
+  }
+}
+
+
+/*Description: Invites user to the channel
+Arguments:
+  <authUserId> (integer)    - <The authUserId is the user who initates the function>
+  <channelId> (integer)    - <The channelId of the channel which is getting the new user.>
+  <uId> (integer)    - <The uId of the person being added to the channel.>
+
+Return Value:
+  Returns <{}> on <successfully added user to channel>
+  Returns <{error: 'error'}> on <user was not added due to failing an error test>
+*/  
+function channelInviteV1(authUserId, channelId, uId) {
+  if (channelExists(channelId) === "false" ||
+      uIdExists(uId) === "false" ||
+      memberExists(channelId, uId) === "true" ||
+      memberExists(channelId, authUserId) === "false")
+  {
+    return {error: "error"};
+  } else {
+    let data = getData();
+    const new_user = {uId: uId,channelPerms: 'member'};
+    let i = data.channel.findIndex(data => data.channelId === channelId);
+    data.channel[i].members.push(new_user);
+    setData(data);
+    return {};
+  }
+}
+
 //Defined numbers.
 const GLOBAL = 1;
 
@@ -115,6 +176,7 @@ function channelPublic(channelId) {
   return (search != null) ? "true" : "false";
 }
 
+
 /*Description: Adds a user to a channel
 Arguments:
   <authUserId> (integer)    - <The authUserId is the user who initates the function>
@@ -142,29 +204,4 @@ function channelJoinV1(authUserId, channelId) {
 }
 
 
-/*Description: Invites user to the channel
-Arguments:
-  <authUserId> (integer)    - <The authUserId is the user who initates the function>
-  <channelId> (integer)    - <The channelId of the channel which is getting the new user.>
-  <uId> (integer)    - <The uId of the person being added to the channel.>
-
-Return Value:
-  Returns <{}> on <successfully added user to channel>
-  Returns <{error: 'error'}> on <user was not added due to failing an error test>
-*/  
-function channelInviteV1(authUserId, channelId, uId) {
-  if (channelExists(channelId) === "false" ||
-      uIdExists(uId) === "false" ||
-      memberExists(channelId, uId) === "true" ||
-      memberExists(channelId, authUserId) === "false")
-  {
-    return {error: "error"};
-  } else {
-    let data = getData();
-    const new_user = {uId: uId,channelPerms: 'member'};
-    let i = data.channel.findIndex(data => data.channelId === channelId);
-    data.channel[i].members.push(new_user);
-    setData(data);
-    return {};
-  }
-}
+export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV1, channelJoinV1, channelInviteV1, channelMessagesV1 };

@@ -4,13 +4,6 @@ import { getData, setData } from './dataStore'
 function channelDetailsV1(authUserId, channelId) {
   if (channelExists(channelId) === "false" ||
     memberExists(channelId, authUserId) === "false") {
-
-      if (channelExists(channelId) === "false") {
-        console.log('channeldoesnt exist');
-      }
-      if (memberExists(channelId, authUserId) === "false") {
-        console.log('member doesnt exist');
-      }
     return {error: 'error'};
   } else {
     let data = getData();

@@ -204,12 +204,4 @@ function channelJoinV1(authUserId, channelId) {
 }
 
 
-function channelMessagesV1(authUserId, channelId, start) {
-  return {
-    messages: [],
-    start: 0,
-    end: -1,
-  };
-}
-
 export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV1, channelJoinV1, channelInviteV1, channelMessagesV1 };

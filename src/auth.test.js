@@ -7,17 +7,16 @@ var validator = require('validator');
 // ======================================== authRegisterV1 Testing ========================================
 
 describe('Testing for authRegisterV1', () => {  
+
     test('Test 1 affirmitive', () => {
       // all should be well
       let testUserId = authRegisterV1('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').authUserId;
       let testUserObject = {
         uId: testUserId,
         email: 'who.is.joe@is.the.question.com',
-        password: 'yourmumma',
         nameFirst: 'John',
         nameLast: 'Smith',
         handle: 'johnsmith',
-        globalPerms: 1,
       }
       expect(isHandleValid(userProfileV1(testUserId, testUserId).handle)).toBe(true);
       expect(validator.isEmail(userProfileV1(testUserId, testUserId).email)).toBe(true);
@@ -78,11 +77,9 @@ describe('Testing for authLoginV1', () => {
     let testUserObject = {
       uId: testUserId,
       email: 'who.is.joe@is.the.question.com',
-      password: 'yourmumma',
       nameFirst: 'John',
       nameLast: 'Smith',
       handle: 'johnsmith',
-      globalPerms: 1,
     }
       expect(doesEmailExist(userProfileV1(testUserId, testUserId).email)).toBe(true);
       expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);

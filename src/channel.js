@@ -135,6 +135,16 @@ function channelPermissions(channelId, uId) {
 }
 
 
+
+function channelMessagesV1(authUserId, channelId, start) {
+  return {
+    messages: [],
+    start: 0,
+    end: -1,
+  };
+}
+
+
 /*Description: Checks what the global permission are of a user
 Arguments:
   <uId> (<integer>)    - <The uId of the user thats being checked.>

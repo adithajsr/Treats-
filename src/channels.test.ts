@@ -1,79 +1,99 @@
-import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels';
-import { clearV1 } from './other';
-import { getData, setData } from './dataStore';
-import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
+import request from 'sync-request';
+import config from './config.json';
+
+const OK = 200;
+const port = config.port;
+const url = config.url;
 
 type user = {
-  email: string,
-  password: string,
-  nameFirst: string,
-  nameLast: string,
-  authUserId?: number,
+  token: string,
+  authUserId: number,
 };
 
-type channel = {
-  authUserId: number,
-  name: string,
-  isPublic: boolean,
-  channelId?: number,
-};
+// TODO: decide if necessary
+// type channel = {
+//   channelId?: number,
+// };
+
+function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v2`,
+    {
+      json: { token, name, isPublic },
+    }
+  );
+  return res;
+}
+
+function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: { email, password, nameFirst, nameLast },
+    }
+  );
+  return res;
+}
+
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
 
 beforeEach(() => {
-  clearV1();
+  requestClear();
 });
 
 describe('channels capabilities', () => {
-  const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
-    // authRegisterV1 returns { authUserId }
-    return { email, password, nameFirst, nameLast, ...authRegisterV1(email, password, nameFirst, nameLast) };
-  };
-
-  const createTestChannel = (authUserId: number, name: string, isPublic: boolean) => {
-    // channelsCreateV1 returns { channelId }
-    return { authUserId, name, isPublic, ...channelsCreateV1(authUserId, name, isPublic) };
-  };
-
-  describe('channelsCreateV1', () => {
-    let testUser: user;
-    let testChannel: channel;
+  describe('test /channels/create/v2', () => {
+    let userRes;
+    let userBodyObj: user;
 
     beforeEach(() => {
-      testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser.authUserId).not.toStrictEqual({ error: 'error' });
-
-      testChannel = createTestChannel(testUser.authUserId, 'channelName', true);
-      expect(testChannel.channelId).not.toStrictEqual({ error: 'error' });
+      // Create a test user
+      userRes = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      userBodyObj = JSON.parse(String(userRes.body));
+      expect(userBodyObj).not.toStrictEqual({ error: 'error' });
     });
 
-    test('Invalid authUserId', () => {
-      expect(channelsCreateV1(testUser.authUserId + 1, 'channelName', true)).toStrictEqual({ error: 'error' });
+    test('Success create new channel', () => {
+      const channelRes = requestChannelsCreate(userBodyObj.token, 'channelName', true);
+      const channelBodyObj = JSON.parse(String(channelRes.body));
+
+      expect(channelRes.statusCode).toBe(OK);
+      expect(channelBodyObj).toStrictEqual({ channelId: expect.any(Number) });
+    });
+
+    test('Fail create new channel, invalid token', () => {
+      const channelRes = requestChannelsCreate(userBodyObj.token + 1, 'channelName', true);
+      const channelBodyObj = JSON.parse(String(channelRes.body));
+
+      expect(channelRes.statusCode).toBe(OK);
+      expect(channelBodyObj).toStrictEqual({ error: 'error' });
     });
 
     test.each([
       // length of name is less than 1 or more than 20 characters
       { name: '' },
       { name: 'moreThanTwentyCharacters' },
-    ])("Invalid channel name: '$name'", ({ name }) => {
-      expect(channelsCreateV1(testUser.authUserId, name, true)).toStrictEqual({ error: 'error' });
-    });
+    ])("Fail create new channel, invalid channel name: '$name'", ({ name }) => {
+      const channelRes = requestChannelsCreate(userBodyObj.token, name, true);
+      const channelBodyObj = JSON.parse(String(channelRes.body));
 
-    const channelsCreateObject = expect.objectContaining({
-      channelId: expect.any(Number),
-    });
-
-    test('Containing the right keys', () => {
-      expect(channelsCreateV1(testUser.authUserId, 'channelName', true)).toEqual(channelsCreateObject);
-    });
-
-    test('Can register same channel name, same publicness', () => {
-      const c1 = channelsCreateV1(testUser.authUserId, 'channelName', true);
-      const c2 = channelsCreateV1(testUser.authUserId, 'channelName', true);
-      expect(c1).toStrictEqual(channelsCreateObject);
-      expect(c2).toStrictEqual(channelsCreateObject);
-      expect(c1).not.toStrictEqual(c2);
+      expect(channelRes.statusCode).toBe(OK);
+      expect(channelBodyObj).toStrictEqual({ error: 'error' });
     });
   });
 
+  /*
   describe('channelsListV1', () => {
     let testUser1: user;
     let testUser2: user;
@@ -172,8 +192,9 @@ describe('channels capabilities', () => {
         channels: []
       });
     });
-  });
+  }); */
 
+  /*
   describe('channelsListallV1 test', () => {
     test('authid is invalid - not an existing user', () => {
       let testUser: user;
@@ -183,12 +204,12 @@ describe('channels capabilities', () => {
     });
 
     test('no channels in database', () => {
-      const testUser1 = authRegisterV1('who@question.com', 'yourmumma', 'John', 'Smith');
+      const testUser1 = requestAuthRegister('who@question.com', 'yourmumma', 'John', 'Smith');
       expect(channelsListallV1(testUser1.authUserId)).toStrictEqual({ channels: [] });
     });
 
     test('return one channel', () => {
-      const testUser2 = authRegisterV1('whom@question.com', 'youmumma', 'Joh', 'Smit');
+      const testUser2 = requestAuthRegister('whom@question.com', 'youmumma', 'Joh', 'Smit');
       const testChannel1 = createTestChannel(testUser2.authUserId, 'channelName', true);
       expect(channelsListallV1(testUser2.authUserId)).toStrictEqual({
         channels: [
@@ -201,7 +222,7 @@ describe('channels capabilities', () => {
     });
 
     test('return multiple channels', () => {
-      const testUser3 = authRegisterV1('who@questin.com', 'youumma', 'Jon', 'Smih');
+      const testUser3 = requestAuthRegister('who@questin.com', 'youumma', 'Jon', 'Smih');
       const c1A = createTestChannel(testUser3.authUserId, 'channel1AName', false);
       const c1B = createTestChannel(testUser3.authUserId, 'channel1BName', true);
       const c1C = createTestChannel(testUser3.authUserId, 'channel1CName', false);
@@ -223,5 +244,5 @@ describe('channels capabilities', () => {
       const received = new Set(channelsListallV1(testUser3.authUserId).channels);
       expect(received).toStrictEqual(expected);
     });
-  });
+  }); */
 });

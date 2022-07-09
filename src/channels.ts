@@ -1,5 +1,17 @@
 import { getData, setData } from './dataStore';
 
+type user = {
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  authUserId?: number,
+};
+
+type member = {
+  uId: number,
+  channelPerms: number,
+}
 
 /*
 Creates a new channel with the given name that is either a public
@@ -14,9 +26,8 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-function channelsCreateV1(authUserId, name, isPublic) {
-
-  let data = getData();
+function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
+  const data = getData();
 
   // Invalid authUserId
   if (data.user.find(a => a.uId === authUserId) === undefined) {
@@ -52,7 +63,6 @@ function channelsCreateV1(authUserId, name, isPublic) {
   };
 }
 
-
 /*
 Provide an array of all channels (and their associated details) that the
 authorised user is part of, regardless of publicness
@@ -64,9 +74,8 @@ Return Value:
     Returns { channels } if no error
     Returns { error: 'error' } on invalid authUserId
 */
-function channelsListV1(authUserId) {
-
-  let data = getData();
+function channelsListV1(authUserId: number) {
+  const data = getData();
 
   // Invalid authUserId
   if (data.user.find(a => a.uId === authUserId) === undefined) {
@@ -78,16 +87,14 @@ function channelsListV1(authUserId) {
 
   // Determine whether or not authorised user is in each channel
   for (let i = 0; i < data.channel.length; i++) {
+    const members: member[] = data.channel[i].members;
 
-    if (data.channel[i].members.find(a => a.uId === authUserId) !== undefined) {
-
+    if (members.find(b => b.uId === authUserId) !== undefined) {
       channelsList.push({
         channelId: data.channel[i].channelId,
         name: data.channel[i].channelName,
       });
-
     }
-
   }
 
   return {
@@ -95,9 +102,7 @@ function channelsListV1(authUserId) {
   };
 }
 
-
-
-{/* <channelsListallV1 returns an array of all channels, regardless of whether they
+/* <channelsListallV1 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
 Arguments:
@@ -105,19 +110,12 @@ Arguments:
 
 Return Value:
     Returns <[{channel}]> on <authUserId was valid and there were channels in data>
-    Returns <[]> on <no channels in data>  
-    Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
+    Returns <[]> on <no channels in data>
+    Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
-
-function channelsListallV1(authUserId) {
-
+function channelsListallV1(authUserId: number) {
   const data = getData();
-  let foundChannels = [];
-
-  // inappropriate authUserId
-  if (isNaN(authUserId) === true || authUserId === '') {
-    return { error: 'error' }
-  }
+  const foundChannels = [];
 
   // user not in database
   if (data.user.find(a => a.uId === authUserId) === undefined) {
@@ -125,7 +123,7 @@ function channelsListallV1(authUserId) {
   }
 
   for (const i in data.channel) {
-    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
+    foundChannels.push({ channelId: data.channel[i].channelId, name: data.channel[i].channelName });
   }
 
   // const {channel} = data; // extracts channel array from data
@@ -134,7 +132,7 @@ function channelsListallV1(authUserId) {
   // return { channels: result } ;
 
   return {
-    channels: foundChannels 
+    channels: foundChannels
   };
 }
 

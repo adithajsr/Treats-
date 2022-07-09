@@ -92,7 +92,7 @@ describe('channels capabilities', () => {
     });
 
     test('Invalid authUserId', () => {
-      expect(channelsListV1(testUser2.authUserId)).toStrictEqual({ error: 'error' });
+      expect(channelsListV1(testUser2.authUserId + 1)).toStrictEqual({ error: 'error' });
     });
 
     test('One channel, authorised user is in channel', () => {

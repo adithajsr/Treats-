@@ -109,18 +109,18 @@ Return Value:
     Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
 
 
-function channelsListallV1(authUserId) {
+function channelsListallV1(authUserId: number) {
 
   const data = getData();
   let foundChannels = [];
 
   // inappropriate authUserId
-  if (isNaN(authUserId) === true || authUserId === '') {
+  if (isNaN(authUserId) === true) {
     return { error: 'error' }
   }
 
   // user not in database
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  if (data.user.find((a: any) => a.uId === authUserId) === undefined) {
     return { error: 'error' };
   }
 

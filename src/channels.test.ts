@@ -187,18 +187,6 @@ describe ( 'channels functions testing', () => {
     
     describe ('channelsListallV1 test', () => {
 
-        test('invalid authid input - empty string', () => {
-
-            expect(channelsListallV1('')).toStrictEqual({ error: 'error' });
-
-        });
-
-        test('authid is invalid - not a number', () => {
-
-            expect(channelsListallV1('abcde')).toStrictEqual({ error: 'error' });
-
-        });
-
         test('authid is invalid - not an existing user', () => {
 
             expect(channelsListallV1(2893479283)).toStrictEqual({ error: 'error' });

@@ -24,6 +24,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
     }
   );
   return res;
+  // TODO: consider moving error checking to wrapper function
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {

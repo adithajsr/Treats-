@@ -10,10 +10,9 @@ type user = {
   authUserId: number,
 };
 
-// TODO: decide if necessary
-// type channel = {
-//   channelId?: number,
-// };
+type channel = {
+  channelId?: number,
+};
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -23,8 +22,10 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
       json: { token, name, isPublic },
     }
   );
-  return res;
-  // TODO: consider moving error checking to wrapper function
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
@@ -35,7 +36,10 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
       json: { email, password, nameFirst, nameLast },
     }
   );
-  return res;
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestClear() {

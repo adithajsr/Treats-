@@ -1,15 +1,15 @@
 // In the database, there are arrays of object user, and arrays of object channel
 
 let data = {
-    user: [
+  user: [
     {
-        uId: 10,
-        email: 'student@unsw.com',
-        password: 'password',
-        nameFirst: 'John',
-        nameLast: 'Doe',
-        handle: 'johndoe0',
-        globalPerms: 1,
+      uId: 10,
+      email: 'student@unsw.com',
+      password: 'password',
+      nameFirst: 'John',
+      nameLast: 'Doe',
+      handle: 'johndoe0',
+      globalPerms: 1,
     },
   ],
 
@@ -34,5 +34,12 @@ let data = {
       ],
     },
   ],
+
+  token: [
+    {
+      token: 'tokenstring',
+      uId: 10,
+    }
+  ]
 
 }

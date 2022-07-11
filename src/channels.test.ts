@@ -5,13 +5,20 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
+// TODO: potentially improve types
 type user = {
-  token: string,
-  authUserId: number,
+  res: any,
+  bodyObj: any,
 };
 
+// type user = {
+//   token: string,
+//   authUserId: number,
+// };
+
+// FIXME:
 type channel = {
-  channelId?: number,
+  channelId: number,
 };
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
@@ -73,30 +80,26 @@ beforeEach(() => {
 
 describe('channels capabilities', () => {
   describe('test /channels/create/v2', () => {
-    let userRes;
-    let userBodyObj: user;
+    let testUser: user;
 
     beforeEach(() => {
       // Create a test user
-      userRes = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      userBodyObj = JSON.parse(String(userRes.body));
-      expect(userBodyObj).not.toStrictEqual({ error: 'error' });
+      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
     test('Success create new channel', () => {
-      const channelRes = requestChannelsCreate(userBodyObj.token, 'channelName', true);
-      const channelBodyObj = JSON.parse(String(channelRes.body));
+      const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
 
-      expect(channelRes.statusCode).toBe(OK);
-      expect(channelBodyObj).toStrictEqual({ channelId: expect.any(Number) });
+      expect(testChannel.res.statusCode).toBe(OK);
+      expect(testChannel.bodyObj).toStrictEqual({ channelId: expect.any(Number) });
     });
 
     test('Fail create new channel, invalid token', () => {
-      const channelRes = requestChannelsCreate(userBodyObj.token + 1, 'channelName', true);
-      const channelBodyObj = JSON.parse(String(channelRes.body));
+      const testChannel = requestChannelsCreate(testUser.bodyObj.token + 1, 'channelName', true);
 
-      expect(channelRes.statusCode).toBe(OK);
-      expect(channelBodyObj).toStrictEqual({ error: 'error' });
+      expect(testChannel.res.statusCode).toBe(OK);
+      expect(testChannel.bodyObj).toStrictEqual({ error: 'error' });
     });
 
     test.each([
@@ -104,11 +107,10 @@ describe('channels capabilities', () => {
       { name: '' },
       { name: 'moreThanTwentyCharacters' },
     ])("Fail create new channel, invalid channel name: '$name'", ({ name }) => {
-      const channelRes = requestChannelsCreate(userBodyObj.token, name, true);
-      const channelBodyObj = JSON.parse(String(channelRes.body));
+      const testChannel = requestChannelsCreate(testUser.bodyObj.token, name, true);
 
-      expect(channelRes.statusCode).toBe(OK);
-      expect(channelBodyObj).toStrictEqual({ error: 'error' });
+      expect(testChannel.res.statusCode).toBe(OK);
+      expect(testChannel.bodyObj).toStrictEqual({ error: 'error' });
     });
   });
 

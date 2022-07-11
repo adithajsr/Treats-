@@ -22,8 +22,10 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
       json: { token, name, isPublic },
     }
   );
-  return res;
-  // TODO: consider moving error checking to wrapper function
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
@@ -34,7 +36,10 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
       json: { email, password, nameFirst, nameLast },
     }
   );
-  return res;
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestChannelsList(token: string) {
@@ -45,8 +50,10 @@ function requestChannelsList(token: string) {
       qs: { token },
     }
   );
-  return res;
-  // TODO: consider moving error checking to wrapper function
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestClear() {
@@ -110,8 +117,8 @@ describe('channels capabilities', () => {
     let user1BodyObj: user;
     let user2Res;
     let user2BodyObj: user;
-    let createdChannelRes;
-    let createdChannelBodyObj: channel;
+    let createdChannel1Res;
+    let createdChannel1BodyObj: channel;
 
     beforeEach(() => {
       // Create test user 1

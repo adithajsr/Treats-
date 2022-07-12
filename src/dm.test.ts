@@ -39,6 +39,20 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   };
 }
 
+function requestDMDetails(token: string, dmId: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/dm/details/v1`,
+    {
+      qs: { token, dmId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
 function requestClear() {
   const res = request(
     'DELETE',
@@ -87,19 +101,25 @@ describe('dm capabilities', () => {
     });
 
     test('Success create new DM, two users in DM', () => {
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
 
-      // FIXME:
+      expect(testDM.res.statusCode).toBe(OK);
+      expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
-      // Creator of DM is first alphabetically
-      const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
-      expect(testDM1.res.statusCode).toBe(OK);
-      expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
-
-      // Creator of DM is second alphabetically
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
     });
 
     test('Success create new DM, more than two users in DM', () => {
       // TODO: try a few different creators and number of users
+
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+
+      expect(testDM.res.statusCode).toBe(OK);
+      expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
+
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
     });
 
     test('Fail create new DM, invalid token', () => {
@@ -132,7 +152,7 @@ describe('dm capabilities', () => {
       expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
 
       // Multiple pairs of duplicate uIds
-      const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser5.bodyObj.authUserId, testUser5.bodyObj.authUserId]);
+      const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser5.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser5.bodyObj.authUserId]);
       expect(testDM2.res.statusCode).toBe(OK);
       expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
     });

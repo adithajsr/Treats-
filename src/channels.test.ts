@@ -3,9 +3,78 @@ import { clearV1 } from './other.js';
 import { getData, setData } from './dataStore.js';
 import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
 
+
+import request from 'sync-request';
+import config from './config.json';
+
+const OK = 200;
+const port = config.port;
+const url = config.url;
+
+// TODO: potentially improve types
+type wrapperOutput = {
+  res: any,
+  bodyObj: any,
+};
+
+function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v2`,
+    {
+      json: { token, name, isPublic },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: { email, password, nameFirst, nameLast },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestChannelsList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/list/v2`,
+    {
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
+
 beforeEach(() => {
-    clearV1();
-});  
+  requestClear();
+});
+
+
 
 describe('channels capabilities', () => {
 
@@ -167,75 +236,89 @@ describe('channels capabilities', () => {
   
     });
   
-  });
-  
+});
 
+function requestChannelsListall(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}channels/listall/v2`,
+    {
+      qs: {
+        token
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
 
+let userRes;
+let userBodyObj: user;
 
 describe ( 'channels functions testing', () => {
+  describe ('channels/listall/v2 test', () => {
+    let testUser: wrapperOutput;
 
-
-    const createTestUser = (email, password, nameFirst, nameLast) => {
-        // authRegisterV1 returns { authUserId }
-        return { email, password, nameFirst, nameLast, ...authRegisterV1(email, password, nameFirst, nameLast) };
-    };
+    beforeEach(() => {
+      // Create a test user
+      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
+    });
     
-    const createTestChannel = (authUserId, name, isPublic) => {
-        // channelsCreateV1 returns { channelId }
-        return { authUserId, name, isPublic, ...channelsCreateV1(authUserId, name, isPublic) };
-    };
-    
-    describe ('channelsListallV1 test', () => {
-
-        test('authid is invalid - not an existing user', () => {
-
-            expect(channelsListallV1(2893479283)).toStrictEqual({ error: 'error' });
-
-        });
-
-        test('no channels in database', () => {
-            let testUser1 = authRegisterV1('who@question.com', 'yourmumma', 'John', 'Smith');
-            expect(channelsListallV1(testUser1.authUserId)).toStrictEqual({"channels": []});
-        });
-
-        test('return one channel', () => { 
-            let testUser2 = authRegisterV1('whom@question.com', 'youmumma', 'Joh', 'Smit');
-            let testChannel1 = createTestChannel(testUser2.authUserId, 'channelName', true);
-            expect(channelsListallV1(testUser2.authUserId)).toStrictEqual({
-                channels: [
-                  {
-                    channelId: testChannel1.channelId,
-                    name : testChannel1.name,
-                  }
-                ]
-              });        
-            
-        });
-
-        test('return multiple channels', () => {
-            let testUser3 = authRegisterV1('who@questin.com', 'youumma', 'Jon', 'Smih');
-            let c1A = createTestChannel(testUser3.authUserId, 'channel1AName', false);
-            let c1B = createTestChannel(testUser3.authUserId, 'channel1BName', true);
-            let c1C = createTestChannel(testUser3.authUserId, 'channel1CName', false);
-
-            const expected = new Set([
-                {
-                channelId: c1A.channelId,
-                name: c1A.name,
-                },
-                {
-                channelId: c1B.channelId,
-                name: c1B.name,
-                },
-                {
-                channelId: c1C.channelId,
-                name: c1C.name,
-                },
-            ]);
-            const received = new Set(channelsListallV1(testUser3.authUserId).channels);
-            expect(received).toStrictEqual(expected);
-        });
-
+    test('invalid token, fail channels list all', () => {
+      const testRequest = requestChannelsListall(testUser.bodyObj.token + 'a');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
 
+    test('no channels in database, channels list all success', () => {
+      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({
+        channels: []
+      });
+    });
+
+    test('return one channel, channels list all success', () => { 
+      // create a test channel
+      let testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({
+        channels: [
+          {
+            channelId: testChannel.bodyObj.channelId,
+            name : testChannel.bodyObj.name,
+          }
+        ]
+      });        
+    });
+
+    test('return multiple channels, channels list all success', () => {
+      let c1 = requestChannelsCreate(testUser.bodyObj.token, 'aname', true);
+      let c2 = requestChannelsCreate(testUser.bodyObj.token, 'bname', false);
+      let c3 = requestChannelsCreate(testUser.bodyObj.token, 'cname', true);
+      const expected = new Set([
+        {
+          channelId: c1.bodyObj.channelId,
+          name: c1.bodyObj.name,
+        },
+        {
+          channelId: c2.bodyObj.channelId,
+          name: c2.bodyObj.name,
+        },
+        {
+          channelId: c3.bodyObj.channelId,
+          name: c3.bodyObj.name,
+        },
+      ]);
+      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+
+      expect(testRequest.res.statusCode).toBe(OK);
+      const received = new Set(testRequest.bodyObj.channels);
+      expect(received).toStrictEqual(expected);
+    });
+  });
 });

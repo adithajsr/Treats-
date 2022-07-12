@@ -128,11 +128,6 @@ function channelsListallV1(authUserId: number) {
     foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
   }
 
-  // const {channel} = data; // extracts channel array from data
-  // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
-  // return { channels: result } ;
-
   return {
     channels: foundChannels 
   };

@@ -238,10 +238,10 @@ setData(database);
 function requestChannelDetails(token: string, channelId: number) {
   const res = request(
     'GET',
-    `${url}:${port}channel/details/v2`,
+    `${url}:${port}/channel/details/v2`,
     {
       qs: {
-        token
+        token, channelId
       }
     }
   );
@@ -270,7 +270,7 @@ function requestChannelJoin(token: string, channelId: number) {
     'POST',
     `${url}:${port}/channel/join/v2`,
     {
-      json: { email, password, nameFirst, nameLast },
+      json: { token, channelId },
     }
   );
   return {

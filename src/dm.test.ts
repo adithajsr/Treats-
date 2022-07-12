@@ -69,14 +69,11 @@ beforeEach(() => {
 });
 
 describe('dm capabilities', () => {
-  
   describe('test /dm/create/v1', () => {
-
     let testUser1: wrapperOutput;
     let testUser2: wrapperOutput;
     let testUser3: wrapperOutput;
     let testUser4: wrapperOutput;
-    let testUser5: wrapperOutput;
 
     beforeEach(() => {
       // Create test user 1
@@ -92,12 +89,8 @@ describe('dm capabilities', () => {
       expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 4
-      testUser4 = requestAuthRegister('jbloggs@proton.com', '111111', 'Jo', 'Bloggs');
+      testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
       expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 5
-      testUser5 = requestAuthRegister('samb@yandex.com', 'dragon', 'Sam', 'Bloggs');
-      expect(testUser5.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
     test('Success create new DM, two users in DM', () => {
@@ -111,15 +104,13 @@ describe('dm capabilities', () => {
     });
 
     test('Success create new DM, more than two users in DM', () => {
-      // TODO: try a few different creators and number of users
-
-      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
 
       expect(testDM.res.statusCode).toBe(OK);
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
+      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe, johndoe0, tomsmith');
     });
 
     test('Fail create new DM, invalid token', () => {
@@ -130,7 +121,7 @@ describe('dm capabilities', () => {
 
     test('Fail create new DM, invalid uId(s)', () => {
       // One invalid uId, invalid uId is not creator's uID
-      const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser4.bodyObj.authUserId, testUser5.bodyObj.authUserId + 20]);
+      const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId + 20]);
       expect(testDM1.res.statusCode).toBe(OK);
       expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
 
@@ -140,23 +131,21 @@ describe('dm capabilities', () => {
       expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
 
       // Multiple invalid uIds
-      const testDM3 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId + 20, testUser5.bodyObj.authUserId + 20]);
+      const testDM3 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId + 20, testUser4.bodyObj.authUserId + 20]);
       expect(testDM3.res.statusCode).toBe(OK);
       expect(testDM3.bodyObj).toStrictEqual({ error: 'error' });
     });
 
     test('Fail create new DM, duplicate uIds', () => {
       // One pair of duplicate uIds
-      const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId, testUser5.bodyObj.authUserId]);
+      const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
       expect(testDM1.res.statusCode).toBe(OK);
       expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
 
       // Multiple pairs of duplicate uIds
-      const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser5.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser5.bodyObj.authUserId]);
+      const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
       expect(testDM2.res.statusCode).toBe(OK);
       expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
     });
-
   });
-
 });

@@ -1,12 +1,9 @@
-// YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
   user: [],
   channel: [],
-  tokens: []
+  token: [],
+  dm: []
 };
-
-// YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
-
 
 
 
@@ -25,16 +22,16 @@ Example usage
 */
 
 
-// Use get() to access the data
+// Use get() to access the data. Firstly writes whats in memory to the file to make sure its up to date..
 function getData() {
-  fs.writeFileSync('database', JSON.stringify(data, null, 4));
-  return JSON.parse(fs.readFileSync('database'));
+  fs.writeFileSync('database.json', JSON.stringify(data, null, 4)); 
+  return JSON.parse(fs.readFileSync('database.json'));
 }
 
-// Use set(newData) to pass in the entire data object, with modifications made
+// Use set(newData) to pass in the entire data object, with modifications made.
 function setData(newData) {
   data = newData;
-  fs.writeFileSync('database', JSON.stringify(newData, null, 4));
+  fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
 }
 
 export { getData, setData };

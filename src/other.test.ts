@@ -26,7 +26,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
 }
 
 function requestClear() {
-	return requestClear();
+	return requestHelper('DELETE', '/clear/v1', {});
 }
 
 function requestUserProfile(authUserId: number, uId: number) {

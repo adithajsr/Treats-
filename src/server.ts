@@ -23,6 +23,35 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.get('/channel/details/v2', (req, res) => {
+  const token = req.query.message
+  res.json(channelsListallV1(token as string))
+});
+
+
+
+
+// dummy functions to be deleted
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
+});
+
+function authRegisterV2 (email, password) {
+  return {
+    token: 'tokenstring',
+    authUserId: 12345
+  }
+}
+
+app.post('/auth/register/v2', (req, res) => {
+  const { email, password } = req.body;
+  res.json(authRegisterV2('tokenstring', 123));
+});
+
+//
+
+
 // for logging errors
 app.use(morgan('dev'));
 

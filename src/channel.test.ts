@@ -258,7 +258,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -274,7 +274,7 @@ function requestChannelDetails(token: string, channelId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -288,7 +288,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -302,7 +302,7 @@ function requestChannelJoin(token: string, channelId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -314,7 +314,7 @@ function requestClear() {
       qs: {},
     }
   );
-  return JSON.parse(String(res.getBody()));
+  return JSON.parse(res.getBody() as string);
 }
 
 
@@ -345,11 +345,6 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
   };
 };
 
-beforeEach(() => {
-  requestClear();
-});
-
-
 describe('channel/details/v2 testing', () => {
 
   let testUser: user;
@@ -360,6 +355,10 @@ describe('channel/details/v2 testing', () => {
     expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
   });
 
+  // afterEach(() => {
+  //   requestClear();
+  // });
+  
   test('invalid token, fail channel details', () => {
     let testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
     const testRequest = requestChannelDetails(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId);

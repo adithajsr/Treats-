@@ -164,14 +164,12 @@ describe('dm capabilities', () => {
   });
 
   describe('test /dm/list/v1', () => {
-
-    // FIXME:
-
     let testUser1: wrapperOutput;
     let testUser2: wrapperOutput;
     let testUser3: wrapperOutput;
     let testUser4: wrapperOutput;
     let testDM1: wrapperOutput;
+    let testDetails1: wrapperOutput;
 
     beforeEach(() => {
       // Create test user 1
@@ -193,6 +191,7 @@ describe('dm capabilities', () => {
       // testUser1 is the creator of testDM1
       testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
       expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
+      testDetails1 = requestDMDetails(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
     });
 
     test('Fail DM list, invalid token', () => {
@@ -203,20 +202,6 @@ describe('dm capabilities', () => {
     });
 
     test('One DM, authorised user is in DM', () => {
-      // FIXME:
-      // Only channel is testChannel1, testUser1 is in testChannel1
-      const testList = requestDMList(testUser1.bodyObj.token);
-
-      expect(testList.res.statusCode).toBe(OK);
-      expect(testList.bodyObj).toStrictEqual({
-        channels: [
-          {
-            channelId: testChannel1.bodyObj.channelId,
-            name: testChannel1.bodyObj.name,
-          }
-        ]
-      });
-
       test.each([
         // Only DM is testDM1
         { token: testUser1.bodyObj.token },
@@ -224,107 +209,104 @@ describe('dm capabilities', () => {
         { token: testUser3.bodyObj.token },
       ])("One DM, authorised user with token '$token' is in DM", ({ token }) => {
         const testList = requestDMList(token);
-  
+
         expect(testList.res.statusCode).toBe(OK);
         expect(testList.bodyObj).toStrictEqual({
           dms: [
             {
               dmId: testDM1.bodyObj.dmId,
-              // FIXME: /dm/create/v1 only returns a dmId, not name
-              name: testChannel1.bodyObj.name,
+              name: testDetails1.bodyObj.name,
             }
           ]
         });
-
       });
-
     });
 
     test('One DM, authorised user is not in DM', () => {
-      // FIXME:
-      // Only channel is testChannel1, testUser2 is not in testChannel1
-      const testList = requestChannelsList(testUser2.bodyObj.token);
+      // Only DM is testDM1, testUser4 is not in testDM1
+      const testList = requestDMList(testUser4.bodyObj.token);
 
       expect(testList.res.statusCode).toBe(OK);
       expect(testList.bodyObj).toStrictEqual({
-        channels: []
+        dms: []
       });
-
     });
 
     test('Multiple DMs, authorised user is in all DMs', () => {
-      // FIXME:
-      // testUser1 is in all channels
-      const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
-      const c1B = requestChannelsCreate(testUser1.bodyObj.token, 'channel1BName', true);
-      const c1C = requestChannelsCreate(testUser1.bodyObj.token, 'channel1CName', false);
+      // testUser1 is in all DMs
+      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const detailsA = requestDMDetails(testUser1.bodyObj.token, dmA.bodyObj.dmId);
+
+      const dmB = requestDMCreate(testUser4.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      const detailsB = requestDMDetails(testUser4.bodyObj.token, dmB.bodyObj.dmId);
+
+      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId.testUser4.bodyObj.authUserId]);
+      const detailsC = requestDMDetails(testUser2.bodyObj.token, dmC.bodyObj.dmId);
 
       const expected = new Set([
         {
-          channelId: testChannel1.bodyObj.channelId,
-          name: testChannel1.bodyObj.name,
+          dmId: testDM1.bodyObj.dmId,
+          name: testDetails1.bodyObj.name,
         },
         {
-          channelId: c1A.bodyObj.channelId,
-          name: c1A.bodyObj.name,
+          dmId: dmA.bodyObj.dmId,
+          name: detailsA.bodyObj.name,
         },
         {
-          channelId: c1B.bodyObj.channelId,
-          name: c1B.bodyObj.name,
+          dmId: dmB.bodyObj.dmId,
+          name: detailsB.bodyObj.name,
         },
         {
-          channelId: c1C.bodyObj.channelId,
-          name: c1C.bodyObj.name,
+          dmId: dmC.bodyObj.dmId,
+          name: detailsC.bodyObj.name,
         },
       ]);
 
-      const testList = requestChannelsList(testUser1.bodyObj.token);
+      const testList = requestDMList(testUser1.bodyObj.token);
 
       expect(testList.res.statusCode).toBe(OK);
-      const received = new Set(testList.bodyObj.channels);
+      const received = new Set(testList.bodyObj.dms);
       expect(received).toStrictEqual(expected);
     });
 
     test('Multiple DMs, authorised user is in some DMs', () => {
-      // FIXME:
-      // testUser1 is in some channels, remaining channels created by testUser2
-      const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
-      const c2A = requestChannelsCreate(testUser2.bodyObj.token, 'channel2AName', true);
-      const c2B = requestChannelsCreate(testUser2.bodyObj.token, 'channel2BName', false);
+      // testUser1 is in some DMs
+      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const detailsA = requestDMDetails(testUser1.bodyObj.token, dmA.bodyObj.dmId);
+
+      const dmB = requestDMCreate(testUser4.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+
+      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
 
       const expected = new Set([
         {
-          channelId: testChannel1.bodyObj.channelId,
-          name: testChannel1.bodyObj.name,
+          dmId: testDM1.bodyObj.dmId,
+          name: testDetails1.bodyObj.name,
         },
         {
-          channelId: c1A.bodyObj.channelId,
-          name: c1A.bodyObj.name,
+          dmId: dmA.bodyObj.dmId,
+          name: detailsA.bodyObj.name,
         },
       ]);
 
-      const testList = requestChannelsList(testUser1.bodyObj.token);
+      const testList = requestDMList(testUser1.bodyObj.token);
 
       expect(testList.res.statusCode).toBe(OK);
-      const received = new Set(testList.bodyObj.channels);
+      const received = new Set(testList.bodyObj.dms);
       expect(received).toStrictEqual(expected);
     });
 
     test('Multiple DMs, authorised user is in no DMs', () => {
-      // FIXME:
-      // testUser2 is in no channels, all channels created by testUser1
-      const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
-      const c1B = requestChannelsCreate(testUser1.bodyObj.token, 'channel1BName', true);
-      const c1C = requestChannelsCreate(testUser1.bodyObj.token, 'channel1CName', false);
+      // testUser4 is in no DMs
+      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const dmB = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
 
-      const testList = requestChannelsList(testUser2.bodyObj.token);
+      const testList = requestDMList(testUser4.bodyObj.token);
       expect(testList.res.statusCode).toBe(OK);
       expect(testList.bodyObj).toStrictEqual({
-        channels: []
+        dms: []
       });
-    
     });
-
   });
-
 });

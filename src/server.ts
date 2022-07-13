@@ -25,7 +25,7 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-app.get('/channels/create/v2', (req, res, next) => {
+app.post('/channels/create/v2', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
     return res.json(channelsCreateV2(token, name, isPublic));

@@ -1,15 +1,14 @@
 import { getData, setData } from './dataStore';
 
-// // TODO: decide if necessary
-// type user = {
-//   email: string,
-//   password: string,
-//   nameFirst: string,
-//   nameLast: string,
-//   authUserId?: number,
-// };
+interface user {
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  authUserId?: number,
+}
 
-type member = {
+interface channelMember {
   uId: number,
   channelPerms: number,
 }
@@ -19,16 +18,15 @@ Creates a new channel with the given name that is either a public
 or private channel
 
 Arguments:
-    authUserId (integer)    - user ID of the user who is creating the channel
+    token (string)          - represents the session of the user who is creating the channel
     name (string)           - name of new channel
     isPublic (boolean)      - publicness of new channel
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid channel name
+    Returns { error: 'error' } on invalid token or invalid channel name
 */
 function channelsCreateV2(token: string, name: string, isPublic: boolean) {
-
   // TODO: use helper functions
 
   const data = getData();
@@ -70,6 +68,7 @@ function channelsCreateV2(token: string, name: string, isPublic: boolean) {
   };
 }
 
+// FIXME:
 /*
 Provide an array of all channels (and their associated details) that the
 authorised user is part of, regardless of publicness
@@ -83,8 +82,6 @@ Return Value:
 */
 function channelsListV1(authUserId: number) {
 
-  // FIXME:
-
   const data = getData();
 
   // Invalid authUserId
@@ -97,7 +94,7 @@ function channelsListV1(authUserId: number) {
 
   // Determine whether or not authorised user is in each channel
   for (let i = 0; i < data.channel.length; i++) {
-    const members: member[] = data.channel[i].members;
+    const members: channelMember[] = data.channel[i].members;
 
     if (members.find(b => b.uId === authUserId) !== undefined) {
       channelsList.push({
@@ -112,6 +109,7 @@ function channelsListV1(authUserId: number) {
   };
 }
 
+// FIXME:
 /* <channelsListallV1 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
@@ -124,8 +122,6 @@ Return Value:
     Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
 function channelsListallV1(authUserId: number) {
-
-  // FIXME:
 
   const data = getData();
   const foundChannels = [];

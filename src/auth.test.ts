@@ -1,107 +1,82 @@
-import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
-import { clearV1 } from './other';
-import { userProfileV1 } from './users';
+import request from 'sync-request';
+import config from './config.json';
 
-const validator = require('validator');
+const OK = 200;
+const port = config.port;
+const url = config.url;
 
-// ======================================== authRegisterV1 Testing ========================================
+// TODO: potentially improve types
+type wrapperOutput = {
+  res: any,
+  bodyObj: any,
+};
 
-describe('Testing for authRegisterV1', () => {
-  test('Test 1 affirmitive', () => {
-    // all should be well
-    const testUserId = authRegisterV1('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').authUserId;
-    const testUserObject = {
-      uId: testUserId,
-      email: 'who.is.joe@is.the.question.com',
-      nameFirst: 'John',
-      nameLast: 'Smith',
-      handle: 'johnsmith',
-    };
-    expect(isHandleValid(userProfileV1(testUserId, testUserId).handle)).toBe(true);
-    expect(validator.isEmail(userProfileV1(testUserId, testUserId).email)).toBe(true);
-    expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);
-  });
+function requestAuthLogout(token: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/logout/v1`,
+    {
+      json: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
 
-  test('Test 2 invalid email', () => {
-    // invalid email - no '@' smymbol
-    const testUserEmail = 'z5420895$ad.unsw.edu.au';
-    const testUserPw = 'myrealpassword';
-    const testUserFN = 'Jonathan';
-    const testUserLN = 'Schmidt';
-    const testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(validator.isEmail(testUserEmail)).toBe(false);
-  });
+function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: { email, password, nameFirst, nameLast },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
 
-  test('Test 3 invalid password', () => {
-    // invalid password - less than 5 characters
-    const testUserEmail = 'i.love.to.code@university.com';
-    const testUserPw = 'this5';
-    const testUserFN = 'Jean';
-    const testUserLN = 'McQueen';
-    const testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(validator.isEmail(testUserEmail)).toBe(true);
-  });
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
 
-  test('Test 4 invalid first name', () => {
-    // invalid nameFirst - below [1-50] range
-    const testUserEmail = 'having.fun@writing.tests.com';
-    const testUserPw = 'thispasswordislongenough';
-    const testUserFN = '';
-    const testUserLN = 'Tou';
-    const testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(validator.isEmail(testUserEmail)).toBe(true);
-  });
-
-  test('Test 5 invalid last name', () => {
-    // invalid nameLast - above [1-50] range
-    const testUserEmail = 'still.having.fun@writing.tests.com';
-    const testUserPw = 'thispasswordismorethanlongenough';
-    const testUserFN = 'Tim';
-    const testUserLN = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'; // 52 characters long
-    const testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(validator.isEmail(testUserEmail)).toBe(true);
-  });
+beforeEach(() => {
+  requestClear();
 });
 
-// ======================================== authLoginV1 Testing ========================================
+describe('test /auth/logout/v1', () => {
+  let testUser: wrapperOutput;
 
-describe('Testing for authLoginV1', () => {
-  test('Test 1 affirmitive', () => {
-    // all should be well
-    const testUserId = authLoginV1('who.is.joe@is.the.question.com', 'yourmumma').authUserId;
-    const testUserObject = {
-      uId: testUserId,
-      email: 'who.is.joe@is.the.question.com',
-      nameFirst: 'John',
-      nameLast: 'Smith',
-      handle: 'johnsmith',
-    };
-    expect(doesEmailExist(userProfileV1(testUserId, testUserId).email)).toBe(true);
-    expect(userProfileV1(testUserId, testUserId)).toStrictEqual(testUserObject);
+  beforeEach(() => {
+    // Create a test user
+    testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
   });
 
-  test('Test 2 invalid email', () => {
-    // invalid email - no existing email
-    const testUserEmail = 'z5420895@ad.unsw.edu.au';
-    const testUserPw = 'myrealpassword';
-    const testUserId = authLoginV1(testUserEmail, testUserPw);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(doesEmailExist(testUserEmail)).toBe(false);
+  test('Success user log out', () => {
+    const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout1.res.statusCode).toBe(OK);
+    expect(testLogout1.bodyObj).toStrictEqual({});
+
+    // Attempt to log out again with newly invalid token
+    const testLogout2 = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout2.res.statusCode).toBe(OK);
+    expect(testLogout2.bodyObj).toStrictEqual({ error: 'error' });
   });
 
-  test('Test 3 invalid password', () => {
-    // invalid password - wrong password with associated email
-    const testUserEmail = 'who.is.joe@is.the.question.com';
-    const testUserPw = 'yourdad';
-    const testUserId = authLoginV1(testUserEmail, testUserPw);
-    expect(testUserId).toStrictEqual({ error: 'error' });
-    expect(validator.isEmail(testUserEmail)).toBe(true);
-    expect(doesEmailExist(testUserEmail)).toBe(true);
+  test('Fail user log out, invalid token', () => {
+    const testLogout = requestAuthLogout(testUser.bodyObj.token + 'a');
+    expect(testLogout.res.statusCode).toBe(OK);
+    expect(testLogout.bodyObj).toStrictEqual({ error: 'error' });
   });
 });
-
-clearV1();

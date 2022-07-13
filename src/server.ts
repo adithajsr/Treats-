@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import { authLogoutV1 } from './auth';
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -18,6 +20,15 @@ app.get('/echo', (req, res, next) => {
   try {
     const data = req.query.echo as string;
     return res.json(echo(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/auth/logout/v1', (req, res, next) => {
+  try {
+    const { token } = req.body;
+    return res.json(authLogoutV1(token));
   } catch (err) {
     next(err);
   }

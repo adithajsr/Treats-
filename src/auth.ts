@@ -135,3 +135,35 @@ export function authRegisterV1 (email: string, password: string, nameFirst: stri
   setData(dataSet);
   return { authUserId: newUserId };
 }
+
+// TODO: Documentation
+/*
+Creates a new channel with the given name that is either a public
+or private channel
+
+Arguments:
+    token (string)          - represents the session of the user who is creating the channel
+    name (string)           - name of new channel
+    isPublic (boolean)      - publicness of new channel
+
+Return Value:
+    Returns { channelId } if no error
+    Returns { error: 'error' } on invalid token or invalid channel name
+*/
+export function authLogoutV1(token: string) {
+  const data = getData();
+
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Token was invalid
+  if (tokenIndex === -1) {
+    return { error: 'error' };
+  }
+
+  // Invalidate the token
+  data.token.splice(tokenIndex, 1);
+
+  setData(data);
+
+  return {};
+}

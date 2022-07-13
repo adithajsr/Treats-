@@ -25,12 +25,26 @@ function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+function requestDMList(token: string) {
   const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
+    'GET',
+    `${url}:${port}/dm/list/v1`,
     {
-      json: { email, password, nameFirst, nameLast },
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestDMRemove(token: string, dmId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/dm/remove/v1`,
+    {
+      qs: { token, dmId },
     }
   );
   return {
@@ -53,12 +67,26 @@ function requestDMDetails(token: string, dmId: number) {
   };
 }
 
-function requestDMList(token: string) {
+function requestDMLeave(token: string, dmId: number) {
   const res = request(
-    'GET',
-    `${url}:${port}/dm/list/v1`,
+    'POST',
+    `${url}:${port}/dm/leave/v1`,
     {
-      qs: { token },
+      json: { token, dmId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: { email, password, nameFirst, nameLast },
     }
   );
   return {
@@ -83,30 +111,30 @@ beforeEach(() => {
 });
 
 describe('dm capabilities', () => {
+  let testUser1: wrapperOutput;
+  let testUser2: wrapperOutput;
+  let testUser3: wrapperOutput;
+  let testUser4: wrapperOutput;
+
+  beforeEach(() => {
+    // Create test user 1
+    testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
+
+    // Create test user 2
+    testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
+    expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
+
+    // Create test user 3
+    testUser3 = requestAuthRegister('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
+    expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
+
+    // Create test user 4
+    testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
+    expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
+  });
+
   describe('test /dm/create/v1', () => {
-    let testUser1: wrapperOutput;
-    let testUser2: wrapperOutput;
-    let testUser3: wrapperOutput;
-    let testUser4: wrapperOutput;
-
-    beforeEach(() => {
-      // Create test user 1
-      testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 2
-      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
-      expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 3
-      testUser3 = requestAuthRegister('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
-      expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 4
-      testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
-      expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
-    });
-
     test('Success create new DM, two users in DM', () => {
       const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
 
@@ -164,30 +192,10 @@ describe('dm capabilities', () => {
   });
 
   describe('test /dm/list/v1', () => {
-    let testUser1: wrapperOutput;
-    let testUser2: wrapperOutput;
-    let testUser3: wrapperOutput;
-    let testUser4: wrapperOutput;
     let testDM1: wrapperOutput;
     let testDetails1: wrapperOutput;
 
     beforeEach(() => {
-      // Create test user 1
-      testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 2
-      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
-      expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 3
-      testUser3 = requestAuthRegister('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
-      expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Create test user 4
-      testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
-      expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
-
       // testUser1 is the creator of testDM1
       testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
       expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
@@ -274,9 +282,9 @@ describe('dm capabilities', () => {
       const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
       const detailsA = requestDMDetails(testUser1.bodyObj.token, dmA.bodyObj.dmId);
 
-      const dmB = requestDMCreate(testUser4.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      requestDMCreate(testUser4.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
 
-      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
+      requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
 
       const expected = new Set([
         {
@@ -298,14 +306,88 @@ describe('dm capabilities', () => {
 
     test('Multiple DMs, authorised user is in no DMs', () => {
       // testUser4 is in no DMs
-      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
-      const dmB = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
-      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
+      requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
 
       const testList = requestDMList(testUser4.bodyObj.token);
       expect(testList.res.statusCode).toBe(OK);
       expect(testList.bodyObj).toStrictEqual({
         dms: []
+      });
+    });
+  });
+
+  describe('test /dm/remove/v1', () => {
+    let testDM1: wrapperOutput;
+
+    beforeEach(() => {
+      // testUser1 is the original creator of testDM1
+      testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
+    });
+
+    test('Success remove DM, two users in DM', () => {
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({});
+
+      // dmId of testDM should now be invalid
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Success remove DM, more than two users in DM', () => {
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+
+      // testUser 2 leaves
+      requestDMLeave(testUser2.bodyObj.token, testDM.bodyObj.dmId);
+
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({});
+
+      // dmId of testDM should now be invalid
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, invalid token', () => {
+      const testRemove = requestDMRemove(testUser4.bodyObj.token + 'a', testDM1.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, invalid dmId', () => {
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId + 20);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, authorised user is not in the DM', () => {
+      // testUser4 was never in testDM1
+      const testRemove1 = requestDMRemove(testUser4.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove1.res.statusCode).toBe(OK);
+      expect(testRemove1.bodyObj).toStrictEqual({ error: 'error' });
+
+      // testUser1 was the original creator of testDM1 but left
+      requestDMLeave(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
+      const testRemove2 = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove2.res.statusCode).toBe(OK);
+      expect(testRemove2.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, authorised user is in the DM but is not the creator', () => {
+      test.each([
+        // testUser2 and testUser3 are in testDM1 but testUser1 is the creator
+        { token: testUser2.bodyObj.token },
+        { token: testUser3.bodyObj.token },
+      ])("Fail remove DM, user with token '$token' is in DM but not the creator", ({ token }) => {
+        const testRemove = requestDMRemove(token, testDM1.bodyObj.dmId);
+
+        expect(testRemove.res.statusCode).toBe(OK);
+        expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
       });
     });
   });

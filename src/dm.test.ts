@@ -171,7 +171,7 @@ describe('dm capabilities', () => {
     let testUser2: wrapperOutput;
     let testUser3: wrapperOutput;
     let testUser4: wrapperOutput;
-    let testChannel1: wrapperOutput;
+    let testDM1: wrapperOutput;
 
     beforeEach(() => {
       // Create test user 1
@@ -179,7 +179,7 @@ describe('dm capabilities', () => {
       expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 2
-      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Jane', 'Schmoe');
+      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
       expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 3
@@ -187,26 +187,25 @@ describe('dm capabilities', () => {
       expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 4
-      testUser4 = requestAuthRegister('jbloggs@proton.com', '111111', 'Jo', 'Bloggs');
+      testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
       expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
 
-      // TODO: use channelJoin to add more people to channels
-
-      // testUser1 created testChannel1 so they automatically join it
-      testChannel1 = requestChannelsCreate(testUser1.bodyObj.token, 'channelName', true);
-      expect(testChannel1.bodyObj).not.toStrictEqual({ error: 'error' });
+      // testUser1 is the creator of testDM1
+      testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
-    test('Fail channels list, invalid token', () => {
-      const testList = requestChannelsList(testUser2.bodyObj.token + 'a');
+    test('Fail DM list, invalid token', () => {
+      const testList = requestDMList(testUser4.bodyObj.token + 'a');
 
       expect(testList.res.statusCode).toBe(OK);
       expect(testList.bodyObj).toStrictEqual({ error: 'error' });
     });
 
-    test('One channel, authorised user is in channel', () => {
+    test('One DM, authorised user is in DM', () => {
+      // FIXME:
       // Only channel is testChannel1, testUser1 is in testChannel1
-      const testList = requestChannelsList(testUser1.bodyObj.token);
+      const testList = requestDMList(testUser1.bodyObj.token);
 
       expect(testList.res.statusCode).toBe(OK);
       expect(testList.bodyObj).toStrictEqual({
@@ -218,9 +217,31 @@ describe('dm capabilities', () => {
         ]
       });
 
+      test.each([
+        // Only DM is testDM1
+        { token: testUser1.bodyObj.token },
+        { token: testUser2.bodyObj.token },
+        { token: testUser3.bodyObj.token },
+      ])("One DM, authorised user with token '$token' is in DM", ({ token }) => {
+        const testList = requestDMList(token);
+  
+        expect(testList.res.statusCode).toBe(OK);
+        expect(testList.bodyObj).toStrictEqual({
+          dms: [
+            {
+              dmId: testDM1.bodyObj.dmId,
+              // FIXME: /dm/create/v1 only returns a dmId, not name
+              name: testChannel1.bodyObj.name,
+            }
+          ]
+        });
+
+      });
+
     });
 
-    test('One channel, authorised user is not in channel', () => {
+    test('One DM, authorised user is not in DM', () => {
+      // FIXME:
       // Only channel is testChannel1, testUser2 is not in testChannel1
       const testList = requestChannelsList(testUser2.bodyObj.token);
 
@@ -231,7 +252,8 @@ describe('dm capabilities', () => {
 
     });
 
-    test('Multiple channels, authorised user is in all channels', () => {
+    test('Multiple DMs, authorised user is in all DMs', () => {
+      // FIXME:
       // testUser1 is in all channels
       const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
       const c1B = requestChannelsCreate(testUser1.bodyObj.token, 'channel1BName', true);
@@ -263,7 +285,8 @@ describe('dm capabilities', () => {
       expect(received).toStrictEqual(expected);
     });
 
-    test('Multiple channels, authorised user is in some channels', () => {
+    test('Multiple DMs, authorised user is in some DMs', () => {
+      // FIXME:
       // testUser1 is in some channels, remaining channels created by testUser2
       const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
       const c2A = requestChannelsCreate(testUser2.bodyObj.token, 'channel2AName', true);
@@ -287,7 +310,8 @@ describe('dm capabilities', () => {
       expect(received).toStrictEqual(expected);
     });
 
-    test('Multiple channels, authorised user is in no channels', () => {
+    test('Multiple DMs, authorised user is in no DMs', () => {
+      // FIXME:
       // testUser2 is in no channels, all channels created by testUser1
       const c1A = requestChannelsCreate(testUser1.bodyObj.token, 'channel1AName', false);
       const c1B = requestChannelsCreate(testUser1.bodyObj.token, 'channel1BName', true);

@@ -3,6 +3,7 @@
 // import { getData, setData } from './dataStore.js';
 // import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
 
+import { clearV1 } from './other'
 
 import request from 'sync-request';
 import config from './config.json';
@@ -40,7 +41,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -54,7 +55,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -68,7 +69,7 @@ function requestChannelsList(token: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -80,7 +81,7 @@ function requestClear() {
       qs: {},
     }
   );
-  return JSON.parse(String(res.getBody()));
+  return JSON.parse(res.getBody() as string);
 }
 
 const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
@@ -110,9 +111,7 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
   };
 };
 
-beforeEach(() => {
-  requestClear();
-});
+
 
 
 
@@ -285,7 +284,7 @@ describe('channels capabilities', () => {
 function requestChannelsListall(token: string) {
   const res = request(
     'GET',
-    `${url}:${port}channels/listall/v2`,
+    `${url}:${port}/channels/listall/v2`,
     {
       qs: {
         token
@@ -294,7 +293,7 @@ function requestChannelsListall(token: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -306,6 +305,10 @@ describe ( 'channels functions testing', () => {
       // Create a test user
       testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
+    });
+
+    afterEach(() => {
+      requestClear();
     });
     
     test('invalid token, fail channels list all', () => {
@@ -323,9 +326,9 @@ describe ( 'channels functions testing', () => {
     });
 
     test('return one channel, channels list all success', () => { 
-      // create a test channel
       let testChannel = createTestChannel(testUser.bodyObj.token, 'channelName', true);
       const testRequest = requestChannelsListall(testUser.bodyObj.token);
+      const testRequest = requestChannelsListall('tokenstring');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({
         channels: [
@@ -337,6 +340,7 @@ describe ( 'channels functions testing', () => {
       });        
     });
 
+    
     test('return multiple channels, channels list all success', () => {
       let c1 = createTestChannel(testUser.bodyObj.token, 'ychannelName', true);
       let c2 = createTestChannel(testUser.bodyObj.token, 'dchannelName', false);
@@ -363,3 +367,4 @@ describe ( 'channels functions testing', () => {
     });
   });
 });
+

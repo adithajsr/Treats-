@@ -14,7 +14,8 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-function channelsCreateV1(authUserId, name, isPublic) {
+/*
+function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
 
   let data = getData();
 
@@ -64,6 +65,7 @@ Return Value:
     Returns { channels } if no error
     Returns { error: 'error' } on invalid authUserId
 */
+/*
 function channelsListV1(authUserId) {
 
   let data = getData();
@@ -94,37 +96,46 @@ function channelsListV1(authUserId) {
     channels: channelsList,
   };
 }
-
+*/
 
 
 {/* <channelsListallV1 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
 Arguments:
-    <authUserId> (<integer>)    - <The authUserId is the user who initates the function>
+    <token> (<string>)    - <The token is required to start the function>
 
 Return Value:
-    Returns <[{channel}]> on <authUserId was valid and there were channels in data>
+    Returns <[{channels}]> on <token was valid and there were channels in data>
     Returns <[]> on <no channels in data>  
-    Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
+Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
 
 
-function channelsListallV1(authUserId: number) {
+interface Database {
+  user: any[];
+  channel: any[];
+  token: any[];
+  dm: any[];
+}
 
+function checkToken(token: string, data: Database) {
+  if (data.token.find((a: any) => a.token === token) === undefined) {
+    return false;
+  }
+  return true;
+}
+
+function channelsListallV1(token: string) {
   const data = getData();
-  let foundChannels = [];
 
-  // inappropriate authUserId
-  if (isNaN(authUserId) === true) {
+  // invalid token - invalid, or token is not in database
+  if (checkToken(token, data) === false) {
     return { error: 'error' }
   }
-
-  // user not in database
-  if (data.user.find((a: any) => a.uId === authUserId) === undefined) {
-    return { error: 'error' };
-  }
-
+  
+  let foundChannels = [];
   for (const i in data.channel) {
+    console.log( data.channel[i].channelId);
     foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
   }
 
@@ -133,4 +144,5 @@ function channelsListallV1(authUserId: number) {
   };
 }
 
-export { channelsCreateV1, channelsListV1, channelsListallV1 };
+// export { channelsCreateV1, channelsListV1, channelsListallV1 };
+export { channelsListallV1 };

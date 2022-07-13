@@ -13,7 +13,7 @@
 
 */
 
-import {getData} from './dataStore.js';
+import {getData} from './dataStore';
 
 function userProfileV1(authUserId, uId) {
 	let data = getData();

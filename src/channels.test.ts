@@ -328,7 +328,6 @@ describe ( 'channels functions testing', () => {
     test('return one channel, channels list all success', () => { 
       let testChannel = createTestChannel(testUser.bodyObj.token, 'channelName', true);
       const testRequest = requestChannelsListall(testUser.bodyObj.token);
-      const testRequest = requestChannelsListall('tokenstring');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({
         channels: [

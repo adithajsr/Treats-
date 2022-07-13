@@ -37,21 +37,21 @@ app.get('/channels/listall/v2', (req, res) => {
 // dummy functions to be deleted
 
 
-app.delete('/clear/v1', (req, res) => {
-  res.json(clearV1());
-});
+// app.delete('/clear/v1', (req, res) => {
+//   res.json(clearV1());
+// });
 
-function authRegisterV2 (email, password) {
-  return {
-    token: 'tokenstring',
-    authUserId: 12345
-  }
-}
+// function authRegisterV2 (email, password) {
+//   return {
+//     token: 'tokenstring',
+//     authUserId: 12345
+//   }
+// }
 
-app.post('/auth/register/v2', (req, res) => {
-  const { email, password } = req.body;
-  res.json(authRegisterV2('tokenstring', 123));
-});
+// app.post('/auth/register/v2', (req, res) => {
+//   const { email, password } = req.body;
+//   res.json(authRegisterV2('tokenstring', 123));
+// });
 
 
 

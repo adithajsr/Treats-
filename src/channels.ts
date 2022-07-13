@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 
-type user = {
+interface user {
   email: string,
   password: string,
   nameFirst: string,
@@ -8,7 +8,7 @@ type user = {
   authUserId?: number,
 };
 
-type member = {
+interface channelMember {
   uId: number,
   channelPerms: number,
 }
@@ -18,19 +18,24 @@ Creates a new channel with the given name that is either a public
 or private channel
 
 Arguments:
-    authUserId (integer)    - user ID of the user who is creating the channel
+    token (string)          - represents the session of the user who is creating the channel
     name (string)           - name of new channel
     isPublic (boolean)      - publicness of new channel
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid channel name
+    Returns { error: 'error' } on invalid token or invalid channel name
 */
-function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
+function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+
+  // TODO: use helper functions
+
   const data = getData();
 
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
@@ -44,7 +49,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
 
   // The user who created it automatically joins the channel
   const channelOwner = {
-    uId: authUserId,
+    uId: data.token[tokenIndex].uId,
     channelPerms: 1,
   };
 
@@ -69,28 +74,35 @@ Provide an array of all channels (and their associated details) that the
 authorised user is part of, regardless of publicness
 
 Arguments:
-    authUserId (integer)    - user ID of the user requesting a list of channels
+    token (string)    - represents the session of the user requesting a list of channels
 
 Return Value:
     Returns { channels } if no error
-    Returns { error: 'error' } on invalid authUserId
+    Returns { error: 'error' } on invalid token
 */
-function channelsListV1(authUserId: number) {
+function channelsListV2(token: string) {
+
+  // TODO: use helper functions
+
   const data = getData();
 
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
   // Create an array to make the list
   const channelsList = [];
 
+  const userId = data.token[tokenIndex].uId;
+
   // Determine whether or not authorised user is in each channel
   for (let i = 0; i < data.channel.length; i++) {
-    const members: member[] = data.channel[i].members;
+    const members: channelMember[] = data.channel[i].members;
 
-    if (members.find(b => b.uId === authUserId) !== undefined) {
+    if (members.find(b => b.uId === userId) !== undefined) {
       channelsList.push({
         channelId: data.channel[i].channelId,
         name: data.channel[i].channelName,
@@ -115,6 +127,9 @@ Return Value:
     Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
 function channelsListallV1(authUserId: number) {
+
+  // FIXME:
+
   const data = getData();
   const foundChannels = [];
 
@@ -137,4 +152,4 @@ function channelsListallV1(authUserId: number) {
   };
 }
 
-export { channelsCreateV1, channelsListV1, channelsListallV1 };
+export { channelsCreateV2, channelsListV2, channelsListallV1 };

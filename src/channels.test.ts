@@ -33,7 +33,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -47,7 +47,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -61,7 +61,7 @@ function requestChannelsList(token: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 

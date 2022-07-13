@@ -1,4 +1,4 @@
-type user = {
+interface user {
   uId: number,
   email: string,
   password: string,
@@ -8,24 +8,24 @@ type user = {
   globalPerms: number,
 };
 
-type channelMember = {
+interface channelMember {
   uId: number,
   channelPerms: number,
 }
 
-type dmMember = {
+interface dmMember {
   uId: number,
   dmPerms: number,
 }
 
-type message = {
+interface message {
   messageId: number,
   uId: number,
   message: string,
   timeSent: number,
 }
 
-type channel = {
+interface channel {
   channelId: number,
   channelName: string,
   isPublic: boolean,
@@ -33,19 +33,19 @@ type channel = {
   messages: message[],
 }
 
-type token = {
+interface token {
   token: string,
   uId: number,
 }
 
-type dm = {
+interface dm {
   dmId: number,
   name: string,
   members: dmMember[],
   messages: message[],
 }
 
-type database = {
+interface database {
   user: user[],
   channel: channel[],
   token: token[],

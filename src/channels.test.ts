@@ -103,12 +103,13 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
   };
 };
 
-beforeEach(() => {
-  requestClear();
-});
-
 describe('channels capabilities', () => {
   describe('test /channels/create/v2', () => {
+
+    beforeEach(() => {
+      requestClear();
+    });
+
     let testUser: user;
 
     beforeEach(() => {
@@ -144,6 +145,11 @@ describe('channels capabilities', () => {
   });
 
   describe('test /channels/list/v2', () => {
+
+    beforeEach(() => {
+      requestClear();
+    });
+
     let testUser1: user;
     let testUser2: user;
     let testUser3: user;

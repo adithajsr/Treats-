@@ -2,7 +2,6 @@ import request from 'sync-request';
 let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
-
 function requestHelper(method:HttpVerb, path: String, payload: object) {
 	let qs = {};
 	let json = {};

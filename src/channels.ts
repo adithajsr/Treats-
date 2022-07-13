@@ -27,11 +27,13 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
+function channelsCreateV2(token: string, name: string, isPublic: boolean) {
   const data = getData();
 
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
@@ -45,7 +47,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
 
   // The user who created it automatically joins the channel
   const channelOwner = {
-    uId: authUserId,
+    uId: data.token[tokenIndex].uId,
     channelPerms: 1,
   };
 
@@ -138,4 +140,4 @@ function channelsListallV1(authUserId: number) {
   };
 }
 
-export { channelsCreateV1, channelsListV1, channelsListallV1 };
+export { channelsCreateV2, channelsListV1, channelsListallV1 };

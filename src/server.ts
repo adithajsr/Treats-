@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import { channelsCreateV2 } from './channels';
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -18,6 +20,15 @@ app.get('/echo', (req, res, next) => {
   try {
     const data = req.query.echo as string;
     return res.json(echo(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/channels/create/v2', (req, res, next) => {
+  try {
+    const { token, name, isPublic } = req.body;
+    return res.json(channelsCreateV2(token, name, isPublic));
   } catch (err) {
     next(err);
   }

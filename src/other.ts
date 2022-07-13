@@ -6,8 +6,6 @@ import {setData} from './dataStore'
 //remove them.
 export function clearV1() {
 	let data = getData();
-	
-	console.log('clear');
 
 	data.user = [];
 	data.channel = [];

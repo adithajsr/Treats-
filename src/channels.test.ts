@@ -1,10 +1,3 @@
-// import { channelsCreateV1, channelsListV1, channelsListallV1 } from './channels.js';
-// import { clearV1 } from './other.js';
-// import { getData, setData } from './dataStore.js';
-// import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
-
-import { clearV1 } from './other'
-
 import request from 'sync-request';
 import config from './config.json';
 
@@ -12,7 +5,6 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-// TODO: potentially replace any types
 type user = {
   email: string,
   password: string,
@@ -21,99 +13,6 @@ type user = {
   res: any,
   bodyObj: any,
 };
-
-type channel = {
-  token: string,
-  name: string,
-  isPublic: boolean,
-  res: any,
-  bodyObj: any,
-};
-
-
-function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channels/create/v2`,
-    {
-      json: { token, name, isPublic },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: { email, password, nameFirst, nameLast },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestChannelsList(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channels/list/v2`,
-    {
-      qs: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(res.getBody() as string);
-}
-
-const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
-  // auth/register/v2 returns { token, authUserId }
-  const requestOutput = requestAuthRegister(email, password, nameFirst, nameLast);
-
-  return {
-    email: email,
-    password: password,
-    nameFirst: nameFirst,
-    nameLast: nameLast,
-    res: requestOutput.res,
-    bodyObj: requestOutput.bodyObj,
-  };
-};
-
-const createTestChannel = (token: string, name: string, isPublic: boolean) => {
-  // channels/create/v2 returns { channelId }
-  const requestOutput = requestChannelsCreate(token, name, isPublic);
-
-  return {
-    token: token,
-    name: name,
-    isPublic: isPublic,
-    res: requestOutput.res,
-    bodyObj: requestOutput.bodyObj,
-  };
-};
-
-
-
-
 
 /*
 
@@ -281,6 +180,72 @@ describe('channels capabilities', () => {
 
 */
 
+function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v2`,
+    {
+      json: { token, name, isPublic },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: { email, password, nameFirst, nameLast },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+// function requestClear() {
+//   const res = request(
+//     'DELETE',
+//     `${url}:${port}/clear/v1`,
+//     {
+//       qs: {},
+//     }
+//   );
+//   return JSON.parse(res.getBody() as string);
+// }
+
+const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
+  // auth/register/v2 returns { token, authUserId }
+  const requestOutput = requestAuthRegister(email, password, nameFirst, nameLast);
+
+  return {
+    email: email,
+    password: password,
+    nameFirst: nameFirst,
+    nameLast: nameLast,
+    res: requestOutput.res,
+    bodyObj: requestOutput.bodyObj,
+  };
+};
+
+const createTestChannel = (token: string, name: string, isPublic: boolean) => {
+  // channels/create/v2 returns { channelId }
+  const requestOutput = requestChannelsCreate(token, name, isPublic);
+
+  return {
+    token: token,
+    name: name,
+    isPublic: isPublic,
+    res: requestOutput.res,
+    bodyObj: requestOutput.bodyObj,
+  };
+};
+
 function requestChannelsListall(token: string) {
   const res = request(
     'GET',
@@ -297,8 +262,8 @@ function requestChannelsListall(token: string) {
   };
 }
 
-describe ( 'channels functions testing', () => {
-  describe ('channels/listall/v2 test', () => {
+describe('channels functions testing', () => {
+  describe('channels/listall/v2 test', () => {
     let testUser: user;
 
     beforeEach(() => {
@@ -307,43 +272,42 @@ describe ( 'channels functions testing', () => {
       expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
-    afterEach(() => {
-      requestClear();
-    });
-    
+    // afterEach(() => {
+    //   requestClear();
+    // });
+
     test('invalid token, fail channels list all', () => {
-      const testRequest = requestChannelsListall(testUser.bodyObj.token + 'a');
+      const testRequest = requestChannelsListall('tokenstring' + 'a');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
 
     test('no channels in database, channels list all success', () => {
-      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+      const testRequest = requestChannelsListall('tokenstring');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({
         channels: []
       });
     });
 
-    test('return one channel, channels list all success', () => { 
-      let testChannel = createTestChannel(testUser.bodyObj.token, 'channelName', true);
-      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+    test('return one channel, channels list all success', () => {
+      const testChannel = createTestChannel('tokenstring', 'channelName', true);
+      const testRequest = requestChannelsListall('tokenstring');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({
         channels: [
           {
             channelId: testChannel.bodyObj.channelId,
-            name : testChannel.name,
+            name: testChannel.name,
           }
         ]
-      });        
+      });
     });
 
-    
     test('return multiple channels, channels list all success', () => {
-      let c1 = createTestChannel(testUser.bodyObj.token, 'ychannelName', true);
-      let c2 = createTestChannel(testUser.bodyObj.token, 'dchannelName', false);
-      let c3 = createTestChannel(testUser.bodyObj.token, 'hchannelName', true);
+      const c1 = createTestChannel('tokenstring', 'ychannelName', true);
+      const c2 = createTestChannel('tokenstring', 'dchannelName', false);
+      const c3 = createTestChannel('tokenstring', 'hchannelName', true);
       const expected = new Set([
         {
           channelId: c1.bodyObj.channelId,
@@ -358,7 +322,7 @@ describe ( 'channels functions testing', () => {
           name: c3.name,
         },
       ]);
-      const testRequest = requestChannelsListall(testUser.bodyObj.token);
+      const testRequest = requestChannelsListall('tokenstring');
 
       expect(testRequest.res.statusCode).toBe(OK);
       const received = new Set(testRequest.bodyObj.channels);
@@ -366,4 +330,3 @@ describe ( 'channels functions testing', () => {
     });
   });
 });
-

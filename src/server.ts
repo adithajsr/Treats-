@@ -4,9 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { channelsListallV1 } from './channels';
-import { clearV1 } from './other'
-
+import { channelsListallV2, channelsCreateV2 } from './channels';
+// import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -28,14 +27,20 @@ app.get('/echo', (req, res, next) => {
 });
 
 app.get('/channels/listall/v2', (req, res) => {
-  const token = req.query.message
-  res.json(channelsListallV1(token as string))
+  const token = req.query.token;
+  res.json(channelsListallV2(token as string));
 });
 
-
+app.post('/channels/create/v2', (req, res, next) => {
+  try {
+    const { token, name, isPublic } = req.body;
+    return res.json(channelsCreateV2(token, name, isPublic));
+  } catch (err) {
+    next(err);
+  }
+});
 
 // dummy functions to be deleted
-
 
 // app.delete('/clear/v1', (req, res) => {
 //   res.json(clearV1());
@@ -52,10 +57,6 @@ app.get('/channels/listall/v2', (req, res) => {
 //   const { email, password } = req.body;
 //   res.json(authRegisterV2('tokenstring', 123));
 // });
-
-
-
-//
 
 // for logging errors
 app.use(morgan('dev'));

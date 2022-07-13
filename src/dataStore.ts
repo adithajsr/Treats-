@@ -1,43 +1,48 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-// let data = {
-//   user: [],
-//   channel: [],
-// 	token: [],
-// 	dm: [],
-// };
-
-
 let data = {
   user: [],
-  channel: [
-    {
-    channelId: 999,
-    channelName: 'channel',
-    isPublic: true,
-    start: 0,
-    members: [
-      {
-        uId: -999,
-        channelPerms: 2,
-      },
-    ],
-    messages: [
-      {
-        messageId: 1,
-        uId: -999,
-        message: 'Hello world',
-        timestamp: '001',
-      },
-    ],
-  },],
+  channel: [],
 	token: [
-    {
-      token: 'tokenstring',
-      uId: 10,
-    }
-  ],
+        {
+          token: 'tokenstring',
+          uId: 10,
+        }
+      ],
 	dm: [],
 };
+
+
+// let data = {
+//   user: [],
+//   channel: [
+//     {
+//     channelId: 999,
+//     channelName: 'channel',
+//     isPublic: true,
+//     start: 0,
+//     members: [
+//       {
+//         uId: -999,
+//         channelPerms: 2,
+//       },
+//     ],
+//     messages: [
+//       {
+//         messageId: 1,
+//         uId: -999,
+//         message: 'Hello world',
+//         timestamp: '001',
+//       },
+//     ],
+//   },],
+// 	token: [
+//     {
+//       token: 'tokenstring',
+//       uId: 10,
+//     }
+//   ],
+// 	dm: [],
+// };
 
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1

@@ -1,6 +1,5 @@
 import { getData, setData } from './dataStore';
 
-
 /*
 Creates a new channel with the given name that is either a public
 or private channel
@@ -14,13 +13,16 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-/*
-function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
 
-  let data = getData();
+function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+  // TODO: use helper functions
 
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  const data = getData();
+
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
@@ -34,7 +36,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
 
   // The user who created it automatically joins the channel
   const channelOwner = {
-    uId: authUserId,
+    uId: data.token[tokenIndex].uId,
     channelPerms: 1,
   };
 
@@ -44,6 +46,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
     channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
+    messages: [],
   });
 
   setData(data);
@@ -52,7 +55,6 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
     channelId: newChannelId,
   };
 }
-
 
 /*
 Provide an array of all channels (and their associated details) that the
@@ -98,8 +100,7 @@ function channelsListV1(authUserId) {
 }
 */
 
-
-{/* <channelsListallV1 returns an array of all channels, regardless of whether they
+/* <channelsListallV2 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
 Arguments:
@@ -107,9 +108,8 @@ Arguments:
 
 Return Value:
     Returns <[{channels}]> on <token was valid and there were channels in data>
-    Returns <[]> on <no channels in data>  
-Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
-
+    Returns <[]> on <no channels in data>
+Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
 interface Database {
   user: any[];
@@ -125,24 +125,24 @@ function checkToken(token: string, data: Database) {
   return true;
 }
 
-function channelsListallV1(token: string) {
+function channelsListallV2(token: string) {
   const data = getData();
 
   // invalid token - invalid, or token is not in database
   if (checkToken(token, data) === false) {
-    return { error: 'error' }
+    console.log('invalid token');
+    return { error: 'error' };
   }
-  
-  let foundChannels = [];
+
+  const foundChannels = [];
   for (const i in data.channel) {
-    console.log( data.channel[i].channelId);
-    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
+    console.log(data.channel[i].channelId);
+    foundChannels.push({ channelId: data.channel[i].channelId, name: data.channel[i].channelName });
   }
 
   return {
-    channels: foundChannels 
+    channels: foundChannels
   };
 }
 
-// export { channelsCreateV1, channelsListV1, channelsListallV1 };
-export { channelsListallV1 };
+export { channelsCreateV2, channelsListallV2 };

@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import { dmCreateV1, dmListV1 } from './dm';
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -18,6 +20,24 @@ app.get('/echo', (req, res, next) => {
   try {
     const data = req.query.echo as string;
     return res.json(echo(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/dm/create/v1', (req, res, next) => {
+  try {
+    const { token, uIds } = req.body;
+    return res.json(dmCreateV1(token, uIds));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/dm/list/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    return res.json(dmListV1(token));
   } catch (err) {
     next(err);
   }

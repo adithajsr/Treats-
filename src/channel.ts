@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore'
+import { getData } from './dataStore';
 
 interface Database {
   user: any[];
@@ -15,60 +15,63 @@ function checkToken(token: string, data: Database) {
 }
 
 function tokenToUid(token: string, data: Database) {
-  let index = data.token.find(a => a.token === token);
-  let uId = data.token[index].uId;
+  const index = data.token.findIndex(a => a.token === token);
+  const uId = data.token[index].uId;
   return uId;
 }
 
-interface userDetail {
-  uId: number;                   
-  email: string;
-  nameFirst: string;
-  nameLast: string;
-  handleStr: string;
-}
+/* Description: Returns details about a channel that an authorised user is a member of
+Arguments:
+    <token> (<string>)    - <The channelId of the channel that's being checked.>
+    <channelId> (<integer>)    - <The token of the user that's checking>
+
+Return Value:
+    Returns <name, isPublic, ownerMembers, allMembers> on <valid token and valid channelId>
+    Returns <error otherwise>
+*/
 
 function channelDetailsV2(token: string, channelId: number) {
   const data = getData();
-  let uId = tokenToUid(token, data);
 
   // check for token validity
   if (checkToken(token, data) === false) {
-    console.log('invalid token');
     return { error: 'error' };
   }
+
+  const uId = tokenToUid(token, data);
+
+  const { channel } = data;
+  const i = data.channel.findIndex(data => data.channelId === channelId);
 
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     return { error: 'error' };
     // check for user in channel
   } else {
-    if (!(memberExists(channelId, uId))) {
+    if (channel[i].members.find(a => a.uId === uId) === undefined) {
       return { error: 'error' };
     }
   }
 
-  const {channel} = data;
-  let i = data.channel.findIndex(data => data.channelId === channelId);
-  const {members} = channel[i];
+  const { members } = channel[i];
 
   const details = {
     name: channel[i].channelName,
     isPublic: channel[i].isPublic,
     ownerMembers: [],
     allMembers: [],
-  }
+  };
 
   // find the member in the user array, then push details on
   const { user } = data;
   for (const i in members) {
-    let index = data.user.findIndex(a => a.uId === members[i].uId);
+    const index = data.user.findIndex(a => a.uId === members[i].uId);
     // owners
     if (members[i].channelPerms === 1) {
       details.ownerMembers.push(
         {
-          uId: user[index].uId,                                  
-          email: user[index].email,                                      
+          uId: user[index].uId,
+          email: user[index].email,
           nameFirst: user[index].nameFirst,
           nameLast: user[index].nameLast,
           handle: user[index].handle,
@@ -78,8 +81,8 @@ function channelDetailsV2(token: string, channelId: number) {
     } else if (members[i].channelPerms === 2) {
       details.allMembers.push(
         {
-          uId: user[index].uId,                                  
-          email: user[index].email,                                      
+          uId: user[index].uId,
+          email: user[index].email,
           nameFirst: user[index].nameFirst,
           nameLast: user[index].nameLast,
           handle: user[index].handle,
@@ -87,7 +90,6 @@ function channelDetailsV2(token: string, channelId: number) {
       );
     }
   }
-
   return details;
 }
 

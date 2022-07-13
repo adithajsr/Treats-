@@ -30,8 +30,8 @@ app.get('/echo', (req, res, next) => {
 });
 
 app.get('/channel/details/v2', (req, res) => {
-  const token = req.query.token;
-  const channelId = req.query.channelId;
+  const token = req.query.token as string;
+  const channelId = req.query.channelId as string;
   res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
 });
 
@@ -62,8 +62,7 @@ app.post('/auth/register/v2', (req, res) => {
   res.json(authRegisterV2('tokenstring', 123));
 });
 
-
-
+//
 
 // for logging errors
 app.use(morgan('dev'));

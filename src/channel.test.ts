@@ -14,14 +14,6 @@ type user = {
   bodyObj: any,
 };
 
-type channel = {
-  token: string,
-  name: string,
-  isPublic: boolean,
-  res: any,
-  bodyObj: any,
-};
-
 //Defined numbers.
 const GLOBAL = 1;
 /*
@@ -280,31 +272,16 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   };
 }
 
-function requestChannelJoin(token: string, channelId: number) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channel/join/v2`,
-    {
-      json: { token, channelId },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(res.getBody() as string);
-}
-
+// function requestClear() {
+//   const res = request(
+//     'DELETE',
+//     `${url}:${port}/clear/v1`,
+//     {
+//       qs: {},
+//     }
+//   );
+//   return JSON.parse(res.getBody() as string);
+// }
 
 const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
   // auth/register/v2 returns { token, authUserId }
@@ -334,7 +311,6 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
 };
 
 describe('channel/details/v2 testing', () => {
-
   let testUser: user;
 
   beforeEach(() => {
@@ -346,11 +322,9 @@ describe('channel/details/v2 testing', () => {
   // afterEach(() => {
   //   requestClear();
   // });
-  
-
 
   test('invalid token, fail channel details', () => {
-    let testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
+    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
     const testRequest = requestChannelDetails(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId);
     expect(testRequest.res.statusCode).toBe(OK);
     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
@@ -363,24 +337,24 @@ describe('channel/details/v2 testing', () => {
   });
 
   test('channelId valid but authorised user is not a member of the channel, fail channel details', () => {
-    let testUser2 = requestAuthRegister('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
-    let testChannel = requestChannelsCreate(testUser2.bodyObj.token, 'name', true);
-    const testRequest = requestChannelDetails(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+    const testUser2 = requestAuthRegister('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
+    const testRequest = requestChannelDetails(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
     expect(testRequest.res.statusCode).toBe(OK);
     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
   });
 
   test('successful channel details return', () => {
-    let testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
-    requestChannelJoin(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-    expect(requestChannelDetails(testUser.bodyObj.token, testChannel.bodyObj.channelId)).toStrictEqual({
-        name: 'name',
-        isPublic: true,
-        ownerMembers: expect.any(Array),
-        allMembers: expect.any(Array),
+    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+    const testRequest = requestChannelDetails(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+    expect(testRequest.res.statusCode).toBe(OK);
+    expect(testRequest.bodyObj).toStrictEqual({
+      name: 'name',
+      isPublic: true,
+      ownerMembers: expect.any(Array),
+      allMembers: expect.any(Array),
     });
-});
-
+  });
 });
 
 /*

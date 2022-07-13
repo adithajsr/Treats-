@@ -54,6 +54,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
     channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
+    messages: [],
   });
 
   setData(data);

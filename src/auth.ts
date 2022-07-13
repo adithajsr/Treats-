@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getData, setData } from './dataStore';
 
 const validator = require('validator');
@@ -9,8 +8,8 @@ Arguments:
     handle (string) - <minimum length 2, with posibility of >
 Return Value:
     Returns <true> on <handle meeting requirements>
-	Returns <false> on <handle not meeting requirements> */
-export function isHandleValid(handle) {
+    Returns <false> on <handle not meeting requirements> */
+export function isHandleValid(handle: string) {
   const regex = /^[a-z]{0,20}$[0-9]*/;
   return regex.test(handle);
 }
@@ -21,8 +20,8 @@ Arguments:
     email (string) - <any>
 Return Value:
     Returns <true> on <email is valid>
-	Returns <false> on <email is invalid> */
-export function doesEmailExist(email) {
+    Returns <false> on <email is invalid> */
+export function doesEmailExist(email: string) {
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
@@ -38,8 +37,8 @@ Arguments:
     email (string) - <any>
 Return Value:
     Returns <true> on <email is valid>
-	Returns <false> on <email is invalid> */
-export function authLoginV1 (email, password) {
+    Returns <false> on <email is invalid> */
+export function authLoginV1 (email: string, password: string) {
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
@@ -60,13 +59,13 @@ export function authLoginV1 (email, password) {
 
 Arguments:
     email (string) - <any>
-	password (string) - <greater than 5 characters long>
-	nameFirst (string) - <1-50 characters long>
-	nameLast (string) - <1-50 characters long>
+    password (string) - <greater than 5 characters long>
+    nameFirst (string) - <1-50 characters long>
+    nameLast (string) - <1-50 characters long>
 Return Value:
     Returns <{ error: 'error' }> on <in valid arguments being inputted or already existing email>
-	Returns <uID> on <if all arguments are valid and a user is created and store> */
-export function authRegisterV1 (email, password, nameFirst, nameLast) {
+    Returns <uID> on <if all arguments are valid and a user is created and store> */
+export function authRegisterV1 (email: string, password: string, nameFirst: string, nameLast: string) {
   const dataSet = getData();
   // TEST DETAILS
   if (password.length < 6) {
@@ -103,7 +102,7 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
         newHandle = newHandle + '0';
       } else {
         isDupplicate = true;
-        const strDigit = newHandle.replace(/^[a-z]{0,20}/, /^$/);
+        const strDigit = newHandle.replace(/^[a-z]{0,20}/, ' ');
         if (parseInt(strDigit) > highestIndex) {
           highestIndex = parseInt(strDigit);
         }
@@ -118,7 +117,7 @@ export function authRegisterV1 (email, password, nameFirst, nameLast) {
 
   // PEFORM RETURN & UPDATE "dataStore"
   let globalPermissions;
-  if (setData.user === undefined) {
+  if (dataSet.user === []) {
     globalPermissions = 1; // owner
   } else {
     globalPermissions = 2; // memeber

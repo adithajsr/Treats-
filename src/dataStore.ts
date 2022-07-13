@@ -1,8 +1,63 @@
-// @ts-nocheck
+type user = {
+  uId: number,
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  handle: string,
+  globalPerms: number,
+};
+
+type channelMember = {
+  uId: number,
+  channelPerms: number,
+}
+
+type dmMember = {
+  uId: number,
+  dmPerms: number,
+}
+
+type message = {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+}
+
+type channel = {
+  channelId: number,
+  channelName: string,
+  isPublic: boolean,
+  members: channelMember[],
+  messages: message[],
+}
+
+type token = {
+  token: string,
+  uId: number,
+}
+
+type dm = {
+  dmId: number,
+  name: string,
+  members: dmMember[],
+  messages: message[],
+}
+
+type database = {
+  user: user[],
+  channel: channel[],
+  token: token[],
+  dm: dm[],
+}
+
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data = {
+let data: database = {
   user: [],
   channel: [],
+  token: [],
+  dm: [],
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -27,7 +82,7 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+function setData(newData: database) {
   data = newData;
 }
 

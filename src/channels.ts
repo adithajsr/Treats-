@@ -1,12 +1,13 @@
 import { getData, setData } from './dataStore';
 
-type user = {
-  email: string,
-  password: string,
-  nameFirst: string,
-  nameLast: string,
-  authUserId?: number,
-};
+// // TODO: decide if necessary
+// type user = {
+//   email: string,
+//   password: string,
+//   nameFirst: string,
+//   nameLast: string,
+//   authUserId?: number,
+// };
 
 type member = {
   uId: number,
@@ -54,6 +55,7 @@ function channelsCreateV1(authUserId: number, name: string, isPublic: boolean) {
     channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
+    messages: [],
   });
 
   setData(data);

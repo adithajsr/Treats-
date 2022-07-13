@@ -1,6 +1,6 @@
-// @ts-nocheck
-import { getData } from './dataStore';
-import { setData } from './dataStore';
+
+import { getData } from './dataStore.js';
+import { setData } from './dataStore.js';
 
 // Assume that the clear function should keep the users and channels arrays and not
 // remove them.

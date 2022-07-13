@@ -1,17 +1,36 @@
-import { authLoginV1, authRegisterV1, isHandleValid, doesEmailExist } from './auth';
+import { authLoginV1, isHandleValid, doesEmailExist } from './auth';
 import { clearV1 } from './other';
 import { userProfileV1 } from './users';
-// eslint-disable-next-line
+import request from 'sync-request';
+
 var validator = require('validator');
 
+const port = config.port;
+const url = config.url;
 
-// ======================================== authRegisterV1 Testing ========================================
-/*
-describe('Testing for authRegisterV1', () => {  
+function requestAuthRegister(email, password, nameFirst, nameLast) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return JSON.parse(res.getBody());
+}
+
+// ======================================== requestAuthRegister Testing ========================================
+
+describe('Testing for requestAuthRegister', () => {  
 
     test('Test 1 affirmitive', () => {
       // all should be well
-      let testUserId = authRegisterV1('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').authUserId;
+      let testUserId = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').authUserId;
       let testUserObject = {
         uId: testUserId,
         email: 'who.is.joe@is.the.question.com',
@@ -30,7 +49,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'myrealpassword'
       let testUserFN = 'Jonathan';
       let testUserLN = 'Schmidt';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
+      let testUserId = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(false);
     });
@@ -41,7 +60,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'this5'
       let testUserFN = 'Jean';
       let testUserLN = 'McQueen';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
+      let testUserId = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
@@ -52,7 +71,7 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'thispasswordislongenough'
       let testUserFN = '';
       let testUserLN = 'Tou';
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
+      let testUserId = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
@@ -63,12 +82,13 @@ describe('Testing for authRegisterV1', () => {
       let testUserPw = 'thispasswordismorethanlongenough'
       let testUserFN = 'Tim';
       let testUserLN = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'; // 52 characters long
-      let testUserId = authRegisterV1(testUserEmail, testUserPw, testUserFN, testUserLN);
+      let testUserId = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
         expect(testUserId).toStrictEqual({ error: 'error'});
         expect(validator.isEmail(testUserEmail)).toBe(true);
     });
 });
 
+/*
 // ======================================== authLoginV1 Testing ========================================
 
 describe('Testing for authLoginV1', () => {

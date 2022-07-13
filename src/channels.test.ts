@@ -144,7 +144,6 @@ describe('channels capabilities', () => {
   });
 
   describe('test /channels/list/v2', () => {
-
     let testUser1: user;
     let testUser2: user;
     let testUser3: user;
@@ -195,7 +194,6 @@ describe('channels capabilities', () => {
           }
         ]
       });
-
     });
 
     test('One channel, authorised user is not in channel', () => {
@@ -206,7 +204,6 @@ describe('channels capabilities', () => {
       expect(testList.bodyObj).toStrictEqual({
         channels: []
       });
-
     });
 
     test('Multiple channels, authorised user is in all channels', () => {
@@ -276,8 +273,6 @@ describe('channels capabilities', () => {
       expect(testList.bodyObj).toStrictEqual({
         channels: []
       });
-
     });
   });
-
 });

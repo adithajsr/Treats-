@@ -28,6 +28,9 @@ Return Value:
     Returns { error: 'error' } on invalid channel name
 */
 function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+
+  // TODO: use helper functions
+
   const data = getData();
 
   const tokenIndex = data.token.findIndex(a => a.token === token);
@@ -79,6 +82,9 @@ Return Value:
     Returns { error: 'error' } on invalid authUserId
 */
 function channelsListV1(authUserId: number) {
+
+  // FIXME:
+
   const data = getData();
 
   // Invalid authUserId
@@ -118,6 +124,9 @@ Return Value:
     Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
 function channelsListallV1(authUserId: number) {
+
+  // FIXME:
+
   const data = getData();
   const foundChannels = [];
 

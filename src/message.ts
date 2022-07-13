@@ -179,7 +179,7 @@ function messageRemoveV1(token: string, messageId: number) {
     for (let j = 0; j < channel[i].messages.length; j++) {
       if (channel[i].messages[j].messageId === messageId) {
         channelIndex = i;
-        messageIndex = j;
+        messageIndex = j;m
         // auth uid didn't send the message
         if (channel[i].messages[j].uId !== uId) {
           return { error: 'error' };

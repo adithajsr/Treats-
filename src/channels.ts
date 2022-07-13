@@ -1,6 +1,5 @@
 import { getData, setData } from './dataStore';
 
-
 /*
 Creates a new channel with the given name that is either a public
 or private channel
@@ -14,12 +13,16 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-function channelsCreateV1(authUserId, name, isPublic) {
 
-  let data = getData();
+function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+  // TODO: use helper functions
 
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  const data = getData();
+
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
@@ -33,7 +36,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
 
   // The user who created it automatically joins the channel
   const channelOwner = {
-    uId: authUserId,
+    uId: data.token[tokenIndex].uId,
     channelPerms: 1,
   };
 
@@ -43,6 +46,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
     channelName: name,
     isPublic: isPublic,
     members: [channelOwner],
+    messages: [],
   });
 
   setData(data);
@@ -51,6 +55,7 @@ function channelsCreateV1(authUserId, name, isPublic) {
     channelId: newChannelId,
   };
 }
+
 
 
 /*
@@ -138,4 +143,4 @@ function channelsListallV1(authUserId) {
   };
 }
 
-export { channelsCreateV1, channelsListV1, channelsListallV1 };
+export { channelsCreateV2, channelsListV1, channelsListallV1 };

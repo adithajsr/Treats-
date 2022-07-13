@@ -11,6 +11,15 @@ let data = {
       handle: 'johndoe0',
       globalPerms: 1,
     },
+    {
+      uId: 98,
+      email: 'student@unsw.com',
+      password: 'password',
+      nameFirst: 'John',
+      nameLast: 'Doe',
+      handle: 'johndoe0',
+      globalPerms: 1,
+    },
   ],
 
   channel: [
@@ -18,11 +27,14 @@ let data = {
       channelId: 999,
       channelName: 'channel',
       isPublic: true,
-      start: 0,
       members: [
         {
-          uId: -999,
+          uId: 10,
           channelPerms: 2,
+        },
+        {
+          uId: 98,
+          channelPerms: 1,
         },
       ],
       messages: [

@@ -7,8 +7,6 @@ import {setData} from './dataStore'
 export function clearV1() {
 	let data = getData();
 	
-	console.log('clear');
-
 	data.user = [];
 	data.channel = [];
 	data.token = [];

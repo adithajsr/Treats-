@@ -1,11 +1,3 @@
-// import { channelPublic, globalPermissions, channelPermissions, uIdExists, 
-//         channelExists, memberExists, channelDetailsV1, channelJoinV1, 
-//         channelInviteV1, channelMessagesV1 } from './channel.js';
-// import { channelsCreateV1 } from './channels.js'
-// import { authRegisterV1 } from './auth.js'
-// import { clearV1 } from './other.js';
-// import { getData, setData } from './dataStore';
-
 import request from 'sync-request';
 import config from './config.json';
 
@@ -13,7 +5,6 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-// TODO: potentially replace any types
 type user = {
   email: string,
   password: string,
@@ -30,9 +21,6 @@ type channel = {
   res: any,
   bodyObj: any,
 };
-
-
-
 
 //Defined numbers.
 const GLOBAL = 1;
@@ -359,6 +347,8 @@ describe('channel/details/v2 testing', () => {
   //   requestClear();
   // });
   
+
+
   test('invalid token, fail channel details', () => {
     let testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
     const testRequest = requestChannelDetails(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId);

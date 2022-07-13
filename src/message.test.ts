@@ -5,12 +5,6 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-type wrapperOutput = {
-    res: any,
-    bodyObj: any,
-};
-
-
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -20,9 +14,10 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
       json: { email, password, nameFirst, nameLast },
     }
   );
+  let value = JSON.parse(res.getBody() as string);
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: value,
   };
 }
 
@@ -157,8 +152,6 @@ function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-
-
 function requestClear() {
   const res = request(
     'DELETE',
@@ -170,9 +163,6 @@ function requestClear() {
   return JSON.parse(String(res.getBody()));
 }
 
-// let userRes;
-// let userBodyObj: user;
-
 function generateString() {
   let length = 1005;
   let set = 'abcdefg';
@@ -182,6 +172,11 @@ function generateString() {
   }
   return string.join('');
 }
+
+type wrapperOutput = {
+  res: any,
+  bodyObj: any,
+};
 
 let testUser: wrapperOutput;
 let testChannel: wrapperOutput;
@@ -193,6 +188,7 @@ describe('messages capabilities', () => {
   describe('message/send/v1 test', () => {
 
     beforeEach(() => {
+      requestClear();
       // Create a test user
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
@@ -289,13 +285,8 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
 
-    // uid????
-    // uid????
-    // uid????
-
     test('auth user does not have owner permissions in channel/dm', () => {
-      // uid
-      requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, uId)
+      requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, testUser.bodyObj.authUserId)
       const testRequest = requestMessageEdit(testUser.bodyObj.token, testMessage.bodyObj.messageId, 'a message');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
@@ -332,8 +323,6 @@ describe('messages capabilities', () => {
       requestClear();
     });
 
-    // requestMessageRemove(token: string, messageId: number) 
-
     test('invalid token, fail message remove', () => {
       const testRequest = requestMessageRemove(testUser.bodyObj.token + 'a', testMessage.bodyObj.messageId);
       expect(testRequest.res.statusCode).toBe(OK);
@@ -353,12 +342,8 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
 
-    // uid????
-    // uid????
-    // uid????
     test('auth user does not have owner permission in channel/dm, fail message remove', () => {
-      // uid????
-      requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, uId);
+      requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, testUser.bodyObj.authUserId);
       const testRequest = requestMessageRemove(testUser.bodyObj.token, testMessage.bodyObj.messageId);
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
@@ -374,10 +359,6 @@ describe('messages capabilities', () => {
 
   describe('message/senddm/v1 test', () => {
     let testUser2: wrapperOutput;
-
-    // dmId does not refer to a valid DM
-    // length of message is less than 1 or over 1000 characters
-    // dmId is valid and the authorised user is not a member of the DM
 
     beforeEach(() => {
       
@@ -403,8 +384,6 @@ describe('messages capabilities', () => {
     afterEach(() => {
       requestClear();
     });
-
-    // requestSendDm(token: string, dmId: number, message: string)
 
     test('invalid token, fail send dm', () => {
       const testRequest = requestSendDm(testUser.bodyObj.token + 'a', testDm.bodyObj.dmId, 'a message');

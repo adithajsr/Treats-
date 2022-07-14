@@ -1,6 +1,18 @@
 import { getData, setData } from './dataStore';
 
-export function dmLeaveV1(token, dmId) {
+
+/*
+This function allows someone to leave a DM channel
+
+Arguments: 
+    token (string): this argument is used to identify the member wanting to leave
+    dmId (number): this argument is used to identify the DM channel
+
+Returns: 
+    {error: 'error'} if the token or dmId are invalid
+    {} if successful
+*/
+export function dmLeaveV1(token: string, dmId: number) {
     const data = getData();
 
     //checking for valid dmId

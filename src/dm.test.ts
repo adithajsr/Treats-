@@ -2,14 +2,13 @@ import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
-const port = config.port;
-const url = config.url;
+const link = config.url + ':' + config.port;
 
 let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 let authSamuel = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer']
 
-function requestHelper(method:HttpVerb, path: String, payload: object) {
+function requestHelper(method: HttpVerb, path: String, payload: object) {
 	let qs = {};
 	let json = {};
 
@@ -21,12 +20,12 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 		json = payload; 
 	}
 
-	const res = request(method, SERVER_URL + path, { qs, json}); //request takes in three arguments
+	const res = request(method, link + path, { qs, json}); //request takes in three arguments
 	return JSON.parse(res.getBody('utf-8')); // what does utf-8 do?
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-	return requestHelper('GET', '/auth/register/v2', {email, password, nameFirst, nameLast});
+	return requestHelper('POST', '/auth/register/v2', {email, password, nameFirst, nameLast});
 }
 
 function requestDmCreate(token: string, uIds: number[]) {

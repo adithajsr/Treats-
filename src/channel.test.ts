@@ -60,41 +60,39 @@ test('Start is greater than total number of messages', () => {
 
     let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
     let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
-    let channelId = requestChannelsCreate(danielToken, 'danielChannel');
+    let channelId = requestChannelsCreate(danielToken, 'danielChannel', true);
 
-    requestMessageSendDM(danielToken, dmId, "First message");
-    requestMessageSendDM(danielToken, dmId, "Second message");
+    requestMessageSendDM(danielToken, channelId, "First message");
+    requestMessageSendDM(danielToken, channelId, "Second message");
 
-    expect(requestDmMessages(danielToken, dmId, 4));
+    expect(requestChannelMessages(danielToken, channelId, 4)).toMatchObject({error: 'error'});
 });
 
-test('Requesting user is not member of DM', () => {
+test('Requesting user is not member of channel', () => {
+    requestClear();
     let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-    let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
     let samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).token;
-    let dmId = requestDmCreate(danielToken, maiyaId);
+    let channelId = requestChannelsCreate(danielToken, 'danielChannel', true);
 
-    expect(requestDmMessages(samToken, dmId, 0)).toMatchObject({error: 'error'});
+    expect(requesChannelMessages(samToken, channelId, 0)).toMatchObject({error: 'error'});
 });
 
 test('Default case', () => {
     requestClear();
     let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-    let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3])
-    let maiyaId = maiyaUser.authId;
-    let maiyatoken = maiyaUser.token;
-    let dmId = requestDmCreate(danielToken, maiyaId);
+    let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).token;
+    let channelId = requestChannelsCreate(danielToken, 'danielChannel', true);
 
-    requestMessageSendDM(danielToken, dmId, "First message");
-    requestMessageSendDM(danielToken, dmId, "Second message");
-    requestMessageSendDM(danielToken, dmId, "Third message");
-    requestMessageSendDM(danielToken, dmId, "Fourth message");
-    requestMessageSendDM(maiyaToken, dmId, "Fifth message");
-    requestMessageSendDM(maiyaToken, dmId, "Sixth message");
+    requestMessageSend(danielToken, channelId, "First message");
+    requestMessageSend(danielToken, channelId, "Second message");
+    requestMessageSend(danielToken, channelId, "Third message");
+    requestMessageSend(danielToken, channelId, "Fourth message");
+    requestMessageSend(maiyaToken, channelId, "Fifth message");
+    requestMessageSend(maiyaToken, channelId, "Sixth message");
 
     let returnObject = {messages: ["First message, Second message, Third message, Fourth message, Fifth message, Sixth message"], start: 0, end: -1};
 
-    expect(requestDmMessages(danielToken, dmId, 0)).toMatchObject(returnObject);
+    expect(requestChannelMessages(danielToken, channelId, 0)).toMatchObject(returnObject);
 });
 
 test ('Start at integer > 0', () => {
@@ -103,18 +101,18 @@ test ('Start at integer > 0', () => {
     let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3])
     let maiyaId = maiyaUser.authId;
     let maiyatoken = maiyaUser.token;
-    let dmId = requestDmCreate(danielToken, maiyaId);
+    let channelId = requestChannelsCreate(danielToken, 'danielChannel', true);
 
-    requestMessageSendDM(danielToken, dmId, "First message");
-    requestMessageSendDM(danielToken, dmId, "Second message");
-    requestMessageSendDM(danielToken, dmId, "Third message");
-    requestMessageSendDM(danielToken, dmId, "Fourth message");
-    requestMessageSendDM(maiyaToken, dmId, "Fifth message");
-    requestMessageSendDM(maiyaToken, dmId, "Sixth message");
+    requestMessageSend(danielToken, channelId, "First message");
+    requestMessageSend(danielToken, channelId, "Second message");
+    requestMessageSend(danielToken, channelId, "Third message");
+    requestMessageSend(danielToken, channelId, "Fourth message");
+    requestMessageSend(maiyaToken, channelId, "Fifth message");
+    requestMessageSend(maiyaToken, channelId, "Sixth message");
 
     let returnObject = {messages: ["First message, Second message, Third message, Fourth message, Fifth message, Sixth message"], start: 3, end: -1};
 
-    expect(requestDmMessages(danielToken, dmId, 3)).toMatchObject(returnObject);
+    expect(requestChannelMessages(danielToken, ChannelId, 3)).toMatchObject(returnObject);
 });
 
 

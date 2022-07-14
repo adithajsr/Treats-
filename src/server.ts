@@ -38,7 +38,7 @@ app.get('/channel/details/v2', (req, res) => {
 });
 
 app.post('/auth/register/v2', (req, res) => {
-  const { email, password, nameFirst, nameLast} = req.body;
+  const { email, password, nameFirst, nameLast } = req.body;
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 

@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import {userProfileV2} from './users.js'
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -25,6 +26,19 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.get('/user/profile/v2', (req, res, next) => {
+  try {
+    const token = req.query.token as string; 
+    const uId = req.query.uId as string;
+    
+    return res.json(userProfileV2(token, uId));
+  }
+
+  catch (err) {
+    next(err);
+  }
+});
 
 // start server
 app.listen(PORT, HOST, () => {

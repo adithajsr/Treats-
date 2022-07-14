@@ -15,7 +15,7 @@
 
 import {getData} from './dataStore.js';
 
-function userProfileV1(authUserId, uId) {
+export function userProfileV2(authUserId, uId) {
 	let data = getData();
 
 	//Determining whether authUserId is valid 
@@ -49,4 +49,4 @@ function userProfileV1(authUserId, uId) {
 	}
 }
 
-export { userProfileV1 };
+

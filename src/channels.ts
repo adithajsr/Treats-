@@ -1,5 +1,79 @@
 import { getData, setData } from './dataStore';
 
+interface channelMember {
+  uId: number,
+  channelPerms: number,
+}
+
+/*
+Helper function: finds the index of the given token in the tokens array
+in the database
+
+Arguments:
+    token (string)          - represents a user session
+
+Return Value:
+    Returns tokenIndex
+*/
+const findTokenIndex = (token: string) => {
+  const data = getData();
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  return tokenIndex;
+};
+
+/*
+Helper function: Checks if the arguments for channelsCreateV2() are valid
+
+Arguments:
+    tokenIndex (number)          - index of token in tokens array in database
+    name (string)                - name of new channel
+
+Return Value:
+    Returns true if arguments are valid
+    Returns false if arguments are invalid
+*/
+const areArgumentsValidChannelsCreate = (tokenIndex: number, name: string) => {
+  // Invalid token
+  if (tokenIndex === -1) {
+    return false;
+  }
+  // Invalid channel name
+  if (name.length < 1 || name.length > 20) {
+    return false;
+  }
+  return true;
+};
+
+/*
+Helper function: Creates an array of all channels (and their associated details)
+that the authorised user is part of
+
+Arguments:
+    userId (number)    - uId of the user corresponding to the given token
+
+Return Value:
+    Returns channelsList
+*/
+const createListChannelsList = (userId: number) => {
+  const data = getData();
+
+  // Create an array to make the list
+  const channelsList = [];
+
+  // Determine whether or not authorised user is in each channel
+  for (let i = 0; i < data.channel.length; i++) {
+    const members: channelMember[] = data.channel[i].members;
+
+    if (members.find(b => b.uId === userId) !== undefined) {
+      channelsList.push({
+        channelId: data.channel[i].channelId,
+        name: data.channel[i].channelName,
+      });
+    }
+  }
+  return channelsList;
+};
+
 /*
 Creates a new channel with the given name that is either a public
 or private channel
@@ -56,91 +130,75 @@ function channelsCreateV2(token: string, name: string, isPublic: boolean) {
   };
 }
 
-
 /*
 Provide an array of all channels (and their associated details) that the
 authorised user is part of, regardless of publicness
 
 Arguments:
-    authUserId (integer)    - user ID of the user requesting a list of channels
+    token (string)    - represents the session of the user requesting a list of channels
 
 Return Value:
     Returns { channels } if no error
-    Returns { error: 'error' } on invalid authUserId
+    Returns { error: 'error' } on invalid token
 */
+function channelsListV2(token: string) {
+  const data = getData();
+  const tokenIndex = findTokenIndex(token);
 
-function channelsListV1(authUserId) {
-
-  let data = getData();
-
-  // Invalid authUserId
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+  // Invalid token
+  if (tokenIndex === -1) {
     return { error: 'error' };
   }
 
-  // Create an array to make the list
-  const channelsList = [];
-
-  // Determine whether or not authorised user is in each channel
-  for (let i = 0; i < data.channel.length; i++) {
-
-    if (data.channel[i].members.find(a => a.uId === authUserId) !== undefined) {
-
-      channelsList.push({
-        channelId: data.channel[i].channelId,
-        name: data.channel[i].channelName,
-      });
-
-    }
-
-  }
+  const userId = data.token[tokenIndex].uId;
+  const channelsList = createListChannelsList(userId);
 
   return {
     channels: channelsList,
   };
 }
 
-
-
-{/* <channelsListallV1 returns an array of all channels, regardless of whether they
+/* <channelsListallV2 returns an array of all channels, regardless of whether they
   are public or private, when initiated by a valid authUserId>
 
 Arguments:
-    <authUserId> (<integer>)    - <The authUserId is the user who initates the function>
+    <token> (<string>)    - <The token is required to start the function>
 
 Return Value:
-    Returns <[{channel}]> on <authUserId was valid and there were channels in data>
-    Returns <[]> on <no channels in data>  
-    Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */}
+    Returns <[{channels}]> on <token was valid and there were channels in data>
+    Returns <[]> on <no channels in data>
+Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
+interface Database {
+  user: any[];
+  channel: any[];
+  token: any[];
+  dm: any[];
+}
 
-function channelsListallV1(authUserId) {
-
-  const data = getData();
-  let foundChannels = [];
-
-  // inappropriate authUserId
-  if (isNaN(authUserId) === true || authUserId === '') {
-    return { error: 'error' }
+function checkToken(token: string, data: Database) {
+  if (data.token.find(a => a.token === token) === undefined) {
+    return false;
   }
+  return true;
+}
 
-  // user not in database
-  if (data.user.find(a => a.uId === authUserId) === undefined) {
+function channelsListallV2(token: string) {
+  const data = getData();
+
+  // invalid token - invalid, or token is not in database
+  if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
 
+  const foundChannels = [];
   for (const i in data.channel) {
-    foundChannels.push({channelId: data.channel[i].channelId, name: data.channel[i].channelName});
+    foundChannels.push({ channelId: data.channel[i].channelId, name: data.channel[i].channelName });
   }
 
-  // const {channel} = data; // extracts channel array from data
-  // //creates a new array with the keys extracted from channels array. The new key names have been done to match brief.
-  // const result = channel.map(channel => ({channelId: channel.channelId, name: channel.channelName}));
-  // return { channels: result } ;
-
   return {
-    channels: foundChannels 
+    channels: foundChannels
   };
 }
 
-export { channelsCreateV2, channelsListV1, channelsListallV1 };
+export { channelsCreateV2, channelsListV2, channelsListallV2 };

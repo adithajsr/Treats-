@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import {dmDetailsV1} from './dm.ts'
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -26,6 +28,17 @@ app.get('/echo', (req, res, next) => {
 // for logging errors
 app.use(morgan('dev'));
 
+app.get('/dm/details/v1', (req, res, next) => {
+  try {
+    const token = req.query.token;
+    const dmId = req.query.dmId;
+    return res.json(dmDetailsV1(token, dmId));
+  }
+
+  catch(err) {
+    next(err);
+  }
+});
 // start server
 app.listen(PORT, HOST, () => {
   console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);

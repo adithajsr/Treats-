@@ -4,14 +4,10 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-
-import { clearV1 } from './other'
 import { authRegisterV1, authLoginV1 } from './auth';
 import { channelsCreateV2, channelsListV2 } from './channels';
-
 import { userProfileV1 } from './users';
-
-
+import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -30,10 +26,6 @@ app.get('/echo', (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
-
-app.delete('/clear/v1', (req, res) => {
-  res.json(clearV1());
 });
 
 app.post('/auth/register/v2', (req, res) => {
@@ -69,7 +61,7 @@ app.post('/auth/login/v2', (req, res) => {
 app.get('/user/profile/v2', (req, res) => {
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
-  res.json(userProfileV1(token, uId));
+  return res.json(userProfileV1(token, uId));
 });
 
 app.delete('/clear/v1', (req, res) => {
@@ -83,4 +75,3 @@ app.use(morgan('dev'));
 app.listen(PORT, HOST, () => {
   console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
 });
-

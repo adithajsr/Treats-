@@ -1,21 +1,21 @@
-import {getData} from './dataStore'
-import {setData} from './dataStore'
+import { getData } from './dataStore';
+import { setData } from './dataStore';
 
 /*
-This function clears the data 
+This function clears the data
 
-Arguments: 
-	NONE
+Arguments:
+- NONE
 
-Returns:       
-	NONE
+Returns:
+- NONE
 */
 export function clearV1() {
-	const data = getData();
+  const data = getData();
 
-	data.user = [];
-	data.channel = [];
-	setData(data);
+  data.user = [];
+  data.channel = [];
+  setData(data);
 
-	return {};
+  return {};
 }

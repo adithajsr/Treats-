@@ -84,7 +84,7 @@ app.get('/dm/details/v1', (req, res, next) => {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
     return res.json(dmDetailsV1(token, dmId));
-  } catch(err) {
+  } catch (err) {
     next(err);
   }
 });

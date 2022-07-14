@@ -17,7 +17,7 @@ Return Value:
     Returns { channelId } if no error
     Returns { error: 'error' } on invalid channel name
 */
-function channelsCreateV1(authUserId, name, isPublic) {
+function channelsCreateV2(authUserId, name, isPublic) {
 
   let data = getData();
 

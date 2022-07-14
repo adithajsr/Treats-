@@ -130,7 +130,7 @@ const createNameDMCreate = (dmMembers: dmMember[]) => {
   for (const handle of handles) {
     dmName += handle + String(', ');
   }
-  dmName += -String(', ');
+  dmName = dmName.substring(0, dmName.length - 2);
 
   return dmName;
 };
@@ -176,32 +176,32 @@ Return Value:
     Returns true if arguments are valid
     Returns false if arguments are invalid
 */
-const areArgumentsValidDMRemove = (tokenIndex: number, dmId: number) => {
-  const data = getData();
+// const areArgumentsValidDMRemove = (tokenIndex: number, dmId: number) => {
+//   const data = getData();
 
-  // Invalid token
-  if (tokenIndex === -1) {
-    return false;
-  }
+//   // Invalid token
+//   if (tokenIndex === -1) {
+//     return false;
+//   }
 
-  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
-  // Invalid dmId
-  if (dmIndex === -1) {
-    return false;
-  }
+//   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+//   // Invalid dmId
+//   if (dmIndex === -1) {
+//     return false;
+//   }
 
-  const useruId = data.token[tokenIndex].uId;
-  const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === useruId);
-  if (memberIndex === -1) {
-    // Authorised user is not in the DM
-    return false;
-  } else if (data.dm[dmIndex].members[memberIndex].dmPerms !== 1) {
-    // Authorised user is in the DM but is not the creator
-    return false;
-  }
+//   const useruId = data.token[tokenIndex].uId;
+//   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === useruId);
+//   if (memberIndex === -1) {
+//     // Authorised user is not in the DM
+//     return false;
+//   } else if (data.dm[dmIndex].members[memberIndex].dmPerms !== 1) {
+//     // Authorised user is in the DM but is not the creator
+//     return false;
+//   }
 
-  return true;
-};
+//   return true;
+// };
 
 /*
 Creates a new DM with the creator as the owner of the DM

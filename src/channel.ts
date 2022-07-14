@@ -110,12 +110,12 @@ function channelDetailsV2(token: string, channelId: number) {
 // Functions being tested
 /* Description: Checks whether a Uid is a member of a channel
 Arguments:
-    <channelId> (integer)    - <The channelId of the channel thats being checked.>
-    <uId> (<integer>)    - <The uId of the user thats being checked.>
+  <channelId> (integer)    - <The channelId of the channel thats being checked.>
+  <uId> (<integer>)    - <The uId of the user thats being checked.>
 
 Return Value:
-    Returns <true> on <uId is found in the channel.>
-    Returns <false> on <uId was not found in the channel.>
+  Returns <true> on <uId is found in the channel.>
+  Returns <false> on <uId was not found in the channel.>
 */
 // function memberExists(channelId: number, uId: number) {
 //   let uidSearch;
@@ -263,48 +263,6 @@ Return Value:
 //     setData(data);
 //     return {};
 //   }
-// }
-
-// //ASSUMPTION: comparing authUserId to uId?? Should we have an authUserId in channel.members array??
-// function channelMessagesV1(authUserId, channelId, start) {
-// 	let data = getData();
-//   for (let element in data.channel) {
-// 		if (channelId = data.channel[element].channelId) {
-// 			for (let count in data.channel[element].members)
-// 				if (data.channel[element].members[count].uId = authUserId) {
-// 					//Error check if start is greater than no. of msgs in channel
-// 					if (start > data.channel[element].messages.length) return {error: 'error'};
-
-// 					//Creating new array to store start + 50 messages in
-// 					let messages = [];
-// 					let i = start;
-// 					let j = 0;
-
-// 					while (i < start + 50) {
-// 						//If start + 50 is greater than number of msgs in channel
-// 						if (i > data.channel[element].messages.length) {
-// 							i = -1;
-// 							break;
-// 						}
-// 						//Copying messages into array
-// 						messages[j] = data.channel[element].messages[i]
-// 						i++;
-// 						j++;
-// 					}
-
-// 					let returnValue = {
-// 						messages: messages,
-// 						start: start,
-// 						end: i
-// 					}
-
-// 					return returnValue;
-// 				}
-// 		}
-// 	}
-
-// 	//If channelId not found or authUserId not part of channelId valid members
-// 	return {error: 'error'};
 // }
 
 // export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV2, channelJoinV1, channelInviteV1, channelMessagesV1 };

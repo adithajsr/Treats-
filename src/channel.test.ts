@@ -15,7 +15,7 @@ type user = {
 };
 
 // Defined numbers.
-const GLOBAL = 1;
+// const GLOBAL = 1;
 /*
 describe('Testing of channel functions', () => {
 //data setup
@@ -373,39 +373,6 @@ describe('channel/details/v2 testing', () => {
 // /*
 // //Testing when start is > no. of messages in given channelId
 // test('Invalid start argument', () => {
-// 	//Input for start must be > no. of msgs in given channelId
-// 	clear();
-
-// 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
-// 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
-
-// 	//HOW TO ACTUALLY PASS MESSAGES TO THIS CHANNEL? DO I JUST USE SETDATA?
-
-// 	let returnValue = channelMessagesV1(danielId, danielChannel, 26);
-// 	expect(returnValue).toMatchObject({error: 'error'});
-
-// })
-
-// //Testing default case
-// test('Default case', () => {
-
-// 	clear();
-
-// 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
-// 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
-
-// 	//HOW TO ACTUALLY PASS MESSAGES TO THIS CHANNEL? DO I JUST USE SETDATA?
-
-// 	let returnValue = channelMessagesV1(danielId, danielChannel, 0);
-
-// })
-
-// //Testing when start + 50 is greater than the amount of messages in the channel
-// test('When end is greater than final message', () => {
-// 	clear();
-
-// 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
-// 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
 
 // let returnValue = channelMessagesV1(danielId, danielChannel, 35);
 // expect(returnValue[3]).toBe(-1);

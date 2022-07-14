@@ -1,7 +1,6 @@
 import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
-// eslint-disable-next-line
-var validator = require('validator');
+import validator from 'validator';
 
 interface ErrorType {
   error: 'error';
@@ -93,7 +92,7 @@ export function makeHandle(nameFirst: string, nameLast: string): string {
         newHandle = newHandle + '0';
       } else {
         isDupplicate = true;
-        const strDigit: string = newHandle.replace(/^[a-z]{0,20}/, /^$/);
+        const strDigit: string = newHandle.replace(/^[a-z]{0,20}/, '');
         if (parseInt(strDigit) > highestIndex) {
           highestIndex = parseInt(strDigit);
         }
@@ -116,7 +115,7 @@ password (string) - <any>
 Return Value:
 returns <true> on <email is valid>
 returns <false> on <email is invalid> */
-export function authLoginV1(email: string, password: string) : { authUserId: number} | ErrorType {
+export function authLoginV1(email: string, password: string) : { authUserId: number, token: string } | ErrorType {
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
@@ -129,7 +128,7 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
         });
         setData(dataSet);
         return {
-          authUserId: newUserId,
+          authUserId: item.uId,
           token: uuid,
         };
       } else {
@@ -169,7 +168,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 
   // PEFORM RETURN & UPDATE "dataStore"
   let globalPermissions: number;
-  if (setData.user === undefined) {
+  if (dataSet.user === []) {
     globalPermissions = 1; // owner
   } else {
     globalPermissions = 2; // memeber
@@ -187,7 +186,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   const uuid: string = newUuid();
         dataSet.token.push({
           token: uuid,
-          uId: item.uId,
+          uId: newUserId,
         });
   setData(dataSet);
   return {

@@ -9,7 +9,7 @@ let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
 
-function requestHelper(method:HttpVerb, path: String, payload: object) {
+function requestHelper(method: HttpVerb, path: string, payload: object) {
 	let qs = {};
 	let json = {};
 
@@ -21,12 +21,12 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 		json = payload; 
 	}
 
-	const res = request(method, link + path, { qs, json}); 
+	const res = request(method, link + path, { qs, json }); 
 	return JSON.parse(res.getBody('utf-8')); 
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-	return requestHelper('GET', '/auth/register/v2', {email, password, nameFirst, nameLast});
+	return requestHelper('POST', '/auth/register/v2', {email, password, nameFirst, nameLast});
 }
 
 function requestClear() {

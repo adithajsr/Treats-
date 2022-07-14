@@ -1,5 +1,5 @@
-import {getData} from './dataStore.js'
-import {setData} from './dataStore.js'
+import {getData} from './dataStore'
+import {setData} from './dataStore'
 
 /*
 This function clears the data 
@@ -10,7 +10,7 @@ Arguments:
 Returns: 
 	NONE
 */
-export function clearV2() {
+export function clearV1() {
 	let data = getData();
 	
 	data.user = [];

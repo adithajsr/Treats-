@@ -1,4 +1,3 @@
-// @ts-nocheck
 
 import { getData, setData } from './dataStore';
 

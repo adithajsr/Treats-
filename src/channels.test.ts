@@ -14,13 +14,13 @@ interface user {
   bodyObj: any,
 }
 
-interface channel {
-  token: string,
-  name: string,
-  isPublic: boolean,
-  res: any,
-  bodyObj: any,
-}
+// interface channel {
+//   token: string,
+//   name: string,
+//   isPublic: boolean,
+//   res: any,
+//   bodyObj: any,
+// }
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -50,19 +50,19 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   };
 }
 
-function requestChannelsList(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channels/list/v2`,
-    {
-      qs: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
-  };
-}
+// function requestChannelsList(token: string) {
+//   const res = request(
+//     'GET',
+//     `${url}:${port}/channels/list/v2`,
+//     {
+//       qs: { token },
+//     }
+//   );
+//   return {
+//     res: res,
+//     bodyObj: JSON.parse(String(res.getBody())),
+//   };
+// }
 
 function requestClear() {
   const res = request(
@@ -89,18 +89,18 @@ const createTestUser = (email: string, password: string, nameFirst: string, name
   };
 };
 
-const createTestChannel = (token: string, name: string, isPublic: boolean) => {
-  // channels/create/v2 returns { channelId }
-  const requestOutput = requestChannelsCreate(token, name, isPublic);
+// const createTestChannel = (token: string, name: string, isPublic: boolean) => {
+//   // channels/create/v2 returns { channelId }
+//   const requestOutput = requestChannelsCreate(token, name, isPublic);
 
-  return {
-    token: token,
-    name: name,
-    isPublic: isPublic,
-    res: requestOutput.res,
-    bodyObj: requestOutput.bodyObj,
-  };
-};
+//   return {
+//     token: token,
+//     name: name,
+//     isPublic: isPublic,
+//     res: requestOutput.res,
+//     bodyObj: requestOutput.bodyObj,
+//   };
+// };
 
 describe('channels capabilities', () => {
   describe('test /channels/create/v2', () => {

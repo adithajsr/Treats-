@@ -2,14 +2,12 @@ import express from 'express';
 import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
-
-import { authRegisterV1 } from './auth';
-import { userProfileV1 } from './users';
-import { clearV1 } from './other';
-
 import cors from 'cors';
 
+import { authRegisterV1 } from './auth';
 import { channelsCreateV2 } from './channels';
+import { userProfileV1 } from './users';
+import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -30,6 +28,12 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.post('/auth/register/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password, nameFirst, nameLast} = req.body;
+  res.json(authRegisterV1(email, password, nameFirst, nameLast));
+});
+
 app.post('/channels/create/v2', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
@@ -37,20 +41,6 @@ app.post('/channels/create/v2', (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
-
-// for logging errors
-app.use(morgan('dev'));
-
-// start server
-app.listen(PORT, HOST, () => {
-  console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
-});
-
-app.post('/auth/register/v2', (req, res) => {
-  // eslint-disable-next-line
-  const { email, password, nameFirst, nameLast} = req.body;
-  res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
 app.get('/user/profile/v2', (req, res) => {
@@ -61,4 +51,12 @@ app.get('/user/profile/v2', (req, res) => {
 
 app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());
+});
+
+// for logging errors
+app.use(morgan('dev'));
+
+// start server
+app.listen(PORT, HOST, () => {
+  console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
 });

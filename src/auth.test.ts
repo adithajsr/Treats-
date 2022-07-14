@@ -206,5 +206,3 @@ describe('Testing for requestAuthLogin', () => {
     expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith').bodyObj).not.toBe({ error: 'error' });
   });
 });
-
-requestClear();

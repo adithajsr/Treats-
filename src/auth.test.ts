@@ -4,10 +4,10 @@ import validator from 'validator';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import fs from 'fs';
+import config from './config.json';
 
-// const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf8', flag: 'r' }));
-const port = '3209' // config.port;
-const url = 'http://127.0.0.1' // config.url;
+const port = config.port;
+const url = config.url;
 
 function requestAuthRegister(email, password, nameFirst, nameLast) {
   const res = request(

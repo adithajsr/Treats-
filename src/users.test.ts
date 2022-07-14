@@ -1,6 +1,13 @@
 import request from 'sync-request';
+import config from './config.json';
+
+
+const OK = 200;
+const link = config.url + config.port;
+
 let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+
 
 function requestHelper(method:HttpVerb, path: String, payload: object) {
 	let qs = {};
@@ -14,7 +21,7 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 		json = payload; 
 	}
 
-	const res = request(method, SERVER_URL + path, { qs, json}); //request takes in three arguments
+	const res = request(method, link + path, { qs, json}); //request takes in three arguments
 	return JSON.parse(res.getBody('utf-8')); // what does utf-8 do?
 }
 

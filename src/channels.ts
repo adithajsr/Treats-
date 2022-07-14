@@ -89,19 +89,10 @@ Return Value:
 */
 
 function channelsCreateV2(token: string, name: string, isPublic: boolean) {
-  // TODO: use helper functions
-
   const data = getData();
+  const tokenIndex = findTokenIndex(token);
 
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
-
-  // Invalid channel name
-  if (name.length < 1 || name.length > 20) {
+  if (areArgumentsValidChannelsCreate(tokenIndex, name) === false) {
     return { error: 'error' };
   }
 

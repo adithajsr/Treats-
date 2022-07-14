@@ -5,23 +5,22 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-// TODO: potentially replace any types
-type user = {
+interface user {
   email: string,
   password: string,
   nameFirst: string,
   nameLast: string,
   res: any,
   bodyObj: any,
-};
+}
 
-type channel = {
+interface channel {
   token: string,
   name: string,
   isPublic: boolean,
   res: any,
   bodyObj: any,
-};
+}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -105,7 +104,6 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
 
 describe('channels capabilities', () => {
   describe('test /channels/create/v2', () => {
-
     beforeEach(() => {
       requestClear();
     });
@@ -145,7 +143,6 @@ describe('channels capabilities', () => {
   });
 
   describe('test /channels/list/v2', () => {
-
     beforeEach(() => {
       requestClear();
     });
@@ -247,8 +244,8 @@ describe('channels capabilities', () => {
     test('Multiple channels, authorised user is in some channels', () => {
       // testUser1 is in some channels, remaining channels created by testUser2
       const c1A = createTestChannel(testUser1.bodyObj.token, 'channel1AName', false);
-      const c2A = createTestChannel(testUser2.bodyObj.token, 'channel2AName', true);
-      const c2B = createTestChannel(testUser2.bodyObj.token, 'channel2BName', false);
+      createTestChannel(testUser2.bodyObj.token, 'channel2AName', true);
+      createTestChannel(testUser2.bodyObj.token, 'channel2BName', false);
 
       const expected = new Set([
         {
@@ -270,9 +267,9 @@ describe('channels capabilities', () => {
 
     test('Multiple channels, authorised user is in no channels', () => {
       // testUser2 is in no channels, all channels created by testUser1
-      const c1A = createTestChannel(testUser1.bodyObj.token, 'channel1AName', false);
-      const c1B = createTestChannel(testUser1.bodyObj.token, 'channel1BName', true);
-      const c1C = createTestChannel(testUser1.bodyObj.token, 'channel1CName', false);
+      createTestChannel(testUser1.bodyObj.token, 'channel1AName', false);
+      createTestChannel(testUser1.bodyObj.token, 'channel1BName', true);
+      createTestChannel(testUser1.bodyObj.token, 'channel1CName', false);
 
       const testList = requestChannelsList(testUser2.bodyObj.token);
       expect(testList.res.statusCode).toBe(OK);

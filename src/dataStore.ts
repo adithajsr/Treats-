@@ -6,7 +6,7 @@ interface user {
   nameLast: string,
   handle: string,
   globalPerms: number,
-};
+}
 
 interface channelMember {
   uId: number,

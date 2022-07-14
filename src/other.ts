@@ -1,8 +1,15 @@
 import {getData} from './dataStore.js'
 import {setData} from './dataStore.js'
 
-//Assume that the clear function should keep the users and channels arrays and not 
-//remove them.
+/*
+This function clears the data 
+
+Arguments: 
+	NONE
+
+Returns: 
+	NONE
+*/
 export function clearV2() {
 	let data = getData();
 	

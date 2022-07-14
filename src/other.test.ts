@@ -1,4 +1,3 @@
-
 import request from 'sync-request';
 import config from './config.json';
 

@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { authRegisterV1 } from './auth';
+import { authRegisterV1, authLoginV1 } from './auth';
 import { channelsCreateV2 } from './channels';
 import { userProfileV1 } from './users';
 import { clearV1 } from './other';
@@ -41,6 +41,12 @@ app.post('/channels/create/v2', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/auth/login/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password } = req.body;
+  res.json(authLoginV1(email, password));
 });
 
 app.get('/user/profile/v2', (req, res) => {

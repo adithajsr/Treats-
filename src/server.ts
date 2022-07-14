@@ -7,9 +7,9 @@ import cors from 'cors';
 
 import { clearV1 } from './other'
 import { authRegisterV1, authLoginV1 } from './auth';
-import { channelsCreateV2 } from './channels';
+import { channelsCreateV1 } from './channels';
 import { userProfileV1 } from './users';
-import { clearV1 } from './other';
+
 
 
 // Set up web app, use JSON
@@ -30,6 +30,7 @@ app.get('/echo', (req, res, next) => {
     next(err);
   }
 });
+
 app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());
 });
@@ -40,10 +41,10 @@ app.post('/auth/register/v2', (req, res) => {
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
-app.post('/channels/create/v2', (req, res, next) => {
+app.post('/channels/create/v1', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
-    return res.json(channelsCreateV2(token, name, isPublic));
+    return res.json(channelsCreateV1(token, name, isPublic));
   } catch (err) {
     next(err);
   }

@@ -50,13 +50,13 @@ function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI:
 }
 
 test('Clearing users', () => {
-	let danielId = requestAuthRegister(authDaniel[0], authDaniel[1],authDaniel[2], authDaniel[3]);
+	let danielId = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]);
 	requestClear();
 	expect(requestUserProfile(danielId, danielId).toMatchObject({error: 'error'}));
 });
-
+/*
 test('Clearing channels containing users', () => {
-	let danielId = requestAuthRegister(authDaniel[0], authDaniel[1],authDaniel[2], authDaniel[3]);
+	let danielId = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]);
 	requestClear();
 
 	requestChannelsCreate(danielId, 'danielChannel', 1);
@@ -87,3 +87,4 @@ test('Clearing channels containing multiple users', () => {
 
 });
 
+*/

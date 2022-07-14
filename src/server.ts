@@ -4,7 +4,12 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { dmCreateV1, dmListV1 } from './dm';
+import { channelDetailsV2 } from './channel';
+import { authRegisterV1, authLoginV1 } from './auth';
+import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
+import { userProfileV1 } from './users';
+import { dmCreateV1, dmListV1, dmDetailsV1 } from './dm';
+import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -25,6 +30,53 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.get('/channel/details/v2', (req, res) => {
+  const token = req.query.token as string;
+  const channelId = req.query.channelId as string;
+  res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
+});
+
+app.post('/auth/register/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password, nameFirst, nameLast} = req.body;
+  res.json(authRegisterV1(email, password, nameFirst, nameLast));
+});
+
+app.post('/auth/login/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password } = req.body;
+  res.json(authLoginV1(email, password));
+});
+
+app.post('/channels/create/v2', (req, res, next) => {
+  try {
+    const { token, name, isPublic } = req.body;
+    return res.json(channelsCreateV2(token, name, isPublic));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/channels/list/v2', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    return res.json(channelsListV2(token));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/channels/listall/v2', (req, res) => {
+  const token = req.query.token;
+  res.json(channelsListallV2(token as string));
+});
+
+app.get('/user/profile/v2', (req, res) => {
+  const token = req.query.token as string;
+  const uId = Number(req.query.uId) as number;
+  res.json(userProfileV1(token, uId));
+});
+
 app.post('/dm/create/v1', (req, res, next) => {
   try {
     const { token, uIds } = req.body;
@@ -41,6 +93,20 @@ app.get('/dm/list/v1', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.get('/dm/details/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    return res.json(dmDetailsV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
 });
 
 // for logging errors

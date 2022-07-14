@@ -59,14 +59,13 @@ function messageSendV1 (token: string, channelId: number, message: string) {
   const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
   const messageId = Math.floor(Math.random() * 100);
   const time = Math.floor((new Date()).getTime() / 1000);
-  const timestamp = time.toString();
 
   data.channel[channelIndex].messages.push(
     {
       messageId: messageId,
       uId: uId,
       message: message,
-      timestamp: timestamp,
+      timeSent: time,
     }
   );
 
@@ -127,7 +126,13 @@ function messageEditV1 (token: string, messageId: number, message: string) {
     return { error: 'error' };
   }
 
-  channel[channelIndex].messages[messageIndex].message = message;
+  if (message === '') {
+    channel[channelIndex].messages = channel[channelIndex].messages.filter(
+      a => a.messageId === messageId
+    );
+  } else {
+    channel[channelIndex].messages[messageIndex].message = message;
+  }
 
   return { };
 }
@@ -200,42 +205,34 @@ Return Value:
 */
 
 function messageSendDmV1 (token: string, dmId: number, message: string) {
-  console.log('dmId is ' + dmId);
-
   const data = getData();
-  if (message.length < 1 || message.length > 1000) {
+  if (message.length < 1 || message === '' || message.length > 1000) {
     return { error: 'error' };
   }
   // token validity
   if (checkToken(token, data) === false) {
-    console.log('invalid token')
     return { error: 'error' };
   }
   const uId = tokenToUid(token, data);
   // check for dm in channel
   if (data.dm.find(a => a.dmId === dmId) === undefined) {
-    
-    console.log('dmid no match');
     return { error: 'error' };
   }
   // dm valid, but auth user is not a member
   const i = data.dm.findIndex(data => data.dmId === dmId);
   if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
-    console.log('auth user not a member')
     return { error: 'error' };
   }
 
   const messageId = Math.floor(Math.random() * 100);
-  console.log(messageId);
   const time = Math.floor((new Date()).getTime() / 1000);
-  const timestamp = time.toString();
 
   data.dm[i].messages.push(
     {
       messageId: messageId,
       uId: uId,
       message: message,
-      timeSent: timestamp
+      timeSent: time
     }
   );
 

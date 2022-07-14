@@ -38,13 +38,11 @@ app.get('/channel/details/v2', (req, res) => {
 });
 
 app.post('/auth/register/v2', (req, res) => {
-  // eslint-disable-next-line
   const { email, password, nameFirst, nameLast} = req.body;
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
 app.post('/auth/login/v2', (req, res) => {
-  // eslint-disable-next-line
   const { email, password } = req.body;
   res.json(authLoginV1(email, password));
 });

@@ -14,9 +14,7 @@ Return Value:
 
 */
 
-import { requestClear } from './auth.test';
-import { requestAuthRegister } from './auth.test';
-import { requestUserProfile } from './auth.test';
+import { requestClear, requestAuthRegister, requestUserProfile } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
 
@@ -93,21 +91,21 @@ describe('Testing for requestUserProfileSetName', () => {
         nameLast: 'Schmidt',
         handleStr: 'johnsmith'
     };
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual.(expectedObject);
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
 
   test('Test 2 invalid nameFirst', () => {
     // error
     const response = requestUserProfileSetName(testToken, '', 'Schmidt');
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual.({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
   });
 
   test('Test 3 invalid nameLast', () => {
     // error
     const response = requestUserProfileSetName(testToken, 'Jonathan', 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz');
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual.({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
   });
   requestClear();
 });

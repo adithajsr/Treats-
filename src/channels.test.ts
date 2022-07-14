@@ -170,8 +170,6 @@ describe('channels capabilities', () => {
       testUser4 = createTestUser('jbloggs@proton.com', '111111', 'Jo', 'Bloggs');
       expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
 
-      // TODO: use channelJoin to add more people to channels
-
       // testUser1 created testChannel1 so they automatically join it
       testChannel1 = createTestChannel(testUser1.bodyObj.token, 'channelName', true);
       expect(testChannel1.bodyObj).not.toStrictEqual({ error: 'error' });

@@ -30,7 +30,7 @@ let data = {
       members: [
         {
           uId: 10,
-          channelPerms: 2,
+          channelPerms: 1,
         },
         {
           uId: 98,

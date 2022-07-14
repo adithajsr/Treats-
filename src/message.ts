@@ -1,19 +1,5 @@
 import { getData } from './dataStore';
 
-/*
-Creates a new channel with the given name that is either a public
-or private channel
-
-Arguments:
-    token (string)          - represents the session of the user who is creating the channel
-    channelId (number)      - channel that message will be sent to
-    name (string)           - name of new message
-
-Return Value:
-    Returns { channelId } if no error
-    Returns { error: 'error' } on invalid token or invalid channel name
-*/
-
 interface Database {
   user: any[];
   channel: any[];
@@ -50,15 +36,15 @@ Return Value:
 */
 
 function messageSendV1 (token: string, channelId: number, message: string) {
+  if (message.length < 1 || message.length > 1000) {
+    return { error: 'error' };
+  }
   const data = getData();
-
   // check for token validity
   if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
-
   const uId = tokenToUid(token, data);
-
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     return { error: 'error' };
@@ -70,12 +56,8 @@ function messageSendV1 (token: string, channelId: number, message: string) {
     }
   }
 
-  if (message.length < 1 || message.length > 1000) {
-    return { error: 'error' };
-  }
-
   const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
-  const messageId = Math.floor(new Date().getTime() / 1000);
+  const messageId = Math.floor(Math.random() * 100);
   const time = Math.floor((new Date()).getTime() / 1000);
   const timestamp = time.toString();
 
@@ -87,6 +69,7 @@ function messageSendV1 (token: string, channelId: number, message: string) {
       timestamp: timestamp,
     }
   );
+
   return { messageId: messageId };
 }
 
@@ -172,14 +155,12 @@ function messageRemoveV1(token: string, messageId: number) {
 
   const uId = tokenToUid(token, data);
   let channelIndex = NOTFOUND;
-  let messageIndex;
   const { channel } = data;
 
   for (let i = 0; i < channel.length; i++) {
     for (let j = 0; j < channel[i].messages.length; j++) {
       if (channel[i].messages[j].messageId === messageId) {
         channelIndex = i;
-        messageIndex = j;m
         // auth uid didn't send the message
         if (channel[i].messages[j].uId !== uId) {
           return { error: 'error' };
@@ -219,30 +200,33 @@ Return Value:
 */
 
 function messageSendDmV1 (token: string, dmId: number, message: string) {
+  console.log('dmId is ' + dmId);
+
   const data = getData();
-
-  // token validity
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
-  const uId = tokenToUid(token, data);
-
-  // check for dm in channel
-  if (data.dm.find(a => a.dmId === dmId) === undefined) {
-    return { error: 'error' };
-    // dm valid, but auth user is not a member
-  }
-
-  const i = data.dm.findIndex(data => data.dmId === dmId);
-  if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
-    return { error: 'error' };
-  }
-
   if (message.length < 1 || message.length > 1000) {
     return { error: 'error' };
   }
+  // token validity
+  if (checkToken(token, data) === false) {
+    console.log('invalid token')
+    return { error: 'error' };
+  }
+  const uId = tokenToUid(token, data);
+  // check for dm in channel
+  if (data.dm.find(a => a.dmId === dmId) === undefined) {
+    
+    console.log('dmid no match');
+    return { error: 'error' };
+  }
+  // dm valid, but auth user is not a member
+  const i = data.dm.findIndex(data => data.dmId === dmId);
+  if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
+    console.log('auth user not a member')
+    return { error: 'error' };
+  }
 
-  const messageId = data.dm[i].messages.length + 1;
+  const messageId = Math.floor(Math.random() * 100);
+  console.log(messageId);
   const time = Math.floor((new Date()).getTime() / 1000);
   const timestamp = time.toString();
 

@@ -46,7 +46,8 @@ app.put('/message/edit/v1', (req, res) => {
 });
 
 app.delete('/message/remove/v1', (req, res) => {
-  const { token, messageId } = req.body;
+  const token = req.query.token as string;
+  const messageId = parseInt(req.query.messageId as string);
   return res.json(messageRemoveV1(token, messageId));
 });
 
@@ -68,6 +69,121 @@ app.post('/auth/register/v2', (req, res) => {
   const { email, password } = req.body;
   res.json(authRegisterV2('tokenstring', 123));
 });
+
+
+import { getData, setData } from './dataStore';
+
+interface dmMember {
+  uId: number,
+  dmPerms: number,
+}
+
+
+const findTokenIndex = (token: string) => {
+  const data = getData();
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  return tokenIndex;
+};
+
+const areUIdsValidDMCreate = (uIds: number[], creatoruId: number) => {
+  const data = getData();
+
+  // Any uId does not refer to a valid user
+  for (const uId of uIds) {
+    if (data.user.find(a => a.uId === uId) === undefined) {
+      // Invalid uId
+      return false;
+    } else if (uId === creatoruId) {
+      // uIds should not include the creator
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const createMembersListDMCreate = (uIds: number[], creatoruId: number) => {
+  // Create an array to make the members list
+  const dmMembers = [];
+
+  // The creator is the owner of the DM
+  dmMembers.push({
+    uId: creatoruId,
+    dmPerms: 1,
+  });
+
+  // Other users in the DM have member permissions
+  for (const uId of uIds) {
+    dmMembers.push({
+      uId: uId,
+      dmPerms: 2,
+    });
+  }
+
+  return dmMembers;
+};
+const createNameDMCreate = (dmMembers: dmMember[]) => {
+  const data = getData();
+
+  // Obtain the user handles and alphabetically sort them
+  const userIndexes = dmMembers.map((dmMember) => data.user.findIndex(a => a.uId === dmMember.uId));
+  const handles: string[] = userIndexes.map((userIndex) => data.user[userIndex].handle);
+  handles.sort((a, b) => a.localeCompare(b));
+
+  // Generate the DM name
+  let dmName = '';
+  for (const handle of handles) {
+    dmName += handle + String(', ');
+  }
+  dmName += -String(', ');
+
+  return dmName;
+};
+
+
+function dmCreateV1(token: string, uIds: number[]) {
+  const data = getData();
+  const tokenIndex = findTokenIndex(token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
+    return { error: 'error' };
+  }
+
+  const creatoruId = data.token[tokenIndex].uId;
+
+  if (areUIdsValidDMCreate(uIds, creatoruId) === false) {
+    return { error: 'error' };
+  }
+
+  const newDMId = data.dm.length + 1;
+  const dmMembers = createMembersListDMCreate(uIds, creatoruId);
+  const dmName = createNameDMCreate(dmMembers);
+
+  // Create a new DM
+  data.dm.push({
+    dmId: newDMId,
+    name: dmName,
+    members: dmMembers,
+    messages: [],
+  });
+
+  setData(data);
+
+  return {
+    dmId: newDMId,
+  };
+}
+
+app.post('/dm/create/v1', (req, res, next) => {
+  try {
+    const { token, uIds } = req.body;
+    return res.json(dmCreateV1(token, uIds));
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 // function channelJoinV2(token: string, channelId: number) {
 

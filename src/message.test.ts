@@ -47,22 +47,6 @@ function requestChannelJoin(token: string, channelId: number) {
   };
 }
 
-// function requestChannelDetails(token: string, channelId: number) {
-//   const res = request(
-//     'GET',
-//     `${url}:${port}/channel/details/v2`,
-//     {
-//       qs: {
-//         token, channelId
-//       }
-//     }
-//   );
-//   return {
-//     res: res,
-//     bodyObj: JSON.parse(res.getBody() as string),
-//   };
-// }
-
 function requestRemoveOwner(token: string, channelId: number, uId: number) {
   const res = request(
     'POST',
@@ -145,7 +129,7 @@ function requestDMCreate(token: string, uIds: number[]) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -161,13 +145,14 @@ function requestClear() {
 }
 
 function generateString() {
-  const length = 1005;
-  const set = 'abcdefg';
-  const string = [];
-  for (let i = 0; i < length; i++) {
-    string.push(set.charAt(Math.floor(Math.random() * set.length)));
+  var length = 1005;
+  var set = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+  var string = '';
+  for (var i = 0; i < length; i++) {
+    var rnum = Math.floor(Math.random() * set.length);
+    string += set[rnum];
   }
-  return string.join('');
+  return string;
 }
 
 type wrapperOutput = {
@@ -298,7 +283,7 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ });
     });
   });
-*/
+
   describe('message/remove/v1 test', () => {
     beforeEach(() => {
       // Create a test user
@@ -309,7 +294,7 @@ describe('messages capabilities', () => {
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
       expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
 
-      const testMessage = requestMessageSend('tokenstring', 999, 'a message');
+      testMessage = requestMessageSend('tokenstring', 999, 'a message');
     });
 
     // afterEach(() => {
@@ -330,7 +315,7 @@ describe('messages capabilities', () => {
 
     test('message was not sent by auth user making this request, fail message remove', () => {
       const diffUser = requestAuthRegister('avalidemail@gmail.com', 'a123abc!@#', 'aJohn', 'aDoe');
-      const testRequest = requestMessageRemove('98', testMessage.bodyObj.messageId);
+      const testRequest = requestMessageRemove(diffUser.bodyObj.token, testMessage.bodyObj.messageId);
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
@@ -348,7 +333,7 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ });
     });
   });
-/*
+*/
   describe('message/senddm/v1 test', () => {
     let testUser2: wrapperOutput;
 
@@ -389,14 +374,14 @@ describe('messages capabilities', () => {
     });
 
     test('length of message is less than 1 character, fail send dm', () => {
-      const testRequest = requestMessageSend(testUser.bodyObj.token, testDm.bodyObj.dmId, '');
+      const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, ' ');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
 
     test('length of message is over 1000 characters, fail send dm', () => {
       const longString = generateString();
-      const testRequest = requestMessageSend(testUser.bodyObj.token, testDm.bodyObj.dmId, longString);
+      const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, longString);
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
     });
@@ -409,10 +394,9 @@ describe('messages capabilities', () => {
     });
 
     test('successful send dm', () => {
-      const testRequest = requestMessageSend(testUser.bodyObj.token, testDm.bodyObj.dmId, 'a message');
+      const testRequest = requestSendDm('tokenstring', testDm.bodyObj.dmId, 'a message');
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ messageId: expect.any(Number) });
     });
   });
-  */
 });

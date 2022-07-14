@@ -4,6 +4,9 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import {channelMessagesV1} from './dm.ts'
+import {MessagesLength} from './dm.ts'
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -22,6 +25,26 @@ app.get('/echo', (req, res, next) => {
     next(err);
   }
 });
+
+app.get('/channel/messages/v2', (req, res, next) => {
+  try {
+    const token = req.query.token;
+    const channelId = req.query.channelId;
+    const start = req.query.start;
+
+    const length = MessagesLength(channelId);
+    
+    const functionTimes = (length - start)/2;
+
+    return res.json(channelMessagesV2(token, channelId, start));
+  }
+
+  catch (err) {
+    next(err);
+  }
+});
+
+
 
 // for logging errors
 app.use(morgan('dev'));

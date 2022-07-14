@@ -1,5 +1,4 @@
 import { isHandleValid } from './auth'; // will require authLogin and doesEmailExist
-import { clearV1 } from './other';
 import validator from 'validator';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
@@ -36,6 +35,17 @@ function requestUserProfile(token: string, uId: number) {
     }
   );
   return JSON.parse(res.getBody() as string);
+}
+
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
 }
 
 // ======================================== requestAuthRegister Testing ========================================
@@ -142,4 +152,4 @@ describe('Testing for authLoginV1', () => {
   });
 });
 */
-clearV1();
+requestClear();

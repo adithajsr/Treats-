@@ -5,6 +5,7 @@ import config from './config.json';
 
 import { authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
+import { clearV1 } from './other';
 
 import cors from 'cors';
 
@@ -35,7 +36,6 @@ app.listen(PORT, HOST, () => {
   console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
 });
 
-// authRegister
 app.post('/auth/register/v2', (req, res) => {
   // eslint-disable-next-line
   const { email, password, nameFirst, nameLast} = req.body;
@@ -43,8 +43,11 @@ app.post('/auth/register/v2', (req, res) => {
 });
 
 app.get('/user/profile/v2', (req, res) => {
-  // eslint-disable-next-line
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
   res.json(userProfileV1(token, uId));
+});
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
 });

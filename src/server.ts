@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1 } from './users';
@@ -26,6 +27,12 @@ app.get('/echo', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.get('/channel/details/v2', (req, res) => {
+  const token = req.query.token as string;
+  const channelId = req.query.channelId as string;
+  res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
 });
 
 app.post('/auth/register/v2', (req, res) => {

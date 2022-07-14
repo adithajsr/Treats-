@@ -1,47 +1,64 @@
+interface user {
+  uId: number,
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  handle: string,
+  globalPerms: number,
+}
+
+interface channelMember {
+  uId: number,
+  channelPerms: number,
+}
+
+interface dmMember {
+  uId: number,
+  dmPerms: number,
+}
+
+interface message {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+}
+
+interface channel {
+  channelId: number,
+  channelName: string,
+  isPublic: boolean,
+  members: channelMember[],
+  messages: message[],
+}
+
+interface token {
+  token: string,
+  uId: number,
+}
+
+interface dm {
+  dmId: number,
+  name: string,
+  members: dmMember[],
+  messages: message[],
+}
+
+interface database {
+  user: user[],
+  channel: channel[],
+  token: token[],
+  dm: dm[],
+}
+
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data = {
+let data: database = {
   user: [],
   channel: [],
-  token: [
-    {
-      token: 'tokenstring',
-      uId: 10,
-    }
-  ],
+  token: [],
   dm: [],
 };
-
-// let data = {
-//   user: [],
-//   channel: [
-//     {
-//     channelId: 999,
-//     channelName: 'channel',
-//     isPublic: true,
-//     start: 0,
-//     members: [
-//       {
-//         uId: -999,
-//         channelPerms: 2,
-//       },
-//     ],
-//     messages: [
-//       {
-//         messageId: 1,
-//         uId: -999,
-//         message: 'Hello world',
-//         timestamp: '001',
-//       },
-//     ],
-//   },],
-// 	token: [
-//     {
-//       token: 'tokenstring',
-//       uId: 10,
-//     }
-//   ],
-// 	dm: [],
-// };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 
@@ -65,7 +82,7 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+function setData(newData: database) {
   data = newData;
 }
 

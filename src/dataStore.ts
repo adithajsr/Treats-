@@ -2,15 +2,14 @@
 let data = {
   user: [],
   channel: [],
-	token: [
-        {
-          token: 'tokenstring',
-          uId: 10,
-        }
-      ],
-	dm: [],
+  token: [
+    {
+      token: 'tokenstring',
+      uId: 10,
+    }
+  ],
+  dm: [],
 };
-
 
 // let data = {
 //   user: [],
@@ -43,7 +42,6 @@ let data = {
 //   ],
 // 	dm: [],
 // };
-
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 

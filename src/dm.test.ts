@@ -5,7 +5,6 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-// TODO: potentially improve types
 type wrapperOutput = {
   res: any,
   bodyObj: any,
@@ -21,7 +20,7 @@ function requestDMCreate(token: string, uIds: number[]) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -35,7 +34,7 @@ function requestDMList(token: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -49,7 +48,7 @@ function requestDMRemove(token: string, dmId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -63,7 +62,7 @@ function requestDMDetails(token: string, dmId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -77,7 +76,7 @@ function requestDMLeave(token: string, dmId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 
@@ -91,7 +90,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(String(res.getBody())),
   };
 }
 

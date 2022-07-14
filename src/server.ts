@@ -4,8 +4,10 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { channelsCreateV2 } from './channels';
-import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
+import { authRegisterV1, authLoginV1 } from './auth';
+import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
+import { userProfileV1 } from './users';
+import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -26,6 +28,18 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.post('/auth/register/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password, nameFirst, nameLast} = req.body;
+  res.json(authRegisterV1(email, password, nameFirst, nameLast));
+});
+
+app.post('/auth/login/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password } = req.body;
+  res.json(authLoginV1(email, password));
+});
+
 app.post('/channels/create/v2', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
@@ -35,165 +49,29 @@ app.post('/channels/create/v2', (req, res, next) => {
   }
 });
 
-app.post('/message/send/v1', (req, res) => {
-  const { token, channelId, message } = req.body;
-  return res.json(messageSendV1(token, channelId, message));
-});
-
-app.put('/message/edit/v1', (req, res) => {
-  const { token, messageId, message } = req.body;
-  return res.json(messageEditV1(token, messageId, message));
-});
-
-app.delete('/message/remove/v1', (req, res) => {
-  const token = req.query.token as string;
-  const messageId = parseInt(req.query.messageId as string);
-  return res.json(messageRemoveV1(token, messageId));
-});
-
-app.post('/message/senddm/v1', (req, res) => {
-  const { token, dmId, message } = req.body;
-  return res.json(messageSendDmV1(token, dmId, message));
-});
-
-// dummy functions to delete
-
-function authRegisterV2 (email, password) {
-  return {
-    token: 'tokenstring',
-    authUserId: 12345
-  }
-}
-
-app.post('/auth/register/v2', (req, res) => {
-  const { email, password } = req.body;
-  res.json(authRegisterV2('tokenstring', 123));
-});
-
-
-import { getData, setData } from './dataStore';
-
-interface dmMember {
-  uId: number,
-  dmPerms: number,
-}
-
-
-const findTokenIndex = (token: string) => {
-  const data = getData();
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-  return tokenIndex;
-};
-
-const areUIdsValidDMCreate = (uIds: number[], creatoruId: number) => {
-  const data = getData();
-
-  // Any uId does not refer to a valid user
-  for (const uId of uIds) {
-    if (data.user.find(a => a.uId === uId) === undefined) {
-      // Invalid uId
-      return false;
-    } else if (uId === creatoruId) {
-      // uIds should not include the creator
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const createMembersListDMCreate = (uIds: number[], creatoruId: number) => {
-  // Create an array to make the members list
-  const dmMembers = [];
-
-  // The creator is the owner of the DM
-  dmMembers.push({
-    uId: creatoruId,
-    dmPerms: 1,
-  });
-
-  // Other users in the DM have member permissions
-  for (const uId of uIds) {
-    dmMembers.push({
-      uId: uId,
-      dmPerms: 2,
-    });
-  }
-
-  return dmMembers;
-};
-const createNameDMCreate = (dmMembers: dmMember[]) => {
-  const data = getData();
-
-  // Obtain the user handles and alphabetically sort them
-  const userIndexes = dmMembers.map((dmMember) => data.user.findIndex(a => a.uId === dmMember.uId));
-  const handles: string[] = userIndexes.map((userIndex) => data.user[userIndex].handle);
-  handles.sort((a, b) => a.localeCompare(b));
-
-  // Generate the DM name
-  let dmName = '';
-  for (const handle of handles) {
-    dmName += handle + String(', ');
-  }
-  dmName += -String(', ');
-
-  return dmName;
-};
-
-
-function dmCreateV1(token: string, uIds: number[]) {
-  const data = getData();
-  const tokenIndex = findTokenIndex(token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
-
-  const creatoruId = data.token[tokenIndex].uId;
-
-  if (areUIdsValidDMCreate(uIds, creatoruId) === false) {
-    return { error: 'error' };
-  }
-
-  const newDMId = data.dm.length + 1;
-  const dmMembers = createMembersListDMCreate(uIds, creatoruId);
-  const dmName = createNameDMCreate(dmMembers);
-
-  // Create a new DM
-  data.dm.push({
-    dmId: newDMId,
-    name: dmName,
-    members: dmMembers,
-    messages: [],
-  });
-
-  setData(data);
-
-  return {
-    dmId: newDMId,
-  };
-}
-
-app.post('/dm/create/v1', (req, res, next) => {
+app.get('/channels/list/v2', (req, res, next) => {
   try {
-    const { token, uIds } = req.body;
-    return res.json(dmCreateV1(token, uIds));
+    const token = req.query.token as string;
+    return res.json(channelsListV2(token));
   } catch (err) {
     next(err);
   }
 });
 
+app.get('/channels/listall/v2', (req, res) => {
+  const token = req.query.token;
+  res.json(channelsListallV2(token as string));
+});
 
-// function channelJoinV2(token: string, channelId: number) {
+app.get('/user/profile/v2', (req, res) => {
+  const token = req.query.token as string;
+  const uId = Number(req.query.uId) as number;
+  res.json(userProfileV1(token, uId));
+});
 
-//   return { };
-// }
-
-// app.post('/channel/join/v2', (req, res) => {
-//   const { token, channelId } = req.body;
-//   res.json(channelJoinV2('tokenstring', 999));
-// });
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
+});
 
 // for logging errors
 app.use(morgan('dev'));

@@ -24,33 +24,33 @@ function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestDMList(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/dm/list/v1`,
-    {
-      qs: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
-  };
-}
+// function requestDMList(token: string) {
+//   const res = request(
+//     'GET',
+//     `${url}:${port}/dm/list/v1`,
+//     {
+//       qs: { token },
+//     }
+//   );
+//   return {
+//     res: res,
+//     bodyObj: JSON.parse(String(res.getBody())),
+//   };
+// }
 
-function requestDMRemove(token: string, dmId: number) {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/dm/remove/v1`,
-    {
-      qs: { token, dmId },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
-  };
-}
+// function requestDMRemove(token: string, dmId: number) {
+//   const res = request(
+//     'DELETE',
+//     `${url}:${port}/dm/remove/v1`,
+//     {
+//       qs: { token, dmId },
+//     }
+//   );
+//   return {
+//     res: res,
+//     bodyObj: JSON.parse(String(res.getBody())),
+//   };
+// }
 
 function requestDMDetails(token: string, dmId: number) {
   const res = request(
@@ -66,19 +66,19 @@ function requestDMDetails(token: string, dmId: number) {
   };
 }
 
-function requestDMLeave(token: string, dmId: number) {
-  const res = request(
-    'POST',
-    `${url}:${port}/dm/leave/v1`,
-    {
-      json: { token, dmId },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
-  };
-}
+// function requestDMLeave(token: string, dmId: number) {
+//   const res = request(
+//     'POST',
+//     `${url}:${port}/dm/leave/v1`,
+//     {
+//       json: { token, dmId },
+//     }
+//   );
+//   return {
+//     res: res,
+//     bodyObj: JSON.parse(String(res.getBody())),
+//   };
+// }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -105,11 +105,11 @@ function requestClear() {
   return JSON.parse(String(res.getBody()));
 }
 
-beforeEach(() => {
-  requestClear();
-});
-
 describe('dm capabilities', () => {
+  beforeEach(() => {
+    requestClear();
+  });
+
   let testUser1: wrapperOutput;
   let testUser2: wrapperOutput;
   let testUser3: wrapperOutput;

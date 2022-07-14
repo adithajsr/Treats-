@@ -1,5 +1,10 @@
 
 import request from 'sync-request';
+import config from './config.json';
+
+const OK = 200;
+
+const link = config.port + ':' + config.url as string;
 
 let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
@@ -17,7 +22,7 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 		json = payload; 
 	}
 
-	const res = request(method, SERVER_URL + path, { qs, json}); //request takes in three arguments
+	const res = request(method, link + path, { qs, json}); //request takes in three arguments
 	return JSON.parse(res.getBody('utf-8')); // what does utf-8 do?
 }
 
@@ -44,7 +49,6 @@ function requestChannelsListAll() {
 function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI: number) {
 	return requestHelper('POST', '/channel/invite/v2', {InviterAUI, channelId, InviteeAUI});
 }
-
 
 test('Clearing users', () => {
 	let danielId = requestAuthRegister(authDaniel[0], authDaniel[1],authDaniel[2], authDaniel[3]);

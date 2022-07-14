@@ -24,7 +24,7 @@ export function dmMessagesV1(token, dmId, start) {
     let returnMessages = [];
 
     for (let i = 0; i < start + 50; i++) {
-        returnMessages[i] = data.dm[dmIndex].messages
+        returnMessages[i] = data.dm[dmIndex].messages[i];
     }
     
     const endIndex = start + 50;

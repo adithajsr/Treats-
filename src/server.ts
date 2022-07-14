@@ -31,7 +31,6 @@ app.get('/dm/messages/v1', (req, res, next) => {
     const token = req.query.token;
     const dmId = req.query.dmId;
     const start = req.query.start;
-    
     return res.json(dmMessagesV1(token, dmId, start));
   }
 

@@ -7,7 +7,7 @@ This function clears the data
 Arguments: 
 	NONE
 
-Returns: 
+Returns:       
 	NONE
 */
 export function clearV1() {

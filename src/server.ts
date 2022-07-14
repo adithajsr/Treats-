@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+import {dmMessagesV1} from './dm.ts'
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -23,6 +25,20 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+
+app.get('/dm/messages/v1', (req, res, next) => {
+  try {
+    const token = req.query.token;
+    const dmId = req.query.dmId;
+    const start = req.query.start;
+    
+    return res.json(dmMessagesV1(token, dmId, start));
+  }
+
+  catch (err) {
+    next(err);
+  }
+})
 // for logging errors
 app.use(morgan('dev'));
 

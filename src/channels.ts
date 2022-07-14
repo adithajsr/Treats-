@@ -1,9 +1,9 @@
 import { getData, setData } from './dataStore';
 
-// interface channelMember {
-//   uId: number,
-//   channelPerms: number,
-// }
+interface channelMember {
+  uId: number,
+  channelPerms: number,
+}
 
 /*
 Helper function: finds the index of the given token in the tokens array
@@ -54,25 +54,25 @@ Arguments:
 Return Value:
     Returns channelsList
 */
-// const createListChannelsList = (userId: number) => {
-//   const data = getData();
+const createListChannelsList = (userId: number) => {
+  const data = getData();
 
-//   // Create an array to make the list
-//   const channelsList = [];
+  // Create an array to make the list
+  const channelsList = [];
 
-//   // Determine whether or not authorised user is in each channel
-//   for (let i = 0; i < data.channel.length; i++) {
-//     const members: channelMember[] = data.channel[i].members;
+  // Determine whether or not authorised user is in each channel
+  for (let i = 0; i < data.channel.length; i++) {
+    const members: channelMember[] = data.channel[i].members;
 
-//     if (members.find(b => b.uId === userId) !== undefined) {
-//       channelsList.push({
-//         channelId: data.channel[i].channelId,
-//         name: data.channel[i].channelName,
-//       });
-//     }
-//   }
-//   return channelsList;
-// };
+    if (members.find(b => b.uId === userId) !== undefined) {
+      channelsList.push({
+        channelId: data.channel[i].channelId,
+        name: data.channel[i].channelName,
+      });
+    }
+  }
+  return channelsList;
+};
 
 /*
 Creates a new channel with the given name that is either a public
@@ -120,4 +120,32 @@ function channelsCreateV2(token: string, name: string, isPublic: boolean) {
   };
 }
 
-export { channelsCreateV2 };
+/*
+Provide an array of all channels (and their associated details) that the
+authorised user is part of, regardless of publicness
+
+Arguments:
+    token (string)    - represents the session of the user requesting a list of channels
+
+Return Value:
+    Returns { channels } if no error
+    Returns { error: 'error' } on invalid token
+*/
+function channelsListV2(token: string) {
+  const data = getData();
+  const tokenIndex = findTokenIndex(token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
+    return { error: 'error' };
+  }
+
+  const userId = data.token[tokenIndex].uId;
+  const channelsList = createListChannelsList(userId);
+
+  return {
+    channels: channelsList,
+  };
+}
+
+export { channelsCreateV2, channelsListV2 };

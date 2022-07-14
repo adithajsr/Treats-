@@ -93,8 +93,8 @@ function channelDetailsV2(token: string, channelId: number) {
   return details;
 }
 
-//Functions being tested
-/*Description: Checks whether a Uid is a member of a channel
+// Functions being tested
+/* Description: Checks whether a Uid is a member of a channel
 Arguments:
     <channelId> (integer)    - <The channelId of the channel thats being checked.>
     <uId> (<integer>)    - <The uId of the user thats being checked.>
@@ -104,17 +104,16 @@ Return Value:
     Returns <false> on <uId was not found in the channel.>
 */
 function memberExists(channelId: number, uId: number) {
-  var uid_search;
-  let data = getData();
-  const {channel} = data;
+  let uid_search;
+  const data = getData();
+  const { channel } = data;
   const channel_search = channel.find(data => data.channelId === channelId);
   if (channel_search != null) {
-    const {members} = channel_search;
+    const { members } = channel_search;
     uid_search = members.find(data => data.uId === uId);
   }
-  return (uid_search != null) ? "true" : "false";
+  return (uid_search != null) ? 'true' : 'false';
 }
-
 
 // /*Description: Invites user to the channel
 // Arguments:
@@ -125,7 +124,7 @@ function memberExists(channelId: number, uId: number) {
 // Return Value:
 //   Returns <{}> on <successfully added user to channel>
 //   Returns <{error: 'error'}> on <user was not added due to failing an error test>
-// */  
+// */
 // function channelInviteV1(authUserId, channelId, uId) {
 //   if (channelExists(channelId) === "false" ||
 //       uIdExists(uId) === "false" ||
@@ -145,8 +144,6 @@ function memberExists(channelId: number, uId: number) {
 
 // //Defined numbers.
 // const GLOBAL = 1;
-
-
 
 // /*Description: Checks whether a chanel exists in the database
 // Arguments:
@@ -228,7 +225,6 @@ function memberExists(channelId: number, uId: number) {
 //   return (search != null) ? "true" : "false";
 // }
 
-
 // /*Description: Adds a user to a channel
 // Arguments:
 //   <authUserId> (integer)    - <The authUserId is the user who initates the function>
@@ -255,8 +251,6 @@ function memberExists(channelId: number, uId: number) {
 //   }
 // }
 
-
-
 // //ASSUMPTION: comparing authUserId to uId?? Should we have an authUserId in channel.members array??
 // function channelMessagesV1(authUserId, channelId, start) {
 // 	let data = getData();
@@ -266,7 +260,7 @@ function memberExists(channelId: number, uId: number) {
 // 				if (data.channel[element].members[count].uId = authUserId) {
 // 					//Error check if start is greater than no. of msgs in channel
 // 					if (start > data.channel[element].messages.length) return {error: 'error'};
-			
+
 // 					//Creating new array to store start + 50 messages in
 // 					let messages = [];
 // 					let i = start;
@@ -277,15 +271,15 @@ function memberExists(channelId: number, uId: number) {
 // 						if (i > data.channel[element].messages.length) {
 // 							i = -1;
 // 							break;
-// 						} 
-// 						//Copying messages into array 
+// 						}
+// 						//Copying messages into array
 // 						messages[j] = data.channel[element].messages[i]
 // 						i++;
 // 						j++;
 // 					}
 
 // 					let returnValue = {
-// 						messages: messages, 
+// 						messages: messages,
 // 						start: start,
 // 						end: i
 // 					}
@@ -299,8 +293,5 @@ function memberExists(channelId: number, uId: number) {
 // 	return {error: 'error'};
 // }
 
-
-
-
 // export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV2, channelJoinV1, channelInviteV1, channelMessagesV1 };
-export { channelDetailsV2 }
+export { channelDetailsV2 };

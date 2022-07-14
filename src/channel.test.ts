@@ -14,7 +14,7 @@ type user = {
   bodyObj: any,
 };
 
-//Defined numbers.
+// Defined numbers.
 const GLOBAL = 1;
 /*
 describe('Testing of channel functions', () => {
@@ -76,7 +76,7 @@ describe('Testing of channel functions', () => {
               globalPerms: 'global',
               channelPerms: 'member',
       }],
-  
+
       channel: [{
           channelId: 999,
           channelName: 'channel',
@@ -167,8 +167,7 @@ describe('Testing of channel functions', () => {
           ]
     }]
   }
-  
- 
+
 setData(database);
 
 //Actual testing
@@ -182,7 +181,7 @@ setData(database);
             expect(channelExists(999)).toStrictEqual('true');
             expect(channelExists(654)).toStrictEqual('true');
           });
-    
+
         test('uId exists tests', () => { //what does that mean
             expect(memberExists(100000, 75646)).toStrictEqual('false');//100000 is a random non existent channel id.
             expect(memberExists(9999, 100000)).toStrictEqual('false');//100000 is a random non existent uId.
@@ -205,13 +204,13 @@ setData(database);
         test('channelJoinV1 channel does not exist error', () => {
             expect(channelJoinV1(37383, 888)).toStrictEqual({error: 'error'});
           });
-        
+
         test('channelJoinV1 already exists error', () => {
             expect(channelJoinV1(34546,999)).toStrictEqual({error: 'error'});
           });
         test('channelJoinV1 private channel error', () => {
             expect(channelJoinV1(37383, 654)).toStrictEqual({error: 'error'});
-          });         
+          });
 
         test('channelJoinV1 useralready exists error', () => {
             expect(channelJoinV1(34546,999)).toStrictEqual({error: 'error'});
@@ -365,9 +364,9 @@ test('Testing channel validity', () => {
 
 	let returnValue = channelMessagesV1(danielId, danielChannel - 1, 0);
 	expect(returnValue).toMatchObject({error: 'error'});
-}) 
+})
 
-//Testing if the member is a part of the given channel 
+//Testing if the member is a part of the given channel
 test('Testing user access', () => {
 	//Input for authUserId must be incongruent with valid channelIds
 	//What to do if authUserId is an invalid number? eg. -15
@@ -383,17 +382,17 @@ test('Testing user access', () => {
 
 	let returnValue = channelMessagesV1(samuelId, danielChannel, 0);
 	expect(returnValue).toMatchObject({error: 'error'});
-	
+
 })
 /*
 //Testing when start is > no. of messages in given channelId
 test('Invalid start argument', () => {
 	//Input for start must be > no. of msgs in given channelId
 	clear();
-	
+
 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
-	
+
 	//HOW TO ACTUALLY PASS MESSAGES TO THIS CHANNEL? DO I JUST USE SETDATA?
 
 	let returnValue = channelMessagesV1(danielId, danielChannel, 26);
@@ -411,11 +410,7 @@ test('Default case', () => {
 
 	//HOW TO ACTUALLY PASS MESSAGES TO THIS CHANNEL? DO I JUST USE SETDATA?
 
-	
-	
 	let returnValue = channelMessagesV1(danielId, danielChannel, 0);
-	
-
 
 })
 
@@ -432,4 +427,3 @@ test('When end is greater than final message', () => {
 	expect(returnValue[3]).toBe(-1);
 })
 */
-

@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { channelsCreateV2 } from './channels'
-import { channelDetailsV2 } from './channel'
+import { channelsCreateV2 } from './channels';
+import { channelDetailsV2 } from './channel';
 
 // delete
-import { clearV1 } from './other'
+import { clearV1 } from './other';
 
 // Set up web app, use JSON
 const app = express();
@@ -54,7 +54,7 @@ function authRegisterV2 (email, password) {
   return {
     token: 'tokenstring',
     authUserId: 12345
-  }
+  };
 }
 
 app.post('/auth/register/v2', (req, res) => {

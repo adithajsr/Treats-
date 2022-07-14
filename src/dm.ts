@@ -1,11 +1,20 @@
 import { getData, setData } from './dataStore';
-//IS MEMBERS TYPE CORRECT?
-//DID I USE THE INTERFACE CORRECTLY?
-interface retValue {
-    name: string, 
-    members: any,
-}
-export function dmDetailsV1(token, dmId): retValue {
+
+/*
+This function returns the name and members of a specified DM
+
+Arguments: 
+    token (string): To ensure the caller is an authorised user
+    dmId (number): To specify which DM it is
+
+
+Return: 
+    Returns {error: 'error'} if the token is unauthorised or the dmId is invalid
+    Returns the name and members of the specified DM if successful
+
+*/
+
+export function dmDetailsV1(token: string, dmId: number) {
     const data = getData();
     //checking if dmId is valid 
 

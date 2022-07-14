@@ -84,8 +84,8 @@ export function makeHandle(nameFirst: string, nameLast: string): string {
     newHandle = newHandle.slice(0, 20);
   }
   // test if handle is already in use, find highest number at the end
-  let highestIndex: number = 0;
-  let isDupplicate: boolean = false;
+  let highestIndex = 0;
+  let isDupplicate = false;
   for (const item of dataSet.user) {
     if (item.handle.search(newHandle) === 0) {
       if (item.handle.search(/[0-9]{1,}$/) === -1) {
@@ -184,10 +184,10 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     globalPerms: globalPermissions,
   });
   const uuid: string = newUuid();
-        dataSet.token.push({
-          token: uuid,
-          uId: newUserId,
-        });
+  dataSet.token.push({
+    token: uuid,
+    uId: newUserId,
+  });
   setData(dataSet);
   return {
     authUserId: newUserId,

@@ -1,5 +1,5 @@
-import { getData, setData } from './dataStore';
-import { doesEmailExist, isHandleValid } from './auth';
+import { getData } from './dataStore'; // will need setData
+// import { doesEmailExist, isHandleValid } from './auth';
 // eslint-disable-next-line
 import validator from 'validator';
 
@@ -17,7 +17,7 @@ important info about a user's profile */
 export function userProfileV1(token: string, uId: number) {
   const data = getData();
   // Determining whether token is valid
-  let count: number = 0;
+  let count = 0;
   for (const element of data.token) {
     if (token === element.token) {
       count = 1;

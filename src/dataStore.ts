@@ -1,8 +1,8 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
-  user: [],
-  channel: [],
-  token: [],
+  user: [] as any[],
+  channel: [] as any[],
+  token: [] as any[],
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -27,7 +27,7 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+function setData(newData : any) {
   data = newData;
 }
 

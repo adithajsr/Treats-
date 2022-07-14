@@ -5,23 +5,22 @@ const OK = 200;
 const port = config.port;
 const url = config.url;
 
-// TODO: potentially replace any types
-type user = {
+interface user {
   email: string,
   password: string,
   nameFirst: string,
   nameLast: string,
   res: any,
   bodyObj: any,
-};
+}
 
-type channel = {
+interface channel {
   token: string,
   name: string,
   isPublic: boolean,
   res: any,
   bodyObj: any,
-};
+}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -43,6 +42,20 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
     `${url}:${port}/auth/register/v2`,
     {
       json: { email, password, nameFirst, nameLast },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.getBody())),
+  };
+}
+
+function requestChannelsList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/list/v2`,
+    {
+      qs: { token },
     }
   );
   return {
@@ -111,7 +124,7 @@ describe('channels capabilities', () => {
     });
 
     test('Fail create new channel, invalid token', () => {
-      const testChannel = requestChannelsCreate(testUser.bodyObj.token + 1, 'channelName', true);
+      const testChannel = requestChannelsCreate(testUser.bodyObj.token + 'a', 'channelName', true);
 
       expect(testChannel.res.statusCode).toBe(OK);
       expect(testChannel.bodyObj).toStrictEqual({ error: 'error' });

@@ -1,3 +1,4 @@
+
 import { getData } from './dataStore';
 import { setData } from './dataStore';
 
@@ -15,6 +16,10 @@ export function clearV1() {
 
   data.user = [];
   data.channel = [];
+
+  data.token = [];
+  data.dm = [];
+
   setData(data);
 
   return {};

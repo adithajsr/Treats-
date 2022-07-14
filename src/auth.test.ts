@@ -87,6 +87,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     expect(response.res.statusCode).toBe(OK);
     const returnObject = response.bodyObj;
+
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     const testUserObject = {
@@ -94,7 +95,7 @@ describe('Testing for requestAuthRegister', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handle: 'johnsmith',
+      handleStr: 'johnsmith',
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handle)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
@@ -175,7 +176,7 @@ describe('Testing for requestAuthLogin', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handle: 'johnsmith',
+      handleStr: 'johnsmith',
     };
     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj).toStrictEqual({ error: 'error' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);

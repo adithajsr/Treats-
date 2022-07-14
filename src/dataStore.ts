@@ -1,85 +1,63 @@
+interface user {
+  uId: number,
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  handle: string,
+  globalPerms: number,
+}
+
+interface channelMember {
+  uId: number,
+  channelPerms: number,
+}
+
+interface dmMember {
+  uId: number,
+  dmPerms: number,
+}
+
+interface message {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+}
+
+interface channel {
+  channelId: number,
+  channelName: string,
+  isPublic: boolean,
+  members: channelMember[],
+  messages: message[],
+}
+
+interface token {
+  token: string,
+  uId: number,
+}
+
+interface dm {
+  dmId: number,
+  name: string,
+  members: dmMember[],
+  messages: message[],
+}
+
+interface database {
+  user: user[],
+  channel: channel[],
+  token: token[],
+  dm: dm[],
+}
+
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-
-let data = {
-  user: [
-    {
-      uId: 10,
-      email: 'student@unsw.com',
-      password: 'password',
-      nameFirst: 'John',
-      nameLast: 'Doe',
-      handle: 'johndoe0',
-      globalPerms: 1,
-    },
-    {
-      uId: 98,
-      email: 'student@unsw.com',
-      password: 'password',
-      nameFirst: 'John',
-      nameLast: 'Doe',
-      handle: 'johndoe0',
-      globalPerms: 1,
-    },
-  ],
-
-  channel: [
-    {
-      channelId: 999,
-      channelName: 'channel',
-      isPublic: true,
-      members: [
-        {
-          uId: 10,
-          channelPerms: 2,
-        },
-        {
-          uId: 98,
-          channelPerms: 1,
-        },
-      ],
-      messages: [
-        {
-          messageId: 1,
-          uId: -999,
-          message: 'Hello world',
-          timestamp: '001',
-        },
-      ],
-    },
-  ],
-
-  token: [
-    {
-      token: 'tokenstring',
-      uId: 10,
-    }
-  ],
-
-  dm: [
-    {
-      dmId: 1,
-      name: 'aliceschmoe, johndoe0',
-      members: [
-        {
-          uId: 3,
-          dmPerms: 1,
-        },
-        {
-          uId: 50,
-          dmPerms: 2,
-        },
-      ],
-      messages: [
-        {
-          messageId: 20,
-          uId: 3,
-          message: 'Express',
-          timeSent: '500',
-        },
-      ],
-    }
-  ],
-
+let data: database = {
+  user: [],
+  channel: [],
+  token: [],
+  dm: [],
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -104,7 +82,8 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+
+function setData(newData: database) {
   data = newData;
 }
 

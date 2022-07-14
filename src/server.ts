@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import {clearV2} from './other.ts'
+import {clearV2} from './other'
 
 // Set up web app, use JSON
 const app = express();
@@ -26,7 +26,7 @@ app.get('/echo', (req, res, next) => {
 });
 app.delete('/clear/v2', (req, res, next) => {
   try {
-    clearv2();
+    clearV2();
   }
 
   catch (err) {

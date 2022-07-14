@@ -1,9 +1,9 @@
-import request from 'sync-request';
+import request, {HttpVerb} from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
 
-const link = config.port + ':' + config.url as string;
+const link = config.url + ':' + config.port as string;
 
 let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
@@ -21,8 +21,8 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 		json = payload; 
 	}
 
-	const res = request(method, link + path, { qs, json}); //request takes in three arguments
-	return JSON.parse(res.getBody('utf-8')); // what does utf-8 do?
+	const res = request(method, link + path, { qs, json}); 
+	return JSON.parse(res.getBody('utf-8')); 
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
@@ -37,7 +37,7 @@ function requestUserProfile(authUserId: number, uId: number) {
 	return requestHelper('GET', '/user/profile/v2', {authUserId, uId});
 }
 
-function requestChannelsCreate(authuserId: number, channelName: string, globalPerms: number) {
+function requestChannelsCreate(authUserId: number, channelName: string, globalPerms: number) {
 	return requestHelper('GET', '/channels/create/v2', {authUserId, channelName, globalPerms});
 }
 

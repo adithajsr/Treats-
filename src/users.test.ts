@@ -19,7 +19,7 @@ function requestHelper(method:HttpVerb, path: String, payload: object) {
 }
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-	return requestHelper('GET', '/auth/register/v2', {email, password, nameFirst, nameLast});
+	return requestHelper('POST', '/auth/register/v2', {email, password, nameFirst, nameLast});
 }
 
 function requestClear() {

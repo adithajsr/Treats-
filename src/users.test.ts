@@ -23,79 +23,83 @@ const port = config.port;
 const url = config.url;
 
 function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
-	const res = request(
-	  'PUT',
-	  `${url}:${port}/user/profile/setname/v1`,
-	  {
-		json: {
-		  token: token,
-		  nameFirst: nameFirst,
-		  nameLast: nameLast,
-		}
-	  }
-	);
-	return {
-	  res: res,
-	  bodyObj: JSON.parse(res.getBody() as string),
-	};
-  }
+  const res = request(
+    'PUT',
+    `${url}:${port}/user/profile/setname/v1`,
+    {
+      json: {
+        token: token,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
 // AWAITING ADITHA TO IMPLEMENT
 /*
 test('Testing invalid uId', () => {
-	clearV1();
-	let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
-	
-	let returnValue = userProfileV1(maddyId/2, maddyId/2);
-	expect(returnValue).toMatchObject({error: 'error'});
+  clearV1();
+  let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
+
+  let returnValue = userProfileV1(maddyId/2, maddyId/2);
+  expect(returnValue).toMatchObject({error: 'error'});
 })
 
-//Testing default case 
+//Testing default case
 test('Default case', () => {
-	
-	clearV1();
 
-	let maiyaId = authRegisterV1('maiyaTaylor@gmail.com', 'password3', 'Maiya', 'Taylor').authUserId;
-	let samuelId = authRegisterV1('samSchreyer@gmail.com', 'password1', 'Samuel', 'Schreyer').authUserId;
-	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung').authUserId;
-	let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines').authUserId;
-	
-	const maiyaInfo = {
-		uId: maiyaId, 
-		email: 'maiyaTaylor@gmail.com', 
-		nameFirst: 'Maiya', 
-		nameLast: 'Taylor', 
-		handle: 'maiyataylor'
-	}
+  clearV1();
 
+  let maiyaId = authRegisterV1('maiyaTaylor@gmail.com', 'password3', 'Maiya', 'Taylor').authUserId;
+  let samuelId = authRegisterV1('samSchreyer@gmail.com', 'password1', 'Samuel', 'Schreyer').authUserId;
+  let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung').authUserId;
+  let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines').authUserId;
 
-	expect(userProfileV1(maiyaId, maiyaId)).toMatchObject(maiyaInfo);
+  const maiyaInfo = {
+    uId: maiyaId,
+      email: 'maiyaTaylor@gmail.com',
+      nameFirst: 'Maiya',
+      nameLast: 'Taylor',
+      handle: 'maiyataylor'
+    }
+
+  expect(userProfileV1(maiyaId, maiyaId)).toMatchObject(maiyaInfo);
 })
 */
 
 // ======================================== requestUserProfileSetName Testing ========================================
 
 describe('Testing for requestUserProfileSetName', () => {
-  const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
-  const testUserId = returnObject.authUserId;
-  const testToken = returnObject.token;
-  
+  afterEach(() => {
+    requestClear();
+  });
   test('Test 1 affirmitive', () => {
     // all should be well
+	const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, 'Jonathan', 'Schmidt');
     expect(response.res.statusCode).toBe(OK);
-	const expectedObject = {
-		uId: testUserId,
-        email: 'who.is.joe@is.the.question.com',
-        nameFirst: 'Jonathan',
-        nameLast: 'Schmidt',
-        handleStr: 'johnsmith'
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'Jonathan',
+      nameLast: 'Schmidt',
+      handleStr: 'johnsmith'
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
 
   test('Test 2 invalid nameFirst', () => {
     // error
+	const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, '', 'Schmidt');
     expect(response.res.statusCode).toBe(OK);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
@@ -103,9 +107,11 @@ describe('Testing for requestUserProfileSetName', () => {
 
   test('Test 3 invalid nameLast', () => {
     // error
+	const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, 'Jonathan', 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz');
     expect(response.res.statusCode).toBe(OK);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
   });
-  requestClear();
 });

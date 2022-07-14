@@ -17,7 +17,7 @@
 import { clearV1 } from './other.js';
 import { authRegisterV1 } from './auth.js';
 import { userProfileV1 } from './users.js';
-/*
+
 test('Testing invalid uId', () => {
   clearV1();
   const maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
@@ -45,4 +45,4 @@ test('Default case', () => {
 
   expect(userProfileV1(maiyaId, maiyaId)).toMatchObject(maiyaInfo);
 });
-*/
+

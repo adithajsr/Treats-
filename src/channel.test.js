@@ -220,36 +220,36 @@
 //   });
 // });
 
-// describe('channelDetailsV1 check', () => {
-//   beforeEach(() => {
-//     clearV1();
-//   });
+describe('channelDetailsV1 check', () => {
+  beforeEach(() => {
+    clearV1();
+  });
 
-//   test('test error returned on invalid channel - empty string', () => {
-//     expect(channelDetailsV1(123, '')).toStrictEqual({ error: 'error' });
-//   });
+  test('test error returned on invalid channel - empty string', () => {
+    expect(channelDetailsV1(123, '')).toStrictEqual({ error: 'error' });
+  });
 
-//   test('test error returned on invalid channel - not a number', () => {
-//     expect(channelDetailsV1(123, 'abcdef')).toStrictEqual({ error: 'error' });
-//   });
+  test('test error returned on invalid channel - not a number', () => {
+    expect(channelDetailsV1(123, 'abcdef')).toStrictEqual({ error: 'error' });
+  });
 
-//   test('test error returned on valid channel but authorised user is not a member of the channel', () => {
-//     const c1 = channelsCreateV1(12345, 'channelone', true);
-//     expect(channelDetailsV1(999999, c1)).toStrictEqual({ error: 'error' });
-//   });
+  test('test error returned on valid channel but authorised user is not a member of the channel', () => {
+    const c1 = channelsCreateV1(12345, 'channelone', true);
+    expect(channelDetailsV1(999999, c1)).toStrictEqual({ error: 'error' });
+  });
 
-//   test('test successful return', () => {
-//     const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe');
-//     const c1 = channelsCreateV1(a1.authUserId, 'channelone', true);
-//     channelJoinV1(a1.authUserId, c1);
-//     expect(channelDetailsV1(a1.authUserId, c1.channelId)).toStrictEqual({
-//       name: 'channelone',
-//       isPublic: true,
-//       ownerMembers: expect.any(Array),
-//       allMembers: expect.any(Array),
-//     });
-//   });
-// });
+  test('test successful return', () => {
+    const a1 = authRegisterV1('email@unsw.com', 'password', 'john', 'doe');
+    const c1 = channelsCreateV1(a1.authUserId, 'channelone', true);
+    channelJoinV1(a1.authUserId, c1);
+    expect(channelDetailsV1(a1.authUserId, c1.channelId)).toStrictEqual({
+      name: 'channelone',
+      isPublic: true,
+      ownerMembers: expect.any(Array),
+      allMembers: expect.any(Array),
+    });
+  });
+});
 
 // test('Testing channel validity', () => {
 //   clearV1();

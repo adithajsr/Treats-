@@ -10,6 +10,7 @@ import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels'
 import { userProfileV1 } from './users';
 import { dmCreateV1, dmListV1, dmDetailsV1 } from './dm';
 import { clearV1 } from './other';
+import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
 // Set up web app, use JSON
 const app = express();
@@ -75,6 +76,27 @@ app.get('/user/profile/v2', (req, res) => {
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
   res.json(userProfileV1(token, uId));
+});
+
+app.post('/message/send/v1', (req, res) => {
+  const { token, channelId, message } = req.body;
+  return res.json(messageSendV1(token, channelId, message));
+});
+
+app.put('/message/edit/v1', (req, res) => {
+  const { token, messageId, message } = req.body;
+  return res.json(messageEditV1(token, messageId, message));
+});
+
+app.delete('/message/remove/v1', (req, res) => {
+  const token = req.query.token as string;
+  const messageId = parseInt(req.query.messageId as string);
+  return res.json(messageRemoveV1(token, messageId));
+});
+
+app.post('/message/senddm/v1', (req, res) => {
+  const { token, dmId, message } = req.body;
+  return res.json(messageSendDmV1(token, dmId, message));
 });
 
 app.post('/dm/create/v1', (req, res, next) => {

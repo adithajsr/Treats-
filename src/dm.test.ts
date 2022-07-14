@@ -105,11 +105,11 @@ function requestClear() {
   return JSON.parse(String(res.getBody()));
 }
 
-beforeEach(() => {
-  requestClear();
-});
-
 describe('dm capabilities', () => {
+  beforeEach(() => {
+    requestClear();
+  });
+
   let testUser1: wrapperOutput;
   let testUser2: wrapperOutput;
   let testUser3: wrapperOutput;
@@ -209,23 +209,17 @@ describe('dm capabilities', () => {
     });
 
     test('One DM, authorised user is in DM', () => {
-      test.each([
-        // Only DM is testDM1
-        { token: testUser1.bodyObj.token },
-        { token: testUser2.bodyObj.token },
-        { token: testUser3.bodyObj.token },
-      ])("One DM, authorised user with token '$token' is in DM", ({ token }) => {
-        const testList = requestDMList(token);
+      // Only DM is testDM1, testUser3 is in testDM1
+      const testList = requestDMList(testUser3.bodyObj.token);
 
-        expect(testList.res.statusCode).toBe(OK);
-        expect(testList.bodyObj).toStrictEqual({
-          dms: [
-            {
-              dmId: testDM1.bodyObj.dmId,
-              name: testDetails1.bodyObj.name,
-            }
-          ]
-        });
+      expect(testList.res.statusCode).toBe(OK);
+      expect(testList.bodyObj).toStrictEqual({
+        dms: [
+          {
+            dmId: testDM1.bodyObj.dmId,
+            name: testDetails1.bodyObj.name,
+          }
+        ]
       });
     });
 
@@ -247,7 +241,7 @@ describe('dm capabilities', () => {
       const dmB = requestDMCreate(testUser4.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
       const detailsB = requestDMDetails(testUser4.bodyObj.token, dmB.bodyObj.dmId);
 
-      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId.testUser4.bodyObj.authUserId]);
+      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
       const detailsC = requestDMDetails(testUser2.bodyObj.token, dmC.bodyObj.dmId);
 
       const expected = new Set([
@@ -378,16 +372,10 @@ describe('dm capabilities', () => {
     });
 
     test('Fail remove DM, authorised user is in the DM but is not the creator', () => {
-      test.each([
-        // testUser2 and testUser3 are in testDM1 but testUser1 is the creator
-        { token: testUser2.bodyObj.token },
-        { token: testUser3.bodyObj.token },
-      ])("Fail remove DM, user with token '$token' is in DM but not the creator", ({ token }) => {
-        const testRemove = requestDMRemove(token, testDM1.bodyObj.dmId);
-
-        expect(testRemove.res.statusCode).toBe(OK);
-        expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
-      });
+      // testUser2 is in testDM1 but testUser1 is the creator
+      const testRemove = requestDMRemove(testUser3.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
     });
   });
 });

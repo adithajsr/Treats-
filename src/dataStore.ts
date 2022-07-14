@@ -1,47 +1,90 @@
-import { getData } from './dataStore'; // will need setData
-// import { doesEmailExist, isHandleValid } from './auth';
-// eslint-disable-next-line
-import validator from 'validator';
-
-/* This function returns the important information about a user's profile.
-
-<authUserId> This function checks whether a valid authUserId is calling the function
-
-<uId> This is the uId that is searched for to return the user's profile
-
-Return Value:
-{error: 'error'} if the authUserId or uId are invalid
-{info} if the authUserId and uId are valid, returns
-important info about a user's profile */
-
-export function userProfileV1(token: string, uId: number) {
-  const data = getData();
-  // Determining whether token is valid
-  let count = 0;
-  for (const element of data.token) {
-    if (token === element.token) {
-      count = 1;
-      break;
-    }
-  }
-
-  // If invalid token
-  if (count === 0) {
-    return { error: 'error' };
-  }
-
-  // Searching for the uId
-  for (const element in data.user) {
-    if (uId === data.user[element].uId) {
-      return {
-        uId: data.user[element].uId,
-        email: data.user[element].email,
-        nameFirst: data.user[element].nameFirst,
-        nameLast: data.user[element].nameLast,
-        handle: data.user[element].handle
-      };
-    }
-  }
-  // If uId doesn't match any uId in data object
-  return { error: 'error' };
+interface user {
+  uId: number,
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  handle: string,
+  globalPerms: number,
 }
+
+interface channelMember {
+  uId: number,
+  channelPerms: number,
+}
+
+interface dmMember {
+  uId: number,
+  dmPerms: number,
+}
+
+interface message {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+}
+
+interface channel {
+  channelId: number,
+  channelName: string,
+  isPublic: boolean,
+  members: channelMember[],
+  messages: message[],
+}
+
+interface token {
+  token: string,
+  uId: number,
+}
+
+interface dm {
+  dmId: number,
+  name: string,
+  members: dmMember[],
+  messages: message[],
+}
+
+interface database {
+  user: user[],
+  channel: channel[],
+  token: token[],
+  dm: dm[],
+}
+
+// YOU SHOULD MODIFY THIS OBJECT BELOW
+let data: database = {
+  user: [],
+  channel: [],
+  token: [],
+  dm: [],
+};
+
+// YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
+
+/*
+Example usage
+    let store = getData()
+    console.log(store) # Prints { 'names': ['Hayden', 'Tam', 'Rani', 'Giuliana', 'Rando'] }
+
+    names = store.names
+
+    names.pop()
+    names.push('Jake')
+
+    console.log(store) # Prints { 'names': ['Hayden', 'Tam', 'Rani', 'Giuliana', 'Jake'] }
+    setData(store)
+*/
+
+// Use get() to access the data
+function getData() {
+  return data;
+}
+
+// Use set(newData) to pass in the entire data object, with modifications made
+
+function setData(newData: database) {
+  data = newData;
+}
+
+export { getData, setData };

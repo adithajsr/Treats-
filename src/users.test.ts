@@ -1,4 +1,4 @@
-import request from 'sync-request';
+import request, {HttpVerb} from 'sync-request';
 import config from './config.json';
 
 
@@ -9,7 +9,7 @@ let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
 
-function requestHelper(method:HttpVerb, path: String, payload: object) {
+function requestHelper(method: HttpVerb, path: String, payload: object) {
 	let qs = {};
 	let json = {};
 
@@ -33,8 +33,8 @@ function requestClear() {
 	return requestHelper('DELETE', '/clear/v2', {});
 }
 
-function requestUserProfile(authUserId: number, uId: number) {
-	return requestHelper('GET', '/user/profile/v2', {authUserId, uId});
+function requestUserProfile(token: string, uId: number) {
+	return requestHelper('GET', '/user/profile/v2', {token, uId});
 }
 
 

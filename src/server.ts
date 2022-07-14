@@ -4,14 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 
 import { authRegisterV1 } from './auth';
-import { userProfileV1 } from './users';
 import { clearV1 } from './other';
-
-import cors from 'cors';
-
-const OK = 200;
-const port = config.port;
-const url = config.url;
 
 import {dmLeaveV1} from './dm.ts'
 
@@ -59,11 +52,6 @@ app.post('/auth/register/v2', (req, res) => {
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
-app.get('/user/profile/v2', (req, res) => {
-  const token = req.query.token as string;
-  const uId = Number(req.query.uId) as number;
-  res.json(userProfileV1(token, uId));
-});
 
 app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());

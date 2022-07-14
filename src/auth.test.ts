@@ -1,4 +1,4 @@
-import { isHandleValid } from './auth'; // will require authLogin and doesEmailExist
+import { isHandleValid } from './auth';
 import validator from 'validator';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
@@ -17,6 +17,20 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
         password: password,
         nameFirst: nameFirst,
         nameLast: nameLast,
+      }
+    }
+  );
+  return JSON.parse(res.getBody() as string);
+}
+
+function requestAuthLogin(email: string, password: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/login/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
       }
     }
   );
@@ -51,6 +65,10 @@ function requestClear() {
 // ======================================== requestAuthRegister Testing ========================================
 
 describe('Testing for requestAuthRegister', () => {
+  afterEach(() => {
+    requestClear();
+  });
+
   test('Test 1 affirmitive', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
@@ -114,42 +132,52 @@ describe('Testing for requestAuthRegister', () => {
   });
 });
 
-/*
-// ======================================== authLoginV1 Testing ========================================
+requestClear();
 
-describe('Testing for authLoginV1', () => {
+// ======================================== requestAuthLogin Testing ========================================
+
+describe('Testing for requestAuthLogin', () => {
+  afterEach(() => {
+    requestClear();
+  });
+
   test('Test 1 affirmitive', () => {
     // all should be well
-    let testUserId = authLoginV1('who.is.joe@is.the.question.com', 'yourmumma').authUserId;
-    let testUserObject = {
+    requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const returnObject = requestAuthLogin('who.is.joe@is.the.question.com', 'yourmumma');
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const testUserObject = {
       uId: testUserId,
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
       handle: 'johnsmith',
-    }
-      expect(doesEmailExist(requestUserProfile(testUserId, testUserId).email)).toBe(true);
-      expect(requestUserProfile(testUserId, testUserId)).toStrictEqual(testUserObject);
+    };
+    expect(requestAuthRegister(requestUserProfile(testToken, testUserId).email, 'myownmumma', 'Jack', 'Fieldson')).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId)).toStrictEqual(testUserObject);
   });
 
   test('Test 2 invalid email', () => {
     // invalid email - no existing email
-    let testUserEmail = 'z5420895@ad.unsw.edu.au';
-    let testUserPw = 'myrealpassword'
-    let testUserId = authLoginV1(testUserEmail, testUserPw);
-      expect(testUserId).toStrictEqual({ error: 'error'});
-      expect(doesEmailExist(testUserEmail)).toBe(false);
+    const testUserEmail = 'z5420895@ad.unsw.edu.au';
+    const testUserPw = 'myrealpassword';
+    requestAuthRegister('z5420895$ad.unsw.edu.au', testUserPw, 'Jonathan', 'Schmidt');
+    const returnObject = requestAuthLogin(testUserEmail, testUserPw);
+    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(requestAuthRegister(testUserEmail, testUserPw, 'Jonathan', 'Schmidt')).not.toBe({ error: 'error' });
   });
 
   test('Test 3 invalid password', () => {
     // invalid password - wrong password with associated email
-    let testUserEmail = 'who.is.joe@is.the.question.com';
-    let testUserPw = 'yourdad'
-    let testUserId = authLoginV1(testUserEmail, testUserPw);
-      expect(testUserId).toStrictEqual({ error: 'error'});
-      expect(validator.isEmail(testUserEmail)).toBe(true);
-      expect(doesEmailExist(testUserEmail)).toBe(true);
+    const testUserEmail = 'who.is.joe@is.the.question.com';
+    const testUserPw = 'yourdad';
+    requestAuthRegister(testUserEmail, 'yourmumma', 'John', 'Smith');
+    const returnObject = requestAuthLogin(testUserEmail, testUserPw);
+    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(validator.isEmail(testUserEmail)).toBe(true);
+    expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith')).not.toBe({ error: 'error' });
   });
 });
-*/
+
 requestClear();

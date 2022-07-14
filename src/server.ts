@@ -4,6 +4,12 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
+const OK = 200;
+const port = config.port;
+const url = config.url;
+
+import {dmLeaveV1} from './dm.ts'
+
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -19,6 +25,17 @@ app.get('/echo', (req, res, next) => {
     const data = req.query.echo as string;
     return res.json(echo(data));
   } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/dm/leave/v1', (req, res, next) => {
+  try {
+    const {token, dmId} = req.body;
+    return res.json(dmLeaveV1(token, dmId));
+  }
+
+  catch(err) {
     next(err);
   }
 });

@@ -1,5 +1,5 @@
 import { isHandleValid } from './auth'; // will require authLogin and doesEmailExist
-// import { clearV1 } from './other';
+import { clearV1 } from './other';
 import validator from 'validator';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
@@ -141,6 +141,5 @@ describe('Testing for authLoginV1', () => {
       expect(doesEmailExist(testUserEmail)).toBe(true);
   });
 });
-
-clearV1();
 */
+clearV1();

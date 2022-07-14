@@ -13,7 +13,7 @@ uuid (string) - <any>
 Return Value:
 returns <true> on <valid uuid>
 returns <false> on <in-use or inccorectly structured uuid> */
-function isUuidValid(uuid: string) : boolean {
+export function isUuidValid(uuid: string) : boolean {
   if (!validateV4uuid(uuid)) {
     return false;
   }

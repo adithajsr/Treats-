@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 
 import { authRegisterV1, authLoginV1 } from './auth';
-import { userProfileV1 } from './users';
+import { userProfileV1, userProfileSetName } from './users';
 import { clearV1 } from './other';
 
 import cors from 'cors';
@@ -52,6 +52,11 @@ app.get('/user/profile/v2', (req, res) => {
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
   res.json(userProfileV1(token, uId));
+});
+
+app.put('/user/profile/setname/v1', (req, res) => {
+  const { token, nameFirst, nameLast } = req.body;
+  res.json(userProfileSetName(token, nameFirst, nameLast));
 });
 
 app.delete('/clear/v1', (req, res) => {

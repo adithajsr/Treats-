@@ -296,23 +296,11 @@ const createTestUser = (email: string, password: string, nameFirst: string, name
   };
 };
 
-const createTestChannel = (token: string, name: string, isPublic: boolean) => {
-  // channels/create/v2 returns { channelId }
-  const requestOutput = requestChannelsCreate(token, name, isPublic);
-
-  return {
-    token: token,
-    name: name,
-    isPublic: isPublic,
-    res: requestOutput.res,
-    bodyObj: requestOutput.bodyObj,
-  };
-};
-
 describe('channel/details/v2 testing', () => {
   let testUser: user;
 
   beforeEach(() => {
+    requestClear();
     // Create a test user
     testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
     expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
@@ -371,7 +359,6 @@ describe('channel/details/v2 testing', () => {
 //   // What to do if authUserId is an invalid number? eg. -15
 //   clearV1();
 
-
 //   const danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 //   const danielChannel = channelsCreateV1(danielId, 'testName', 1);
 
@@ -389,7 +376,6 @@ describe('channel/details/v2 testing', () => {
 // 	//Input for start must be > no. of msgs in given channelId
 // 	clear();
 
-
 // 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 // 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
 
@@ -404,7 +390,6 @@ describe('channel/details/v2 testing', () => {
 // test('Default case', () => {
 
 // 	clear();
-
 
 // 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 // 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
@@ -422,6 +407,5 @@ describe('channel/details/v2 testing', () => {
 // 	let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
 // 	let danielChannel = channelsCreateV1(danielId, 'testName', 1);
 
-	let returnValue = channelMessagesV1(danielId, danielChannel, 35);
-	expect(returnValue[3]).toBe(-1);
-
+// let returnValue = channelMessagesV1(danielId, danielChannel, 35);
+// expect(returnValue[3]).toBe(-1);

@@ -1,11 +1,25 @@
 import { getData } from './dataStore';
 
 interface Database {
-  user: any[];
-  channel: any[];
-  token: any[];
-  dm: any[];
+  user: any[],
+  channel: any[],
+  token: any[],
+  dm: any[],
 }
+
+interface Details {
+  name: string,
+  isPublic: boolean,
+  ownerMembers: any[],
+  allMembers: any[],
+}
+
+// const details = {
+//   name: channel[i].channelName,
+//   isPublic: channel[i].isPublic,
+//   ownerMembers: [],
+//   allMembers: [],
+// };
 
 function checkToken(token: string, data: Database) {
   if (data.token.find((a: any) => a.token === token) === undefined) {
@@ -55,7 +69,7 @@ function channelDetailsV2(token: string, channelId: number) {
 
   const { members } = channel[i];
 
-  const details = {
+  const details: Details = {
     name: channel[i].channelName,
     isPublic: channel[i].isPublic,
     ownerMembers: [],
@@ -103,17 +117,17 @@ Return Value:
     Returns <true> on <uId is found in the channel.>
     Returns <false> on <uId was not found in the channel.>
 */
-function memberExists(channelId: number, uId: number) {
-  let uid_search;
-  const data = getData();
-  const { channel } = data;
-  const channel_search = channel.find(data => data.channelId === channelId);
-  if (channel_search != null) {
-    const { members } = channel_search;
-    uid_search = members.find(data => data.uId === uId);
-  }
-  return (uid_search != null) ? 'true' : 'false';
-}
+// function memberExists(channelId: number, uId: number) {
+//   let uidSearch;
+//   const data = getData();
+//   const { channel } = data;
+//   const channelSearch = channel.find(data => data.channelId === channelId);
+//   if (channelSearch != null) {
+//     const { members } = channelSearch;
+//     uidSearch = members.find(data => data.uId === uId);
+//   }
+//   return (uidSearch != null) ? 'true' : 'false';
+// }
 
 // /*Description: Invites user to the channel
 // Arguments:

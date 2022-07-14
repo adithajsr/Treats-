@@ -30,7 +30,11 @@ app.get('/dm/messages/v1', (req, res, next) => {
   try {
     const token = req.query.token;
     const dmId = req.query.dmId;
-    const start = req.query.start;
+    const start = req.query.start;  
+    
+    const length = MessagesLength(channelId);
+    const functionTimes = (length - start)/2;
+
     return res.json(dmMessagesV1(token, dmId, start));
   }
 

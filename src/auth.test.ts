@@ -4,6 +4,7 @@ import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
 
+const OK = 200;
 const port = config.port;
 const url = config.url;
 
@@ -20,7 +21,10 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
       }
     }
   );
-  return JSON.parse(res.getBody() as string);
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
 }
 
 function requestAuthLogout(token: string) {
@@ -63,7 +67,7 @@ function requestClear() {
 }
 
 // ======================================== requestAuthRegister Testing ========================================
-
+/*
 describe('Testing for requestAuthRegister', () => {
   test('Test 1 affirmitive', () => {
     // all should be well
@@ -127,7 +131,7 @@ describe('Testing for requestAuthRegister', () => {
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 });
-
+*/
 /*
 // ======================================== authLoginV1 Testing ========================================
 
@@ -167,6 +171,11 @@ describe('Testing for authLoginV1', () => {
 });
 */
 requestClear();
+
+type wrapperOutput = {
+  res: any,
+  bodyObj: any,
+};
 
 describe('test /auth/logout/v1', () => {
   beforeEach(() => {

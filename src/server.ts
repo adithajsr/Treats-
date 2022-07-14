@@ -28,7 +28,6 @@ app.use(morgan('dev'));
 // start server
 app.listen(PORT, HOST, () => {
   console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
-  console.log(process.env.PORT);
 });
 
 // authRegister

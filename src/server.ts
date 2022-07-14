@@ -5,7 +5,7 @@ import config from './config.json';
 import cors from 'cors';
 
 import { authRegisterV1, authLoginV1 } from './auth';
-import { channelsCreateV2, channelsListV2 } from './channels';
+import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1 } from './users';
 import { clearV1 } from './other';
 
@@ -34,6 +34,12 @@ app.post('/auth/register/v2', (req, res) => {
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
+app.post('/auth/login/v2', (req, res) => {
+  // eslint-disable-next-line
+  const { email, password } = req.body;
+  res.json(authLoginV1(email, password));
+});
+
 app.post('/channels/create/v2', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
@@ -52,10 +58,9 @@ app.get('/channels/list/v2', (req, res, next) => {
   }
 });
 
-app.post('/auth/login/v2', (req, res) => {
-  // eslint-disable-next-line
-  const { email, password } = req.body;
-  res.json(authLoginV1(email, password));
+app.get('/channels/listall/v2', (req, res) => {
+  const token = req.query.token;
+  res.json(channelsListallV2(token as string));
 });
 
 app.get('/user/profile/v2', (req, res) => {

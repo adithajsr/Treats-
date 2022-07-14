@@ -79,14 +79,15 @@ Creates a new channel with the given name that is either a public
 or private channel
 
 Arguments:
-    token (string)          - represents the session of the user who is creating the channel
+    authUserId (integer)    - user ID of the user who is creating the channel
     name (string)           - name of new channel
     isPublic (boolean)      - publicness of new channel
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid token or invalid channel name
+    Returns { error: 'error' } on invalid channel name
 */
+
 function channelsCreateV2(token: string, name: string, isPublic: boolean) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
@@ -148,4 +149,47 @@ function channelsListV2(token: string) {
   };
 }
 
-export { channelsCreateV2, channelsListV2 };
+/* <channelsListallV2 returns an array of all channels, regardless of whether they
+  are public or private, when initiated by a valid authUserId>
+
+Arguments:
+    <token> (<string>)    - <The token is required to start the function>
+
+Return Value:
+    Returns <[{channels}]> on <token was valid and there were channels in data>
+    Returns <[]> on <no channels in data>
+Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
+
+interface Database {
+  user: any[];
+  channel: any[];
+  token: any[];
+  dm: any[];
+}
+
+function checkToken(token: string, data: Database) {
+  if (data.token.find(a => a.token === token) === undefined) {
+    return false;
+  }
+  return true;
+}
+
+function channelsListallV2(token: string) {
+  const data = getData();
+
+  // invalid token - invalid, or token is not in database
+  if (checkToken(token, data) === false) {
+    return { error: 'error' };
+  }
+
+  const foundChannels = [];
+  for (const i in data.channel) {
+    foundChannels.push({ channelId: data.channel[i].channelId, name: data.channel[i].channelName });
+  }
+
+  return {
+    channels: foundChannels
+  };
+}
+
+export { channelsCreateV2, channelsListV2, channelsListallV2 };

@@ -5,7 +5,7 @@ import config from './config.json';
 import cors from 'cors';
 
 import { channelDetailsV2 } from './channel';
-import { authRegisterV1, authLoginV1 } from './auth';
+import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1 } from './users';
 import { dmCreateV1, dmListV1, dmDetailsV1 } from './dm';
@@ -45,6 +45,15 @@ app.post('/auth/register/v2', (req, res) => {
 app.post('/auth/login/v2', (req, res) => {
   const { email, password } = req.body;
   res.json(authLoginV1(email, password));
+});
+
+app.post('/auth/logout/v1', (req, res, next) => {
+  try {
+    const { token } = req.body;
+    return res.json(authLogoutV1(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/channels/create/v2', (req, res, next) => {

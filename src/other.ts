@@ -6,6 +6,7 @@ export function clearV1() {
   const data = getData();
   data.user = [];
   data.channel = [];
+  data.token = [];
 
   setData(data);
 

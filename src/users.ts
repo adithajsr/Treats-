@@ -87,7 +87,8 @@ Arguments:
 nameFirst (string) - <1-50 characters long>
 nameLast (string) - <1-50 characters long>
 Return Value:
-returns <void> on <success>
+returns <'empty'> on <success>
+^ !!! convert return to {} !!! ^
 returns <{ error: 'error' }> on <invalid arguments> */
 export function userProfileSetName(token: string, nameFirst: string, nameLast: string) {
   if ((nameFirst.length < 1) || (nameFirst.length > 50) ||
@@ -95,5 +96,10 @@ export function userProfileSetName(token: string, nameFirst: string, nameLast: s
     return { error: 'error' };
   }
   const result = findAndSet(nameFirst, token, 'names', nameLast);
-  return (result === { error: 'error' }) ? result : setData(result);
+  if (result === { error: 'error' }) {
+    return result;
+  } else {
+    setData(result);
+    return {};
+  }
 }

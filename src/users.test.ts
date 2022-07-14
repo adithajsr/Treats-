@@ -102,7 +102,14 @@ describe('Testing for requestUserProfileSetName', () => {
     const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, '', 'Schmidt');
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
+	expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+		email: 'who.is.joe@is.the.question.com',
+        uId: testUserId,
+		nameFirst: 'John',
+		nameLast: 'Smith',
+		handleStr: 'johnsmith',
+	});
   });
 
   test('Test 3 invalid nameLast', () => {
@@ -112,6 +119,13 @@ describe('Testing for requestUserProfileSetName', () => {
     const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, 'Jonathan', 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz');
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
+	expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+		email: 'who.is.joe@is.the.question.com',
+        uId: testUserId,
+		nameFirst: 'John',
+		nameLast: 'Smith',
+		handleStr: 'johnsmith',
+	});
   });
 });

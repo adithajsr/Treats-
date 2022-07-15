@@ -33,13 +33,6 @@ function checkToken(token: string, data: Database) {
   return true;
 }
 
-function checkToken(token: string, data: Database) {
-  if (data.token.find((a: any) => a.token === token) === undefined) {
-    return false;
-  }
-  return true;
-}
-
 /*
 Converts a token to its relevant uid
 

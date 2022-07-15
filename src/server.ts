@@ -8,7 +8,7 @@ import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
-import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
+import { dmMessagesV1, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
@@ -31,6 +31,18 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.get('/dm/messages/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    const start = parseInt(req.query.start as string);
+    return res.json(dmMessagesV1(token, dmId, start));
+  } catch (err) {
+    next(err);
+  }
+});
+// for logging errors
+app.use(morgan('dev'));
 app.get('/dm/details/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;

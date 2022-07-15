@@ -265,7 +265,7 @@ Return Value:
   Returns <true> on <Channel is found.>
   Returns <false> on <Channel was not found.>
 */
-function channelExists(channelId) :boolean {
+function channelExists(channelId: number) :boolean {
   const data = getData();
   const search = data.channel.find((data) => data.channelId === channelId);
   return (search != null);
@@ -278,7 +278,7 @@ Return Value:
   Returns <true> on <uId is found.>
   Returns <false> on <uId was not found.>
 */
-function uIdExists(uId): boolean {
+function uIdExists(uId: number): boolean {
   const data = getData();
   const search = data.user.find((data) => data.uId === uId);
   return (search != null);
@@ -342,7 +342,7 @@ function channelPublic(channelId: number): boolean {
   Return Value:
       Returns <null>
   */
-function changePerms(channelId: number, uId: number, newPerm) {
+function changePerms(channelId: number, uId: number, newPerm: number) {
   const data = getData();
   const i = data.channel.findIndex((data) => data.channelId === channelId);
   const j = data.channel[i].members.findIndex((data) => data.uId === uId);

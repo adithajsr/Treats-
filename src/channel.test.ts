@@ -109,13 +109,18 @@ describe('channel/details/v2 testing', () => {
 });
 
 // ======================================== Setup ========================================
-let channel1;
-let channel2;
-let channel3;
-let admin;
-let user1;
-let user2;
-let user3;
+interface authRegUser {
+  token: string,
+  authUserId: number,
+}
+
+let channel1: number;
+let channel2: number;
+let channel3: number;
+let admin: authRegUser;
+let user1: authRegUser;
+let user2: authRegUser;
+let user3: authRegUser;
 
 // ======================================== Helper functions ========================================
 

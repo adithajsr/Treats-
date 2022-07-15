@@ -239,4 +239,3 @@ describe('Testing for requestUserProfileSetEmail', () => {
     });
   });
 });
-

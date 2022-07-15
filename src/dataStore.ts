@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 interface user {
   uId: number,
   email: string,
@@ -53,7 +55,7 @@ interface database {
 }
 
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data: database = {
+const emptyData: database = {
   user: [],
   channel: [],
   token: [],
@@ -76,27 +78,43 @@ Example usage
     setData(store)
 */
 
-// FIXME:
+// TODO: remove original code
+// // Use get() to access the data
+// function getData() {
+//   return data;
+// }
+
+// // Use set(newData) to pass in the entire data object, with modifications made
+// function setData(newData: database) {
+//   data = newData;
+// }
+
 // Use get() to access the data
 function getData() {
-  return data;
+  // TODO: remove Joseph's code
+  // Firstly writes whats in memory to the file to make sure its up to date..
+  // fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
+  // return JSON.parse(fs.readFileSync('database.json'));
+
+  if (fs.existsSync('database.json') === false) {
+    // No data stored yet, so use empty data base
+    return emptyData;
+  }
+
+  // Data has been stored in 'database.json'
+  const storedData = fs.readFileSync('database.json', { flag: 'r' });
+  const fileData: database = JSON.parse(String(storedData));
+
+  return fileData;
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: database) {
-  data = newData;
+  // TODO: remove Joseph's code
+  // data = newData;
+  // fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
+
+  fs.writeFileSync('database.json', JSON.stringify(newData, null, 4), { flag: 'w' });
 }
-
-// // Use get() to access the data. Firstly writes whats in memory to the file to make sure its up to date..
-// function getData() {
-//   fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
-//   return JSON.parse(fs.readFileSync('database.json'));
-// }
-
-// // Use set(newData) to pass in the entire data object, with modifications made.
-// function setData(newData) {
-//   data = newData;
-//   fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
-// }
 
 export { getData, setData };

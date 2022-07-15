@@ -1,6 +1,5 @@
 import request from 'sync-request';
 import config from './config.json';
-import { requestClear } from './users.test';
 
 const OK = 200;
 const port = config.port;

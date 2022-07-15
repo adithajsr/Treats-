@@ -1,3 +1,4 @@
+
 import request from 'sync-request';
 import config from './config.json';
 
@@ -98,7 +99,6 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   };
 }
 
-
 function requestClear() {
   const res = request(
     'DELETE',
@@ -135,19 +135,47 @@ test('Non-member attempts to leave', () => {
   expect(obj.res.statusCode).toBe(OK);
 });
 
+test('Invalid token', () => {
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  expect(requestDMDetails(danielToken + 'a', dmId).bodyObj).toMatchObject({ error: 'error' });
+});
+
+test('Invalid dmId', () => {
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  expect(requestDMDetails(danielToken, dmId / 2).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMDetails(danielToken, dmId / 2).res.statusCode).toBe(OK);
+});
+
+test('Unauthorised access request', () => {
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  expect(requestDMDetails(samToken, dmId).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMDetails(samToken, dmId).res.statusCode).toBe(OK);
+});
+
 test('Default case', () => {
   requestClear();
   const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj;
   const danielToken = danielUser.token;
   const danielId = danielUser.authUserId;
   const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+
   const maiyaToken = maiyaUser.token;
   const maiyaId = maiyaUser.authUserId;
 
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-   const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
-   expect(returnObject.name).toEqual('danielyung, maiyataylor'); //NEED TO FIX DM CREATE OR DOUBLE CHECK IT
+  const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
+  expect(returnObject.name).toEqual('danielyung, maiyataylor'); // NEED TO FIX DM CREATE OR DOUBLE CHECK IT
 
   requestDMLeave(maiyaToken, dmId);
 

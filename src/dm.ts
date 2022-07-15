@@ -315,8 +315,8 @@ Arguments:
 Return:
     Returns {error: 'error'} if the token is unauthorised or the dmId is invalid
     Returns the name and members of the specified DM if successful
-
 */
+
 export function dmDetailsV1(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid

@@ -33,12 +33,68 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   };
 }
 
+function requestMessageSend(token: string, channelId: number, message: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/send/v1`,
+    {
+      json: { token, channelId, message },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestMessageEdit(token: string, messageId: number, message: string) {
+  const res = request(
+    'PUT',
+    `${url}:${port}/message/edit/v1`,
+    {
+      json: { token, messageId, message },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestMessageRemove(token: string, messageId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/message/remove/v1`,
+    {
+      qs: { token, messageId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
 function requestSendDm(token: string, dmId: number, message: string) {
   const res = request(
     'POST',
     `${url}:${port}/message/senddm/v1`,
     {
       json: { token, dmId, message },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestRemoveOwner(token: string, channelId: number, uId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/removeowner/v1`,
+    {
+      json: { token, channelId, uId },
     }
   );
   return {
@@ -100,12 +156,12 @@ type wrapperOutput = {
 let testUser: wrapperOutput;
 let testChannel: wrapperOutput;
 let testDm: wrapperOutput;
+let testMessage: wrapperOutput;
 
 describe('messages capabilities', () => {
-  /*
   describe('message/send/v1 test', () => {
     beforeEach(() => {
-      // requestClear();
+      requestClear();
       // Create a test user
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
@@ -115,9 +171,9 @@ describe('messages capabilities', () => {
       expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
-    // afterEach(() => {
-    //   requestClear();
-    // });
+    afterEach(() => {
+      requestClear();
+    });
 
     test('invalid token, fail message send', () => {
       const testRequest = requestMessageSend(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId, 'a message');
@@ -171,9 +227,9 @@ describe('messages capabilities', () => {
       testMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'a message');
     });
 
-    // afterEach(() => {
-    //   requestClear();
-    // });
+    afterEach(() => {
+      requestClear();
+    });
 
     test('invalid token, fail message edit', () => {
       const testRequest = requestMessageEdit(testUser.bodyObj.token + 'a', testMessage.bodyObj.messageId, 'a message');
@@ -230,12 +286,12 @@ describe('messages capabilities', () => {
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
       expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
 
-      testMessage = requestMessageSend('tokenstring', 999, 'a message');
+      testMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'a message');
     });
 
-    // afterEach(() => {
-    //   requestClear();
-    // });
+    afterEach(() => {
+      requestClear();
+    });
 
     test('invalid token, fail message remove', () => {
       const testRequest = requestMessageRemove(testUser.bodyObj.token + 'a', testMessage.bodyObj.messageId);
@@ -257,7 +313,7 @@ describe('messages capabilities', () => {
     });
 
     test('auth user does not have owner permission in channel/dm, fail message remove', () => {
-      // requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, testUser.bodyObj.authUserId);
+      requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, testUser.bodyObj.authUserId);
       const testRequest = requestMessageRemove(testUser.bodyObj.token, testMessage.bodyObj.messageId);
       expect(testRequest.res.statusCode).toBe(OK);
       expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
@@ -269,7 +325,7 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ });
     });
   });
-*/
+
   describe('message/senddm/v1 test', () => {
     let testUser2: wrapperOutput;
 
@@ -286,9 +342,6 @@ describe('messages capabilities', () => {
       // Create a test channel
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
       expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
-
-      // Have user join channel
-      // requestChannelJoin(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
 
       // Create a test dm
       testDm = requestDMCreate(testUser.bodyObj.token, [testUser2.bodyObj.authUserId]);

@@ -1,10 +1,4 @@
 // ======================================== Imports. ========================================
-import express, {
-  json,
-  Request,
-  Response
-} from 'express';
-import cors from 'cors';
 
 import { getData, setData } from './dataStore';
 
@@ -22,12 +16,10 @@ interface Details {
   allMembers: any[],
 }
 
-
 // Constants
 const OWNER = 1;
 const USER = 0;
 // ======================================== Main Functions. =======================================
-
 
 /*
 Checks validity of a token
@@ -59,8 +51,8 @@ Return Value:
   Returns { uId }      - relevant uId corresponding to token
 */
 function tokenToUid(token: string, data: Database) {
-  const index = data.token.findIndex(a => a.token === token);
-  const uId = data.token[index].uId;
+  const index = data.token.findIndex((a) => a.token === token);
+  const { uId } = data.token[index];
   return uId;
 }
 
@@ -85,16 +77,15 @@ function channelDetailsV2(token: string, channelId: number) {
   const uId = tokenToUid(token, data);
 
   const { channel } = data;
-  const i = data.channel.findIndex(data => data.channelId === channelId);
+  const i = data.channel.findIndex((data) => data.channelId === channelId);
 
   // check for channel in database
-  if (data.channel.find(a => a.channelId === channelId) === undefined) {
+  if (data.channel.find((a) => a.channelId === channelId) === undefined) {
     return { error: 'error' };
     // check for user in channel
-  } else {
-    if (channel[i].members.find(a => a.uId === uId) === undefined) {
-      return { error: 'error' };
-    }
+  }
+  if (channel[i].members.find((a) => a.uId === uId) === undefined) {
+    return { error: 'error' };
   }
 
   const { members } = channel[i];
@@ -109,7 +100,7 @@ function channelDetailsV2(token: string, channelId: number) {
   // find the member in the user array, then push details on
   const { user } = data;
   for (const i in members) {
-    const index = data.user.findIndex(a => a.uId === members[i].uId);
+    const index = data.user.findIndex((a) => a.uId === members[i].uId);
     // owners
     if (members[i].channelPerms === 1) {
       details.ownerMembers.push(
@@ -298,7 +289,6 @@ Return Value:
 // export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV2, channelJoinV1, channelInviteV1, channelMessagesV1 };
 export { channelDetailsV2 };
 
-
 // ======================================== Main Functions. ========================================
 
 /* Description: Adds a user to a channel
@@ -310,18 +300,17 @@ Return Value:
   Returns <{}> on <successfully added user to channel>
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-export function channelJoinV2(token: string, channelId: number){
+export function channelJoinV2(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
-		uIdExists(authUserId) === false ||
+    uIdExists(authUserId) === false ||
     memberExists(channelId, authUserId) === true ||
-		(channelPublic(channelId) === false && globalPermissions(authUserId) !== OWNER)) {
+    (channelPublic(channelId) === false && globalPermissions(authUserId) !== OWNER)) {
     return { error: 'error' };
-  } else {
-    addUser(channelId, authUserId);
-    return {};
   }
-};
+  addUser(channelId, authUserId);
+  return {};
+}
 
 /* Description: Invites user to the channel
 Arguments:
@@ -333,17 +322,16 @@ Return Value:
   Returns <{}> on <successfully added user to channel>
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-export function channelInviteV2(token: string, channelId: number, uId: number){
+export function channelInviteV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
-		uIdExists(uId) === false ||
-		memberExists(channelId, uId) === true ||
-		memberExists(channelId, authUserId) === false) {
+    uIdExists(uId) === false ||
+    memberExists(channelId, uId) === true ||
+    memberExists(channelId, authUserId) === false) {
     return { error: 'error' };
-  } else {
-    addUser(channelId, uId);
-    return {};
   }
+  addUser(channelId, uId);
+  return {};
 }
 
 /* Description: Removes a user from a channel.
@@ -353,17 +341,16 @@ Arguments:
 
 Return Value:
     Returns <{}> on <successfully removed user from the channel.>
-    Returns <{error: 'error'}> on <user couldn't be removed from channel.>
+    Returns <error: 'error'> on <user couldn't be removed from channel.>
 */
-export function channelLeaveV1(token: string, channelId: number){
+export function channelLeaveV1(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     memberExists(channelId, authUserId) === false) {
-    return { error: 'error' }
-  } else {
-    leaveChannel(channelId, authUserId);
-    return {};
+    return { error: 'error' };
   }
+  leaveChannel(channelId, authUserId);
+  return {};
 }
 
 /* Description: Make a member an owner of a channel
@@ -376,18 +363,17 @@ Return Value:
     Returns <{}> on <successfully made user owner>
     Returns <{error: 'error'}> on <user was not made an owner>
 */
-export function channelAddownerV1(token: string, channelId: number, uId: number){
+export function channelAddownerV1(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
-		uIdExists(uId) === false ||
-		memberExists(channelId, uId) === false ||
+    uIdExists(uId) === false ||
+    memberExists(channelId, uId) === false ||
     channelPermissions(channelId, uId) === OWNER ||
     channelPermissions(channelId, authUserId) !== OWNER) {
     return { error: 'error' };
-  } else {
-    changePerms(channelId, uId, OWNER);
-    return {};
   }
+  changePerms(channelId, uId, OWNER);
+  return {};
 }
 
 /* Description: Remove member as an owner of a channel
@@ -400,18 +386,17 @@ Return Value:
     Returns <{}> on <successfully removed user as owner>
     Returns <{error: 'error'}> on <user was not removed as an owner>
 */
-export function channelRemoveownerV1(token: string, channelId: number, uId: number){
+export function channelRemoveownerV1(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
-		uIdExists(uId) === false ||
-		channelPermissions(channelId, uId) !== OWNER ||
-		numOwners(channelId) <= 1 ||
-		channelPermissions(channelId, authUserId) !== OWNER) {
-    return { error: 'error' }
-  } else {
-    changePerms(channelId, uId, USER);
-    return {};
+    uIdExists(uId) === false ||
+    channelPermissions(channelId, uId) !== OWNER ||
+    numOwners(channelId) <= 1 ||
+    channelPermissions(channelId, authUserId) !== OWNER) {
+    return { error: 'error' };
   }
+  changePerms(channelId, uId, USER);
+  return {};
 }
 
 // ======================================== Helper Functions ========================================
@@ -428,10 +413,10 @@ Return Value:
 function memberExists(channelId: number, uId: number): boolean {
   let uidSearch = null;
   const data = getData();
-  const channelSearch = data.channel.find(data => data.channelId === channelId);
+  const channelSearch = data.channel.find((data) => data.channelId === channelId);
   if (channelSearch != null) {
     const { members } = channelSearch;
-    uidSearch = members.find(data => data.uId === uId);
+    uidSearch = members.find((data) => data.uId === uId);
   }
   return (uidSearch != null);
 }
@@ -444,9 +429,9 @@ Return Value:
   Returns <false> on <Channel was not found.>
 */
 function channelExists(channelId) :boolean {
-  let data = getData();
-  const search = data.channel.find(data => data.channelId === channelId);
-  return (search != null) ? true : false;
+  const data = getData();
+  const search = data.channel.find((data) => data.channelId === channelId);
+  return (search != null);
 }
 
 /* Description: Checks whether a user  exists in the database
@@ -457,9 +442,9 @@ Return Value:
   Returns <false> on <uId was not found.>
 */
 function uIdExists(uId): boolean {
-  let data = getData();
-  const search = data.user.find(data => data.uId === uId);
-  return (search != null) ? true : false;
+  const data = getData();
+  const search = data.user.find((data) => data.uId === uId);
+  return (search != null);
 }
 
 /* Description: Checks what the channel permissions are of a user
@@ -475,10 +460,10 @@ function channelPermissions(channelId: number, uId: number) {
   let uidSearch = null;
   const data = getData();
   const { channel } = data;
-  const channelSearch = channel.find(data => data.channelId === channelId);
+  const channelSearch = channel.find((data) => data.channelId === channelId);
   if (channelSearch != null) {
     const { members } = channelSearch;
-    uidSearch = members.find(data => data.uId === uId);
+    uidSearch = members.find((data) => data.uId === uId);
   }
   return (uidSearch != null) ? uidSearch.channelPerms : 'invalid';
 }
@@ -493,7 +478,7 @@ Return Value:
 */
 function globalPermissions(uId: number) {
   const data = getData();
-  const search = data.user.find(data => data.uId === uId);
+  const search = data.user.find((data) => data.uId === uId);
   return (search != null) ? search.globalPerms : 'invalid';
 }
 
@@ -507,23 +492,23 @@ Return Value:
 */
 function channelPublic(channelId: number): boolean {
   const data = getData();
-  const search = data.channel.find(data => data.channelId === channelId && data.isPublic === true);
+  const search = data.channel.find((data) => data.channelId === channelId && data.isPublic === true);
   return (search != null);
 }
 
 /* Description: Changes a user permissions in a channel.
-		Arguments:
-		  <channelId> (integer)    - <The channel thats being edited>
-		  <uId> (integer)    - <The uId of the user thats being edited>
-		  <newPerm> (string)    - <The new permission>
+    Arguments:
+      <channelId> (integer)    - <The channel thats being edited>
+      <uId> (integer)    - <The uId of the user thats being edited>
+      <newPerm> (string)    - <The new permission>
 
-	Return Value:
-		  Returns <null>
-	*/
+  Return Value:
+      Returns <null>
+  */
 function changePerms(channelId: number, uId: number, newPerm) {
   const data = getData();
-  const i = data.channel.findIndex(data => data.channelId === channelId);
-  const j = data.channel[i].members.findIndex(data => data.uId === uId);
+  const i = data.channel.findIndex((data) => data.channelId === channelId);
+  const j = data.channel[i].members.findIndex((data) => data.uId === uId);
   data.channel[i].members[j].channelPerms = newPerm;
   setData(data);
 }
@@ -538,8 +523,8 @@ function changePerms(channelId: number, uId: number, newPerm) {
 function numOwners(channelId: number) {
   const data = getData();
   const { channel } = data;
-  const i = channel.findIndex(data => data.channelId === channelId);
-  return channel[i].members.filter(x => x.channelPerms === OWNER).length;
+  const i = channel.findIndex((data) => data.channelId === channelId);
+  return channel[i].members.filter((x) => x.channelPerms === OWNER).length;
 }
 
 /* Description: Converts a token to a userId
@@ -552,38 +537,38 @@ function numOwners(channelId: number) {
   */
 function tokenConvert(token: string) : number {
   const data = getData();
-  const tokenSearch = data.token.find(data => data.token === token);
+  const tokenSearch = data.token.find((data) => data.token === token);
   return (tokenSearch != null) ? tokenSearch.uId : 0;
 }
 
 /* Description: removes user from a channels database.
-		Arguments:
-		  <channelId> (integer)    - <The channel thats being edited>
-		  <uId> (integer)    - <The uId of the user thats being edited>
+    Arguments:
+      <channelId> (integer)    - <The channel thats being edited>
+      <uId> (integer)    - <The uId of the user thats being edited>
 
-	Return Value:
-		  Returns <null>
-	*/
+  Return Value:
+      Returns <null>
+  */
 function leaveChannel(channelId: number, uId: number) {
   const data = getData();
-  const i = data.channel.findIndex(data => data.channelId === channelId);
-  const j = data.channel[i].members.findIndex(data => data.uId === uId);
+  const i = data.channel.findIndex((data) => data.channelId === channelId);
+  const j = data.channel[i].members.findIndex((data) => data.uId === uId);
   data.channel[i].members.splice(j, 1);
   setData(data);
 }
 
 /* Description: adds user to a channels database.
-		Arguments:
-		  <channelId> (integer)    - <The channel thats being edited>
-		  <uId> (integer)    - <The uId of the user thats being edited>
+    Arguments:
+    <channelId> (integer)    - <The channel thats being edited>
+    <uId> (integer)    - <The uId of the user thats being edited>
 
-	Return Value:
-		  Returns <null>
-	*/
+  Return Value:
+    Returns <null>
+*/
 function addUser(channelId: number, uId: number) {
   const data = getData();
-  const newUser = { uId: uId, channelPerms: USER };
-  const i = data.channel.findIndex(data => data.channelId === channelId);
+  const newUser = { uId, channelPerms: USER };
+  const i = data.channel.findIndex((data) => data.channelId === channelId);
   data.channel[i].members.push(newUser);
   setData(data);
 }

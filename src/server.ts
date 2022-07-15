@@ -122,7 +122,6 @@ app.post('/channel/removeowner/v1', (req, res, next) => {
   }
 });
 
-
 app.get('/channels/list/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;

@@ -1,14 +1,20 @@
+import { getData, setData } from './dataStore';
 
-import { getData } from './dataStore';
-import { setData } from './dataStore';
+/*
+This function clears the data
 
-// Assume that the clear function should keep the users and channels arrays and not
-// remove them.
+Arguments:
+- NONE
+
+Returns:
+- NONE
+*/
 export function clearV1() {
   const data = getData();
 
   data.user = [];
   data.channel = [];
+
   data.token = [];
   data.dm = [];
 

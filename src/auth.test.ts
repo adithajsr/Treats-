@@ -1,5 +1,6 @@
 import { isHandleValid } from './auth';
 import validator from 'validator';
+import { requestClear, requestUserProfile } from './users.test';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
@@ -58,37 +59,6 @@ function requestAuthLogout(token: string) {
   };
 }
 
-export function requestUserProfile(token: string, uId: number) {
-  const res = request(
-    'GET',
-    `${url}:${port}/user/profile/v2`,
-    {
-      qs: {
-        token: token,
-        uId: uId
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
 // ======================================== requestAuthRegister Testing ========================================
 
 describe('Testing for requestAuthRegister', () => {
@@ -101,6 +71,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     expect(response.res.statusCode).toBe(OK);
     const returnObject = response.bodyObj;
+
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     const testUserObject = {

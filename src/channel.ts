@@ -15,7 +15,7 @@ interface Details {
 }
 
 /*
-Checks validity of a tkoen
+Checks validity of a token
 
 Arguments:
   token (string)         - represents the session of the user who is creating the channel

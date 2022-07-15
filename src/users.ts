@@ -74,7 +74,6 @@ returns <dataSet> on <success>
 returns <{ error: 'error' }> on <invalid token/uId> */
 function findAndSet(var1: string, token: string, dataKey: string, var2?: string) {
   const dataSet = getData();
-  console.log('is this working? ', dataSet);
   if (!doesTokenExist(token)) {
     return { error: 'error' };
   }
@@ -91,10 +90,10 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
         user.nameFirst = var1;
         user.nameLast = var2;
       } else {
-        user.dataKey = var1;
+        user[dataKey] = var1;
       }
-      setData(dataSet)
-      return null;
+      setData(dataSet);
+      return {};
     }
   }
   return { error: 'error' };

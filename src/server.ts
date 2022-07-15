@@ -5,6 +5,7 @@ import config from './config.json';
 import cors from 'cors';
 
 import { channelDetailsV2 } from './channel';
+import { channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
@@ -71,6 +72,51 @@ app.post('/channels/create/v2', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
     return res.json(channelsCreateV2(token, name, isPublic));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/join/v2', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+    return res.json(channelJoinV2(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/invite/v2', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelInviteV2(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/leave/v1', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+    return res.json(channelLeaveV1(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/addowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelAddownerV1(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/removeowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelRemoveownerV1(token, channelId, uId));
   } catch (err) {
     next(err);
   }

@@ -101,6 +101,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     expect(response.res.statusCode).toBe(OK);
     const returnObject = response.bodyObj;
+
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     const testUserObject = {

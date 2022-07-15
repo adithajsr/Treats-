@@ -144,26 +144,26 @@ Arguments:
 Return Value:
     Returns dmsList
 */
-// const createListDMList = (userId: number) => {
-//   const data = getData();
+const createListDMList = (userId: number) => {
+  const data = getData();
 
-//   // Create an array to make the list
-//   const dmsList = [];
+  // Create an array to make the list
+  const dmsList = [];
 
-//   // Determine whether or not authorised user is in each channel
-//   for (let i = 0; i < data.dm.length; i++) {
-//     const members: dmMember[] = data.dm[i].members;
+  // Determine whether or not authorised user is in each channel
+  for (let i = 0; i < data.dm.length; i++) {
+    const members: dmMember[] = data.dm[i].members;
 
-//     if (members.find(b => b.uId === userId) !== undefined) {
-//       dmsList.push({
-//         dmId: data.dm[i].dmId,
-//         name: data.dm[i].name,
-//       });
-//     }
-//   }
+    if (members.find(b => b.uId === userId) !== undefined) {
+      dmsList.push({
+        dmId: data.dm[i].dmId,
+        name: data.dm[i].name,
+      });
+    }
+  }
 
-//   return dmsList;
-// };
+  return dmsList;
+};
 
 /*
 Helper function: Checks if the arguments for dmRemoveV1() are valid
@@ -249,6 +249,33 @@ function dmCreateV1(token: string, uIds: number[]) {
 }
 
 /*
+Provide an array of all DMs that the authorised user is part of
+
+Arguments:
+    token (string)  - represents the session of the user requesting a list of DMs
+
+Return Value:
+    Returns { dms } if no error
+    Returns { error: 'error' } on invalid token
+*/
+function dmListV1(token: string) {
+  const data = getData();
+  const tokenIndex = findTokenIndex(token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
+    return { error: 'error' };
+  }
+
+  const userId = data.token[tokenIndex].uId;
+  const dmsList = createListDMList(userId);
+
+  return {
+    dms: dmsList,
+  };
+}
+
+/*
 This function returns the name and members of a specified DM
 
 Arguments:
@@ -281,4 +308,4 @@ export function dmDetailsV1(token: string, dmId: number) {
   return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }
 
-export { dmCreateV1 };
+export { dmCreateV1, dmListV1 };

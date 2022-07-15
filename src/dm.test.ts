@@ -24,19 +24,19 @@ function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-// function requestDMList(token: string) {
-//   const res = request(
-//     'GET',
-//     `${url}:${port}/dm/list/v1`,
-//     {
-//       qs: { token },
-//     }
-//   );
-//   return {
-//     res: res,
-//     bodyObj: JSON.parse(String(res.getBody())),
-//   };
-// }
+function requestDMList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/dm/list/v1`,
+    {
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.getBody())),
+  };
+}
 
 // function requestDMRemove(token: string, dmId: number) {
 //   const res = request(
@@ -187,6 +187,127 @@ describe('dm capabilities', () => {
       const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
       expect(testDM2.res.statusCode).toBe(OK);
       expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
+    });
+  });
+
+  describe('test /dm/list/v1', () => {
+    let testDM1: wrapperOutput;
+    let testDetails1: wrapperOutput;
+
+    beforeEach(() => {
+      // testUser1 is the creator of testDM1
+      testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
+      testDetails1 = requestDMDetails(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
+    });
+
+    test('Fail DM list, invalid token', () => {
+      const testList = requestDMList(testUser4.bodyObj.token + 'a');
+
+      expect(testList.res.statusCode).toBe(OK);
+      expect(testList.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('One DM, authorised user is in DM', () => {
+      // Only DM is testDM1, testUser3 is in testDM1
+      const testList = requestDMList(testUser3.bodyObj.token);
+
+      expect(testList.res.statusCode).toBe(OK);
+      expect(testList.bodyObj).toStrictEqual({
+        dms: [
+          {
+            dmId: testDM1.bodyObj.dmId,
+            name: testDetails1.bodyObj.name,
+          }
+        ]
+      });
+    });
+
+    test('One DM, authorised user is not in DM', () => {
+      // Only DM is testDM1, testUser4 is not in testDM1
+      const testList = requestDMList(testUser4.bodyObj.token);
+
+      expect(testList.res.statusCode).toBe(OK);
+      expect(testList.bodyObj).toStrictEqual({
+        dms: []
+      });
+    });
+
+    test('Multiple DMs, authorised user is in all DMs', () => {
+      // testUser1 is in all DMs
+      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const detailsA = requestDMDetails(testUser1.bodyObj.token, dmA.bodyObj.dmId);
+
+      const dmB = requestDMCreate(testUser4.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      const detailsB = requestDMDetails(testUser4.bodyObj.token, dmB.bodyObj.dmId);
+
+      const dmC = requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
+      const detailsC = requestDMDetails(testUser2.bodyObj.token, dmC.bodyObj.dmId);
+
+      const expected = new Set([
+        {
+          dmId: testDM1.bodyObj.dmId,
+          name: testDetails1.bodyObj.name,
+        },
+        {
+          dmId: dmA.bodyObj.dmId,
+          name: detailsA.bodyObj.name,
+        },
+        {
+          dmId: dmB.bodyObj.dmId,
+          name: detailsB.bodyObj.name,
+        },
+        {
+          dmId: dmC.bodyObj.dmId,
+          name: detailsC.bodyObj.name,
+        },
+      ]);
+
+      const testList = requestDMList(testUser1.bodyObj.token);
+
+      expect(testList.res.statusCode).toBe(OK);
+      const received = new Set(testList.bodyObj.dms);
+      expect(received).toStrictEqual(expected);
+    });
+
+    test('Multiple DMs, authorised user is in some DMs', () => {
+      // testUser1 is in some DMs
+      const dmA = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const detailsA = requestDMDetails(testUser1.bodyObj.token, dmA.bodyObj.dmId);
+
+      requestDMCreate(testUser4.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+
+      requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
+
+      const expected = new Set([
+        {
+          dmId: testDM1.bodyObj.dmId,
+          name: testDetails1.bodyObj.name,
+        },
+        {
+          dmId: dmA.bodyObj.dmId,
+          name: detailsA.bodyObj.name,
+        },
+      ]);
+
+      const testList = requestDMList(testUser1.bodyObj.token);
+
+      expect(testList.res.statusCode).toBe(OK);
+      const received = new Set(testList.bodyObj.dms);
+      expect(received).toStrictEqual(expected);
+    });
+
+    test('Multiple DMs, authorised user is in no DMs', () => {
+      // testUser4 is in no DMs
+      requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      requestDMCreate(testUser2.bodyObj.token, [testUser1.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      requestDMCreate(testUser2.bodyObj.token, [testUser3.bodyObj.authUserId]);
+
+      const testList = requestDMList(testUser4.bodyObj.token);
+      expect(testList.res.statusCode).toBe(OK);
+      expect(testList.bodyObj).toStrictEqual({
+        dms: []
+      });
     });
   });
 });

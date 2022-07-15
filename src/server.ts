@@ -8,7 +8,7 @@ import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1 } from './users';
-import { dmCreateV1, dmDetailsV1 } from './dm';
+import { dmCreateV1, dmListV1, dmDetailsV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
@@ -38,13 +38,11 @@ app.get('/channel/details/v2', (req, res) => {
 });
 
 app.post('/auth/register/v2', (req, res) => {
-  // eslint-disable-next-line
-  const { email, password, nameFirst, nameLast} = req.body;
+  const { email, password, nameFirst, nameLast } = req.body;
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
 app.post('/auth/login/v2', (req, res) => {
-  // eslint-disable-next-line
   const { email, password } = req.body;
   res.json(authLoginV1(email, password));
 });
@@ -112,6 +110,15 @@ app.post('/dm/create/v1', (req, res, next) => {
   try {
     const { token, uIds } = req.body;
     return res.json(dmCreateV1(token, uIds));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/dm/list/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    return res.json(dmListV1(token));
   } catch (err) {
     next(err);
   }

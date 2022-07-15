@@ -64,6 +64,23 @@ function requestUserProfileSetEmail(token: string, email: string) {
   };
 }
 
+function requestUserProfileSetHandle(token: string, handleStr: string) {
+  const res = request(
+    'PUT',
+    `${url}:${port}/user/profile/handle/v1`,
+    {
+      json: {
+        token: token,
+        handleStr: handleStr,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
 // AWAITING ADITHA TO IMPLEMENT
 /*
 test('Testing invalid uId', () => {
@@ -191,5 +208,63 @@ describe('Testing for requestUserProfileSetEmail', () => {
       nameLast: 'Smith',
       handleStr: 'johnsmith',
     });
+  });
+});
+
+// ======================================== requestUserProfileSetHandle Testing ========================================
+describe('Testing for requestUserProfileSetHandle', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, 'BigChungas2000');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'BigChungas2000'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+
+  test('Test 2 invalid handle', () => {
+    // error
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, '');
+    expect(response.res.statusCode).toBe(OK);
+    expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      email: 'who.is.joe@is.the.question.com',
+      uId: testUserId,
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+    });
+  });
+
+  test('Test 3 occupied handle', () => {
+    // all should be well
+    requestAuthRegister('something@gmail.com', 'th1sp4ssw0rd', 'big', 'chungas');
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, 'bigchungas');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
 });

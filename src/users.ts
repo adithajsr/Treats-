@@ -41,7 +41,7 @@ export function userProfileV1(token: string, uId: number) {
       };
     }
   }
-  
+
   // If uId doesn't match any uId in data object
   return { error: 'error' };
 }

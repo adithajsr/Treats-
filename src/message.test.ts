@@ -1,23 +1,11 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister } from './auth.test';
+import { requestClear } from './users.test';
 
 const OK = 200;
 const port = config.port;
 const url = config.url;
-
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: { email, password, nameFirst, nameLast },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -59,17 +47,6 @@ function requestDMCreate(token: string, uIds: number[]) {
     res: res,
     bodyObj: JSON.parse(String(res.getBody())),
   };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(String(res.getBody()));
 }
 
 /*
@@ -270,70 +247,70 @@ describe('messages capabilities', () => {
     });
   });
 */
-  // describe('message/senddm/v1 test', () => {
-  //   let testUser2: wrapperOutput;
+  describe('message/senddm/v1 test', () => {
+    let testUser2: wrapperOutput;
 
-  //   beforeEach(() => {
-  //     requestClear();
-  //     // Create a test user
-  //     testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-  //     expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
+    beforeEach(() => {
+      requestClear();
+      // Create a test user
+      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
 
-  //     // Create test user 2
-  //     testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
-  //     expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
+      // Create test user 2
+      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
+      expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
 
-  //     // Create a test channel
-  //     testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
-  //     expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
+      // Create a test channel
+      testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+      expect(testChannel.bodyObj).not.toStrictEqual({ error: 'error' });
 
-  //     // Have user join channel
-  //     // requestChannelJoin(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
+      // Have user join channel
+      // requestChannelJoin(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
 
-  //     // Create a test dm
-  //     testDm = requestDMCreate(testUser.bodyObj.token, [testUser2.bodyObj.authUserId]);
-  //   });
+      // Create a test dm
+      testDm = requestDMCreate(testUser.bodyObj.token, [testUser2.bodyObj.authUserId]);
+    });
 
-  //   afterEach(() => {
-  //     requestClear();
-  //   });
+    afterEach(() => {
+      requestClear();
+    });
 
-  //   test('invalid token, fail send dm', () => {
-  //     const testRequest = requestSendDm(testUser.bodyObj.token + 'a', testDm.bodyObj.dmId, 'a message');
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
-  //   });
+    test('invalid token, fail send dm', () => {
+      const testRequest = requestSendDm(testUser.bodyObj.token + 'a', testDm.bodyObj.dmId, 'a message');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    });
 
-  //   test('dmId does not refer to a valid dm, fail send dm', () => {
-  //     const testRequest = requestSendDm(testUser.bodyObj.token, 9999, 'a message');
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
-  //   });
+    test('dmId does not refer to a valid dm, fail send dm', () => {
+      const testRequest = requestSendDm(testUser.bodyObj.token, 9999, 'a message');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    });
 
-  //   test('length of message is less than 1 character, fail send dm', () => {
-  //     const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, '');
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
-  //   });
+    test('length of message is less than 1 character, fail send dm', () => {
+      const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, '');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    });
 
-  //   test('length of message is over 1000 characters, fail send dm', () => {
-  //     const longString = generateString();
-  //     const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, longString);
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
-  //   });
+    test('length of message is over 1000 characters, fail send dm', () => {
+      const longString = generateString();
+      const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, longString);
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    });
 
-  //   test('dmId valid but auth user is not a member of the dm, fail send dm', () => {
-  //     const badUser = requestAuthRegister('astudent@unsw.com', 'apassword', 'aAlice', 'aSchmoe');
-  //     const testRequest = requestSendDm(badUser.bodyObj.token, testDm.bodyObj.dmId, 'a message');
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
-  //   });
+    test('dmId valid but auth user is not a member of the dm, fail send dm', () => {
+      const badUser = requestAuthRegister('astudent@unsw.com', 'apassword', 'aAlice', 'aSchmoe');
+      const testRequest = requestSendDm(badUser.bodyObj.token, testDm.bodyObj.dmId, 'a message');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    });
 
-  //   test('successful send dm', () => {
-  //     const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, 'a message');
-  //     expect(testRequest.res.statusCode).toBe(OK);
-  //     expect(testRequest.bodyObj).toStrictEqual({ messageId: expect.any(Number) });
-  //   });
-  // });
+    test('successful send dm', () => {
+      const testRequest = requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, 'a message');
+      expect(testRequest.res.statusCode).toBe(OK);
+      expect(testRequest.bodyObj).toStrictEqual({ messageId: expect.any(Number) });
+    });
+  });
 });

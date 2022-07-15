@@ -4,7 +4,6 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-
 import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';

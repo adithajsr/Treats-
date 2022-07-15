@@ -89,8 +89,10 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       if (dataKey === 'names') {
         user.nameFirst = var1;
         user.nameLast = var2;
-      } else {
-        user[dataKey] = var1;
+      } else if (dataKey === 'email') {
+        user.email = var1;
+      } else if (dataKey === 'handle') {
+        user.handle = var1;
       }
       setData(dataSet);
       return {};

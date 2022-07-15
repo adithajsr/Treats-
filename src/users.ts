@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { doesEmailExist } from './auth'; // isHandleValid
+import { doesEmailExist } from './auth';
 import validator from 'validator';
 
 /* This function returns the important information about a user's profile.
@@ -61,6 +61,24 @@ function doesTokenExist(token: string) : boolean {
     }
   }
   return false;
+}
+
+/* <checks if a handle is valid and unique>
+
+Arguments:
+handleStr (string) - <handle>
+Return Value:
+returns <true> on <unique and valid handle>
+returns <false> on <existant or invalid handle> */
+function isHandleAllowed(handleStr: string) : boolean {
+  const dataSet = getData();
+  for (const item of dataSet.user) {
+    if (item.handle === handleStr) {
+      return false;
+    }
+  }
+  const regex = /^[a-z0-9]{0,20}$/i;
+  return regex.test(handleStr);
 }
 
 /* <finds the relevent user and inputs the given data into the given key/field>
@@ -130,4 +148,26 @@ export function userProfileSetEmail(token: string, email: string) {
     return { error: 'error' };
   }
   return findAndSet(email, token, 'email');
+}
+
+/* <Update the authorised user's email address>
+
+Arguments:
+newHandle (string) - <any>
+Return Value:
+returns <void> on <success>
+returns <{ error: 'error' }> on <invalid arguments> */
+export function userProfileSetHandle(token: string, handleStr: string) {
+  if ((handleStr.length < 3) || (handleStr.length > 20) ||
+      !isHandleAllowed(handleStr)) {
+    return { error: 'error' };
+  }
+  // Check if handle is in use
+  const dataSet = getData();
+  for (const item of dataSet.user) {
+    if (item.handle === handleStr) {
+      return { error: 'error' };
+    }
+  }
+  return findAndSet(handleStr, token, 'handle');
 }

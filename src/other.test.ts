@@ -1,5 +1,7 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister } from './auth.test';
+import { requestClear, requestUserProfile } from './users.test';
 
 const OK = 200;
 const url = config.url;
@@ -7,56 +9,6 @@ const port = config.port;
 
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 // const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
-
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: {
-        email: email,
-        password: password,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestUserProfile(token: string, uId: number) {
-  const res = request(
-    'GET',
-  `${url}:${port}/user/profile/v2`,
-  {
-    qs: {
-      token: token,
-      uId: uId
-    }
-  }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(

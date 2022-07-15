@@ -1,6 +1,6 @@
-
 import request from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister } from './auth.test';
 
 const OK = 200;
 const url = config.url;
@@ -10,24 +10,6 @@ const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
 // ======================================== ClearV1 Testing ========================================
-export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: {
-        email: email,
-        password: password,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
 
 export function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -72,6 +54,23 @@ export function requestUserProfileSetEmail(token: string, email: string) {
         email: email,
       }
 
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+export function requestUserProfileSetHandle(token: string, handleStr: string) {
+  const res = request(
+    'PUT',
+    `${url}:${port}/user/profile/handle/v1`,
+    {
+      json: {
+        token: token,
+        handleStr: handleStr,
+      }
     }
   );
   return {
@@ -240,3 +239,60 @@ describe('Testing for requestUserProfileSetEmail', () => {
   });
 });
 
+// ======================================== requestUserProfileSetHandle Testing ========================================
+describe('Testing for requestUserProfileSetHandle', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, 'BigChungas2000');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'BigChungas2000'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+
+  test('Test 2 invalid handle', () => {
+    // error
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, '');
+    expect(response.res.statusCode).toBe(OK);
+    expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      email: 'who.is.joe@is.the.question.com',
+      uId: testUserId,
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+    });
+  });
+
+  test('Test 3 occupied handle', () => {
+    // all should be well
+    requestAuthRegister('something@gmail.com', 'th1sp4ssw0rd', 'big', 'chungas');
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle(testToken, 'bigchungas');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+});

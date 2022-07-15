@@ -80,7 +80,6 @@ Example usage
 
 // Use get() to access the data
 function getData() {
-
   if (fs.existsSync('database.json') === false) {
     // No data stored yet, so use empty data base
     return emptyData;

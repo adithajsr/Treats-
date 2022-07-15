@@ -8,7 +8,7 @@ import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV1 } from './users';
-import { dmCreateV1, dmListV1, dmDetailsV1 } from './dm';
+import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
@@ -124,11 +124,30 @@ app.get('/dm/list/v1', (req, res, next) => {
   }
 });
 
+app.delete('/dm/remove/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    return res.json(dmRemoveV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/dm/details/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
     return res.json(dmDetailsV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/dm/leave/v1', (req, res, next) => {
+  try {
+    const { token, dmId } = req.body;
+    return res.json(dmLeaveV1(token, dmId));
   } catch (err) {
     next(err);
   }

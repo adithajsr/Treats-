@@ -38,19 +38,19 @@ function requestDMList(token: string) {
   };
 }
 
-// function requestDMRemove(token: string, dmId: number) {
-//   const res = request(
-//     'DELETE',
-//     `${url}:${port}/dm/remove/v1`,
-//     {
-//       qs: { token, dmId },
-//     }
-//   );
-//   return {
-//     res: res,
-//     bodyObj: JSON.parse(String(res.getBody())),
-//   };
-// }
+function requestDMRemove(token: string, dmId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/dm/remove/v1`,
+    {
+      qs: { token, dmId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.getBody())),
+  };
+}
 
 function requestDMDetails(token: string, dmId: number) {
   const res = request(
@@ -66,19 +66,19 @@ function requestDMDetails(token: string, dmId: number) {
   };
 }
 
-// function requestDMLeave(token: string, dmId: number) {
-//   const res = request(
-//     'POST',
-//     `${url}:${port}/dm/leave/v1`,
-//     {
-//       json: { token, dmId },
-//     }
-//   );
-//   return {
-//     res: res,
-//     bodyObj: JSON.parse(String(res.getBody())),
-//   };
-// }
+function requestDMLeave(token: string, dmId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/dm/leave/v1`,
+    {
+      json: { token, dmId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.getBody())),
+  };
+}
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -308,6 +308,74 @@ describe('dm capabilities', () => {
       expect(testList.bodyObj).toStrictEqual({
         dms: []
       });
+    });
+  });
+
+  describe('test /dm/remove/v1', () => {
+    let testDM1: wrapperOutput;
+
+    beforeEach(() => {
+      // testUser1 is the original creator of testDM1
+      testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
+    });
+
+    test('Success remove DM, two users in DM', () => {
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({});
+
+      // dmId of testDM should now be invalid
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Success remove DM, more than two users in DM', () => {
+      const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
+
+      // testUser 2 leaves
+      requestDMLeave(testUser2.bodyObj.token, testDM.bodyObj.dmId);
+
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({});
+
+      // dmId of testDM should now be invalid
+      const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, invalid token', () => {
+      const testRemove = requestDMRemove(testUser4.bodyObj.token + 'a', testDM1.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, invalid dmId', () => {
+      const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId + 20);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, authorised user is not in the DM', () => {
+      // testUser4 was never in testDM1
+      const testRemove1 = requestDMRemove(testUser4.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove1.res.statusCode).toBe(OK);
+      expect(testRemove1.bodyObj).toStrictEqual({ error: 'error' });
+
+      // testUser1 was the original creator of testDM1 but left
+      requestDMLeave(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
+      const testRemove2 = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove2.res.statusCode).toBe(OK);
+      expect(testRemove2.bodyObj).toStrictEqual({ error: 'error' });
+    });
+
+    test('Fail remove DM, authorised user is in the DM but is not the creator', () => {
+      // testUser2 is in testDM1 but testUser1 is the creator
+      const testRemove = requestDMRemove(testUser3.bodyObj.token, testDM1.bodyObj.dmId);
+      expect(testRemove.res.statusCode).toBe(OK);
+      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
     });
   });
 });

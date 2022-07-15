@@ -176,32 +176,32 @@ Return Value:
     Returns true if arguments are valid
     Returns false if arguments are invalid
 */
-// const areArgumentsValidDMRemove = (tokenIndex: number, dmId: number) => {
-//   const data = getData();
+const areArgumentsValidDMRemove = (tokenIndex: number, dmId: number) => {
+  const data = getData();
 
-//   // Invalid token
-//   if (tokenIndex === -1) {
-//     return false;
-//   }
+  // Invalid token
+  if (tokenIndex === -1) {
+    return false;
+  }
 
-//   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
-//   // Invalid dmId
-//   if (dmIndex === -1) {
-//     return false;
-//   }
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+  // Invalid dmId
+  if (dmIndex === -1) {
+    return false;
+  }
 
-//   const useruId = data.token[tokenIndex].uId;
-//   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === useruId);
-//   if (memberIndex === -1) {
-//     // Authorised user is not in the DM
-//     return false;
-//   } else if (data.dm[dmIndex].members[memberIndex].dmPerms !== 1) {
-//     // Authorised user is in the DM but is not the creator
-//     return false;
-//   }
+  const useruId = data.token[tokenIndex].uId;
+  const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === useruId);
+  if (memberIndex === -1) {
+    // Authorised user is not in the DM
+    return false;
+  } else if (data.dm[dmIndex].members[memberIndex].dmPerms !== 1) {
+    // Authorised user is in the DM but is not the creator
+    return false;
+  }
 
-//   return true;
-// };
+  return true;
+};
 
 /*
 Creates a new DM with the creator as the owner of the DM
@@ -276,6 +276,36 @@ function dmListV1(token: string) {
 }
 
 /*
+Removes all members from an existing DM
+
+Arguments:
+    token (string)  - represents the session of the user who is removing the DM
+    dmId (number)   - dmId of existing DM
+
+Return Value:
+    Returns {} if no error
+    Returns { error: 'error' } on invalid token, invalid dmId, or invalid user
+*/
+function dmRemoveV1(token: string, dmId: number) {
+  const data = getData();
+  const tokenIndex = findTokenIndex(token);
+
+  if (areArgumentsValidDMRemove(tokenIndex, dmId) === false) {
+    return { error: 'error' };
+  }
+
+  // Remove all members from the DM
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+  data.dm[dmIndex].members = [];
+
+  setData(data);
+
+  return {};
+}
+
+export { dmCreateV1, dmListV1, dmRemoveV1 };
+
+/*
 This function returns the name and members of a specified DM
 
 Arguments:
@@ -287,7 +317,6 @@ Return:
     Returns the name and members of the specified DM if successful
 
 */
-
 export function dmDetailsV1(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid
@@ -308,4 +337,36 @@ export function dmDetailsV1(token: string, dmId: number) {
   return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }
 
-export { dmCreateV1, dmListV1 };
+/*
+This function allows someone to leave a DM channel
+
+Arguments:
+    token (string): this argument is used to identify the member wanting to leave
+    dmId (number): this argument is used to identify the DM channel
+
+Returns:
+    {error: 'error'} if the token or dmId are invalid
+    {} if successful
+*/
+export function dmLeaveV1(token: string, dmId: number) {
+  const data = getData();
+
+  // checking for valid dmId
+  const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);
+  if (dmIndex === -1) return { error: 'error' };
+
+  // checking that member is authorised user of DM
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  if (tokenIndex === -1) return { error: 'error' };
+
+  const uId = data.token[tokenIndex].uId;
+  const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
+
+  if (memberIndex === -1) return { error: 'error' };
+  // removes member from members array in DM array
+  data.dm[dmIndex].members.splice(memberIndex, 1);
+
+  setData(data);
+
+  return {};
+}

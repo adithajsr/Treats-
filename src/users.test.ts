@@ -8,7 +8,7 @@
 <uId> This is the uId that is searched for to return the user's profile
 
 Return Value:
-  {error: 'error'} if the authUserd or uId are invalid
+  {error: 'error'} if the authUserId or uId are invalid
   {info} if the authUserId and uId are valid, returns
   important info about a user's profile
 
@@ -72,6 +72,22 @@ function requestUserProfileSetHandle(token: string, handleStr: string) {
       json: {
         token: token,
         handleStr: handleStr,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestUsersAll(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/users/all/v1`,
+    {
+      qs: {
+        token: token,
       }
     }
   );
@@ -266,5 +282,59 @@ describe('Testing for requestUserProfileSetHandle', () => {
       handleStr: 'johnsmith'
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+});
+
+// ======================================== requestUsersAll Testing ========================================
+
+describe('Testing for requestUsersAll', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
+    const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
+    const response = requestUsersAll(testToken, 'something@gmail.com');
+    expect(response.res.statusCode).toBe(OK);
+    expectedObject(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrict([
+      {
+        uId: returnObject.bodyObj.authUserId,
+        email: 'who.is.joe@is.the.question.com',
+        nameFirst: 'John',
+        nameLast: 'Smith',
+        handleStr: 'johnsmith',
+      }, {
+        uId: uId2,
+        email: 'z5420895@ad.unsw.edu.au',
+        nameFirst: 'Jonathan',
+        nameLast: 'Schmidt',
+        handleStr: 'jonathanschmidt',
+      }, {
+        uId: uId3,
+        email: 'validemail@gmail.com',
+        nameFirst: 'John',
+        nameLast: 'Doe',
+        handleStr: 'johndoe',
+      }
+    ]);
+  });
+
+  test('Test 2 invalid email', () => {
+    // error
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetEmail(testToken, '');
+    expect(response.res.statusCode).toBe(OK);
+    expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      email: 'who.is.joe@is.the.question.com',
+      uId: testUserId,
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+    });
   });
 });

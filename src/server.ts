@@ -7,7 +7,7 @@ import cors from 'cors';
 import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle } from './users';
+import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
@@ -77,6 +77,11 @@ app.get('/channels/list/v2', (req, res, next) => {
 app.get('/channels/listall/v2', (req, res) => {
   const token = req.query.token;
   res.json(channelsListallV2(token as string));
+});
+
+app.get('/users/all/v1', (req, res) => {
+  const token = req.query.token
+  res.json(usersAll(token));
 });
 
 app.get('/user/profile/v2', (req, res) => {

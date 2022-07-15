@@ -1,0 +1,102 @@
+import request from 'sync-request';
+import config from './config.json';
+
+const OK = 200;
+const url = config.url;
+const port = config.port;
+
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+
+export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+export function requestUserProfile(token: string, uId: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/user/profile/v2`,
+    {
+      qs: {
+        token: token,
+        uId: uId
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+test('Invalid uId', () => {
+  requestClear();
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
+  const maiyaToken = maiyaUser.bodyObj.token;
+  const maiyaId = maiyaUser.bodyObj.authUserId;
+  const returnObject = requestUserProfile(maiyaToken, maiyaId + 20);
+  expect(returnObject.res.statusCode).toBe(OK);
+
+  expect(returnObject.bodyObj).toMatchObject({ error: 'error' });
+});
+
+test('Testing default case', () => {
+  requestClear();
+
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
+  const maiyaToken = maiyaUser.bodyObj.token;
+  const maiyaId = maiyaUser.bodyObj.authUserId;
+  const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]);
+  const danielToken = danielUser.bodyObj.token;
+  const danielId = danielUser.bodyObj.authUserId;
+
+  const maiyaInfo = {
+    uId: maiyaId,
+    email: 'maiyaTaylor@gmail.com',
+    nameFirst: 'Maiya',
+    nameLast: 'Taylor',
+    handleStr: 'maiyataylor',
+  };
+
+  const danielInfo = {
+    uId: danielId,
+    email: 'danielYung@gmail.com',
+    nameFirst: 'Daniel',
+    nameLast: 'Yung',
+    handleStr: 'danielyung',
+  };
+
+  expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject(danielInfo);
+  const obj1 = requestUserProfile(maiyaToken, maiyaId);
+  expect(obj1.bodyObj).toMatchObject(maiyaInfo);
+  expect(obj1.res.statusCode).toBe(OK);
+});

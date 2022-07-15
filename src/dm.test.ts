@@ -166,8 +166,8 @@ test('When all members leave', () => {
 
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-   const returnObject = requestDMDetails(danielToken, dmId);
-   expect(returnObject.bodyObj.name).toEqual('danielyung, maiyataylor');
+  const returnObject = requestDMDetails(danielToken, dmId);
+  expect(returnObject.bodyObj.name).toEqual('danielyung, maiyataylor');
 
   requestDMLeave(danielToken, dmId);
   requestDMLeave(maiyaToken, dmId);

@@ -255,7 +255,6 @@ describe('Testing for requestUserProfileSetEmail', () => {
   });
 });
 
-
 // ======================================== requestUserProfileSetHandle Testing ========================================
 describe('Testing for requestUserProfileSetHandle', () => {
   afterEach(() => {

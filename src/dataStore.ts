@@ -78,23 +78,8 @@ Example usage
     setData(store)
 */
 
-// TODO: remove original code
-// // Use get() to access the data
-// function getData() {
-//   return data;
-// }
-
-// // Use set(newData) to pass in the entire data object, with modifications made
-// function setData(newData: database) {
-//   data = newData;
-// }
-
 // Use get() to access the data
 function getData() {
-  // TODO: remove Joseph's code
-  // Firstly writes whats in memory to the file to make sure its up to date..
-  // fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
-  // return JSON.parse(fs.readFileSync('database.json'));
 
   if (fs.existsSync('database.json') === false) {
     // No data stored yet, so use empty data base
@@ -110,10 +95,6 @@ function getData() {
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: database) {
-  // TODO: remove Joseph's code
-  // data = newData;
-  // fs.writeFileSync('database.json', JSON.stringify(data, null, 4));
-
   fs.writeFileSync('database.json', JSON.stringify(newData, null, 4), { flag: 'w' });
 }
 

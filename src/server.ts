@@ -5,6 +5,7 @@ import config from './config.json';
 import cors from 'cors';
 
 import { authRegisterV1, authLoginV1 } from './auth';
+import { channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { channelsCreateV2 } from './channels';
 import { userProfileV1 } from './users';
 import { clearV1 } from './other';
@@ -42,6 +43,56 @@ app.post('/channels/create/v2', (req, res, next) => {
     next(err);
   }
 });
+
+app.post('/channel/join/v2', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+	console.log('This is token:');
+	console.log(token);
+	console.log('This is channelId:');
+	console.log(channelId);
+    return res.json(channelJoinV2(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/invite/v2', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelInviteV2(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/leave/v1', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+    return res.json(channelLeaveV1(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/addowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelAddownerV1(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/removeowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelRemoveownerV1(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
 
 app.post('/auth/login/v2', (req, res) => {
   // eslint-disable-next-line

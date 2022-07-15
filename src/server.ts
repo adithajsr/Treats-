@@ -5,10 +5,10 @@ import config from './config.json';
 import cors from 'cors';
 
 import { channelDetailsV2 } from './channel';
-import { authRegisterV1, authLoginV1 } from './auth';
+import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1 } from './users';
-import { dmCreateV1, dmDetailsV1 } from './dm';
+import { userProfileV1, userProfileSetName } from './users'; // TO COME: userProfileSetEmail & userProfileSetHandle
+import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
@@ -38,15 +38,22 @@ app.get('/channel/details/v2', (req, res) => {
 });
 
 app.post('/auth/register/v2', (req, res) => {
-  // eslint-disable-next-line
-  const { email, password, nameFirst, nameLast} = req.body;
+  const { email, password, nameFirst, nameLast } = req.body;
   res.json(authRegisterV1(email, password, nameFirst, nameLast));
 });
 
 app.post('/auth/login/v2', (req, res) => {
-  // eslint-disable-next-line
   const { email, password } = req.body;
   res.json(authLoginV1(email, password));
+});
+
+app.post('/auth/logout/v1', (req, res, next) => {
+  try {
+    const { token } = req.body;
+    return res.json(authLogoutV1(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/channels/create/v2', (req, res, next) => {
@@ -78,6 +85,23 @@ app.get('/user/profile/v2', (req, res) => {
   return res.json(userProfileV1(token, uId));
 });
 
+app.put('/user/profile/setname/v1', (req, res) => {
+  const { token, nameFirst, nameLast } = req.body;
+  res.json(userProfileSetName(token, nameFirst, nameLast));
+});
+
+/*
+app.put('/user/profile/email/v1', (req, res) => {
+  const { token, email } = req.body;
+  res.json(userProfileSetEmail(token, email));
+});
+
+app.put('/user/profile/handle/v1', (req, res) => {
+  const { token, handle } = req.body;
+  res.json(userProfileSetHandle(token, handleStr));
+});
+*/
+
 app.post('/message/send/v1', (req, res) => {
   const { token, channelId, message } = req.body;
   return res.json(messageSendV1(token, channelId, message));
@@ -108,11 +132,39 @@ app.post('/dm/create/v1', (req, res, next) => {
   }
 });
 
+app.get('/dm/list/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    return res.json(dmListV1(token));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/dm/remove/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    return res.json(dmRemoveV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/dm/details/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
     return res.json(dmDetailsV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/dm/leave/v1', (req, res, next) => {
+  try {
+    const { token, dmId } = req.body;
+    return res.json(dmLeaveV1(token, dmId));
   } catch (err) {
     next(err);
   }

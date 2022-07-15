@@ -1,28 +1,35 @@
-// A file to test the function userProfile for Iteration 1
-// Written by Aditha Jayasuriya, started on 17/06/2022
 
-// This function returns the important information about a user's profile.
-/*
-<authUserId> This function checks whether a valid authUserId is calling the function
-
-<uId> This is the uId that is searched for to return the user's profile
-
-Return Value:
-  {error: 'error'} if the authUserd or uId are invalid
-  {info} if the authUserId and uId are valid, returns
-  important info about a user's profile
-
-*/
-
-import { requestClear, requestAuthRegister, requestUserProfile } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
-const port = config.port;
 const url = config.url;
+const port = config.port;
 
-function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+
+// ======================================== ClearV1 Testing ========================================
+export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+export function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
   const res = request(
     'PUT',
     `${url}:${port}/user/profile/setname/v1`,
@@ -34,20 +41,28 @@ function requestUserProfileSetName(token: string, nameFirst: string, nameLast: s
       }
     }
   );
-  if (JSON.parse(res.getBody() as string) === null) {
-    return {
-      res: res,
-      bodyObj: {},
-    };
-  } else {
-    return {
-      res: res,
-      bodyObj: JSON.parse(res.getBody() as string),
-    };
-  }
+
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
 }
 
-function requestUserProfileSetEmail(token: string, email: string) {
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+export function requestUserProfileSetEmail(token: string, email: string) {
   const res = request(
     'PUT',
     `${url}:${port}/user/profile/email/v1`,
@@ -56,6 +71,7 @@ function requestUserProfileSetEmail(token: string, email: string) {
         token: token,
         email: email,
       }
+
     }
   );
   return {
@@ -65,36 +81,66 @@ function requestUserProfileSetEmail(token: string, email: string) {
 }
 
 // AWAITING ADITHA TO IMPLEMENT
-/*
-test('Testing invalid uId', () => {
-  clearV1();
-  let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
 
-  let returnValue = userProfileV1(maddyId/2, maddyId/2);
-  expect(returnValue).toMatchObject({error: 'error'});
-})
+export function requestUserProfile(token: string, uId: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/user/profile/v2`,
+    {
+      qs: {
+        token: token,
+        uId: uId
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
-//Testing default case
-test('Default case', () => {
+test('Invalid uId', () => {
+  requestClear();
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
+  const maiyaToken = maiyaUser.bodyObj.token;
+  const maiyaId = maiyaUser.bodyObj.authUserId;
+  const returnObject = requestUserProfile(maiyaToken, maiyaId + 20);
+  expect(returnObject.res.statusCode).toBe(OK);
 
-  clearV1();
+  expect(returnObject.bodyObj).toMatchObject({ error: 'error' });
+});
 
-  let maiyaId = authRegisterV1('maiyaTaylor@gmail.com', 'password3', 'Maiya', 'Taylor').authUserId;
-  let samuelId = authRegisterV1('samSchreyer@gmail.com', 'password1', 'Samuel', 'Schreyer').authUserId;
-  let danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung').authUserId;
-  let maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines').authUserId;
+test('Testing default case', () => {
+  requestClear();
+
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
+  const maiyaToken = maiyaUser.bodyObj.token;
+  const maiyaId = maiyaUser.bodyObj.authUserId;
+  const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]);
+  const danielToken = danielUser.bodyObj.token;
+  const danielId = danielUser.bodyObj.authUserId;
 
   const maiyaInfo = {
     uId: maiyaId,
-      email: 'maiyaTaylor@gmail.com',
-      nameFirst: 'Maiya',
-      nameLast: 'Taylor',
-      handle: 'maiyataylor'
-    }
+    email: 'maiyaTaylor@gmail.com',
+    nameFirst: 'Maiya',
+    nameLast: 'Taylor',
+    handleStr: 'maiyataylor',
+  };
 
-  expect(userProfileV1(maiyaId, maiyaId)).toMatchObject(maiyaInfo);
-})
-*/
+  const danielInfo = {
+    uId: danielId,
+    email: 'danielYung@gmail.com',
+    nameFirst: 'Daniel',
+    nameLast: 'Yung',
+    handleStr: 'danielyung',
+  };
+
+  expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject(danielInfo);
+  const obj1 = requestUserProfile(maiyaToken, maiyaId);
+  expect(obj1.bodyObj).toMatchObject(maiyaInfo);
+  expect(obj1.res.statusCode).toBe(OK);
+});
 
 // ======================================== requestUserProfileSetName Testing ========================================
 
@@ -193,3 +239,4 @@ describe('Testing for requestUserProfileSetEmail', () => {
     });
   });
 });
+

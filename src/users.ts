@@ -37,10 +37,11 @@ export function userProfileV1(token: string, uId: number) {
         email: data.user[element].email,
         nameFirst: data.user[element].nameFirst,
         nameLast: data.user[element].nameLast,
-        handleStr: data.user[element].handle
+        handleStr: data.user[element].handle,
       };
     }
   }
+
   // If uId doesn't match any uId in data object
   return { error: 'error' };
 }

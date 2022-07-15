@@ -31,6 +31,17 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+app.get('/user/profile/v2', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const uId = Number(req.query.uId) as number;
+
+    return res.json(userProfileV1(token, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/channel/details/v2', (req, res) => {
   const token = req.query.token as string;
   const channelId = req.query.channelId as string;

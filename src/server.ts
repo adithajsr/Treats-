@@ -187,6 +187,19 @@ app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());
 });
 
+app.post('/dm/leave/v1', (req, res, next) => {
+  try {
+    const { token, dmId } = req.body;
+    return res.json(dmLeaveV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
+});
+
 // for logging errors
 app.use(morgan('dev'));
 

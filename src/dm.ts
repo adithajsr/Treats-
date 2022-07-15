@@ -321,7 +321,8 @@ export function dmDetailsV1(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid
 
-  const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+
   if (dmIndex === -1) return { error: 'error' };
 
   // checking that member is authorised user of DM
@@ -330,7 +331,9 @@ export function dmDetailsV1(token: string, dmId: number) {
   if (tokenIndex === -1) return { error: 'error' };
 
   const uId = data.token[tokenIndex].uId;
+  // console.log(uId);
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
+  // console.log(memberIndex);
 
   if (memberIndex === -1) return { error: 'error' };
 
@@ -339,12 +342,11 @@ export function dmDetailsV1(token: string, dmId: number) {
 
 /*
 This function allows someone to leave a DM channel
-
 Arguments:
     token (string): this argument is used to identify the member wanting to leave
     dmId (number): this argument is used to identify the DM channel
 
-Returns:
+Reurns:
     {error: 'error'} if the token or dmId are invalid
     {} if successful
 */

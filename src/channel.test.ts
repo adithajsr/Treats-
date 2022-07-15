@@ -320,36 +320,3 @@ describe('channel/details/v2 testing', () => {
     });
   });
 });
-
-// test('Testing channel validity', () => {
-//   clearV1();
-//   const danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
-//   const danielChannel = channelsCreateV1(danielId, 'testName', 1);
-
-//   const returnValue = channelMessagesV1(danielId, danielChannel - 1, 0);
-//   expect(returnValue).toMatchObject({ error: 'error' });
-// });
-
-// // Testing if the member is a part of the given channel
-// test('Testing user access', () => {
-//   // Input for authUserId must be incongruent with valid channelIds
-//   // What to do if authUserId is an invalid number? eg. -15
-//   clearV1();
-
-//   const danielId = authRegisterV1('danielYung@gmail.com', 'password', 'Daniel', 'Yung');
-//   const danielChannel = channelsCreateV1(danielId, 'testName', 1);
-
-//   const maddyId = authRegisterV1('maddyHaines@gmail.com', 'password2', 'Maddy', 'Haines');
-//   channelInviteV1(danielId, danielChannel, maddyId);
-
-//   const samuelId = authRegisterV1('samSchreyer@gmail.com', 'password1', 'Samuel', 'Schreyer');
-
-//   const returnValue = channelMessagesV1(samuelId, danielChannel, 0);
-//   expect(returnValue).toMatchObject({ error: 'error' });
-// });
-// /*
-// //Testing when start is > no. of messages in given channelId
-// test('Invalid start argument', () => {
-
-// let returnValue = channelMessagesV1(danielId, danielChannel, 35);
-// expect(returnValue[3]).toBe(-1);

@@ -15,20 +15,6 @@ type wrapperOutput = {
   bodyObj: any,
 };
 
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
 function requestDMCreate(token: string, uIds: number[]) {
   const res = request(
     'POST',
@@ -113,6 +99,42 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
   };
 }
 
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
+
+test('Testing invalid dmId', () => {
+  requestClear();
+  requestClear();
+  const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj;
+  const danielToken = danielUser.token;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaId = maiyaUser.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  const obj = requestDMLeave(danielToken, dmId + 20);
+  expect(obj.bodyObj).toMatchObject({ error: 'error' });
+  expect(obj.res.statusCode).toBe(OK);
+});
+
+test('Non-member attempts to leave', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+  const obj = requestDMLeave(samToken, dmId);
+  expect(obj.bodyObj).toMatchObject({ error: 'error' });
+  expect(obj.res.statusCode).toBe(OK);
+});
+
 test('Invalid token', () => {
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
@@ -146,14 +168,43 @@ test('Default case', () => {
   const danielToken = danielUser.token;
   const danielId = danielUser.authUserId;
   const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+
+  const maiyaToken = maiyaUser.token;
   const maiyaId = maiyaUser.authUserId;
 
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
-  const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
-  expect(returnObject.name).toEqual('danielyung, maiyataylor');
 
-  expect(returnObject.members[0].uId).toEqual(danielId); // how do we know which one will be first - same applies for above line
-  expect(returnObject.members[1].uId).toEqual(maiyaId);
+  const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
+  expect(returnObject.name).toEqual('danielyung, maiyataylor'); // NEED TO FIX DM CREATE OR DOUBLE CHECK IT
+
+  requestDMLeave(maiyaToken, dmId);
+
+  const returnObject2 = requestDMDetails(danielToken, dmId);
+  expect(returnObject2.bodyObj.members[0].uId).toEqual(danielId);
+  expect(returnObject2.res.statusCode).toBe(OK);
+});
+
+test('When all members leave', () => {
+  requestClear();
+  const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj;
+  const danielToken = danielUser.token;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaToken = maiyaUser.token;
+  const maiyaId = maiyaUser.authUserId;
+
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
+
+  const returnObject = requestDMDetails(danielToken, dmId);
+  expect(returnObject.bodyObj.name).toEqual('danielyung, maiyataylor');
+
+  requestDMLeave(danielToken, dmId);
+  requestDMLeave(maiyaToken, dmId);
+
+  const returnObject2 = requestDMDetails(danielToken, dmId); // this token would cease to exist or be valid in the system so is
+  expect(returnObject2.bodyObj).toMatchObject({ error: 'error' });
+  expect(returnObject2.res.statusCode).toBe(OK);
+  const returnObject3 = requestDMDetails(maiyaToken, dmId);
+  expect(returnObject3.res.statusCode).toBe(OK);
 });
 
 describe('dm capabilities', () => {

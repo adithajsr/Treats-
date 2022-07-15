@@ -62,6 +62,27 @@ export function requestClear() {
   };
 }
 
+
+export function requestUserProfileSetEmail(token: string, email: string) {
+  const res = request(
+    'PUT',
+    `${url}:${port}/user/profile/email/v1`,
+    {
+      json: {
+        token: token,
+        email: email,
+      }
+
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+// AWAITING ADITHA TO IMPLEMENT
+
 export function requestUserProfile(token: string, uId: number) {
   const res = request(
     'GET',
@@ -121,6 +142,7 @@ test('Testing default case', () => {
   expect(obj1.bodyObj).toMatchObject(maiyaInfo);
   expect(obj1.res.statusCode).toBe(OK);
 });
+/*
 // ======================================== requestUserProfileSetName Testing ========================================
 
 describe('Testing for requestUserProfileSetName', () => {
@@ -178,3 +200,44 @@ describe('Testing for requestUserProfileSetName', () => {
     });
   });
 });
+
+// ======================================== requestUserProfileSetEmail Testing ========================================
+describe('Testing for requestUserProfileSetEmail', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetEmail(testToken, 'something@gmail.com');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'something@gmail.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+
+  test('Test 2 invalid email', () => {
+    // error
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetEmail(testToken, '');
+    expect(response.res.statusCode).toBe(OK);
+    expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      email: 'who.is.joe@is.the.question.com',
+      uId: testUserId,
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+    });
+  });
+});
+*/

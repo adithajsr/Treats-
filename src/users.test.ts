@@ -34,10 +34,17 @@ function requestUserProfileSetName(token: string, nameFirst: string, nameLast: s
       }
     }
   );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
+  if (JSON.parse(res.getBody() as string) === null) {
+	return {
+		res: res,
+		bodyObj: {},
+	  };
+  } else {
+	return {
+		res: res,
+		bodyObj: JSON.parse(res.getBody() as string),
+	  };
+  }
 }
 
 // AWAITING ADITHA TO IMPLEMENT

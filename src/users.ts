@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { isUuidValid } from './auth'; // doesEmailExist, isHandleValid
+// import { doesEmailExist, isHandleValid } from './auth';
 // import validator from 'validator';
 
 /* This function returns the important information about a user's profile.
@@ -45,6 +45,23 @@ export function userProfileV1(token: string, uId: number) {
   return { error: 'error' };
 }
 
+/* <checks if a Token is in use>
+
+Arguments:
+token (string) - <uuidV4>
+Return Value:
+returns <true> on <existing token>
+returns <false> on <non-existant token> */
+function doesTokenExist(token: string) : boolean {
+  const dataSet = getData();
+  for (const item of dataSet.token) {
+    if (item.token === token) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /* <finds the relevent user and inputs the given data into the given key/field>
 
 Arguments:
@@ -57,7 +74,8 @@ returns <dataSet> on <success>
 returns <{ error: 'error' }> on <invalid token/uId> */
 function findAndSet(var1: string, token: string, dataKey: string, var2?: string) {
   const dataSet = getData();
-  if (!isUuidValid(token)) {
+  console.log('is this working? ', dataSet);
+  if (!doesTokenExist(token)) {
     return { error: 'error' };
   }
   let uId: number;
@@ -75,7 +93,8 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       } else {
         user.dataKey = var1;
       }
-      return dataSet;
+      setData(dataSet)
+      return null;
     }
   }
   return { error: 'error' };
@@ -88,18 +107,11 @@ nameFirst (string) - <1-50 characters long>
 nameLast (string) - <1-50 characters long>
 Return Value:
 returns <'empty'> on <success>
-^ !!! convert return to {} !!! ^
 returns <{ error: 'error' }> on <invalid arguments> */
 export function userProfileSetName(token: string, nameFirst: string, nameLast: string) {
   if ((nameFirst.length < 1) || (nameFirst.length > 50) ||
       (nameLast.length < 1) || (nameLast.length > 50)) {
     return { error: 'error' };
   }
-  const result = findAndSet(nameFirst, token, 'names', nameLast);
-  if (result === { error: 'error' }) {
-    return result;
-  } else {
-    setData(result);
-    return {};
-  }
+  return findAndSet(nameFirst, token, 'names', nameLast);
 }

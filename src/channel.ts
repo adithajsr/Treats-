@@ -2,22 +2,6 @@
 import { getData, setData } from './dataStore';
 
 /*
-This function returns the amount of messages in a specified channel
-Arguments: 
-    channelId (number) - specifying the channel
-
-Return: 
-    messageAmount (number) - amount of messages
-*/
-
-export function MessagesLength(channelId: number) {
-    const data = getData();
-    const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
-    messageAmount = data.channel[channelIndex].messages.length;
-    return messageAmount;
-}
-
-/*
 This function returns 50 messages in a specified channel from a specified startpoint
 
 Arguments: 
@@ -31,7 +15,7 @@ Return:
     Returns an array of messages, start and end indexes if successful
 
 */
-export function channelMessagesv2(token: string, channelId: number, start: number) {
+export function channelMessagesV2(token: string, channelId: number, start: number) {
     let data = getData();
 
     //checking for valid channelId
@@ -47,8 +31,9 @@ export function channelMessagesv2(token: string, channelId: number, start: numbe
 
     if (memberIndex === -1) return {error: 'error'};
 
-    //checking whether start index is greater than the amount of messages 
-    messageAmount = data.channel[channelIndex].messages.length;
+    //checking whether start index is greater than the amount of messages
+    
+    const messageAmount = data.channel[channelIndex].messages.length;
 
     if (start > messageAmount) {
         return {error: 'error'};
@@ -62,14 +47,12 @@ export function channelMessagesv2(token: string, channelId: number, start: numbe
     }
     
     //Checking whether there are less messages than the endIndex
-    const endIndex = start + 50;
+    let endIndex = start + 50;
     if (messageAmount < endIndex) endIndex = -1;
 
 
     return {returnMessages, start, endIndex};
 }
-
-import { getData } from './dataStore';
 
 interface Database {
   user: any[],

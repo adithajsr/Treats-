@@ -12,8 +12,8 @@ import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
-import {channelMessagesV1} from './dm.ts'
-import {MessagesLength} from './dm.ts'
+import {channelMessagesV2} from './channel'
+
 
 // Set up web app, use JSON
 const app = express();
@@ -37,14 +37,9 @@ app.get('/echo', (req, res, next) => {
 
 app.get('/channel/messages/v2', (req, res, next) => {
   try {
-    const token = req.query.token;
-    const channelId = req.query.channelId;
-    const start = req.query.start;
-
-    const length = MessagesLength(channelId);
-    
-    const functionTimes = (length - start)/2;
-
+    const token = req.query.token as string;
+    const channelId = Number(req.query.channelId) as number;
+    const start = Number(req.query.start) as number;
     return res.json(channelMessagesV2(token, channelId, start));
   }
 

@@ -12,8 +12,7 @@ import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
-import {channelMessagesV2} from './channel'
-
+import { channelMessagesV2 } from './channel';
 
 // Set up web app, use JSON
 const app = express();
@@ -34,16 +33,13 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-
 app.get('/channel/messages/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const channelId = Number(req.query.channelId) as number;
     const start = Number(req.query.start) as number;
     return res.json(channelMessagesV2(token, channelId, start));
-  }
-
-  catch (err) {
+  } catch (err) {
     next(err);
   }
 });
@@ -55,7 +51,6 @@ app.get('/user/profile/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const uId = Number(req.query.uId) as number;
-
 
     return res.json(userProfileV1(token, uId));
   } catch (err) {

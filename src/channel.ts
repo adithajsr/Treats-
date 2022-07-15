@@ -1,57 +1,57 @@
 
-import { getData, setData } from './dataStore';
+import { getData } from './dataStore';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
 
-Arguments: 
+Arguments:
     token (string) - to determine if valid user requesting function
-    channelId(number) - to specify the channel 
-    start (number) - to specify where we start from 
+    channelId(number) - to specify the channel
+    start (number) - to specify where we start from
 
-Return: 
-    Returns {error: 'error'} if invalid dmId, unauthorised member or start > 
+Return:
+    Returns {error: 'error'} if invalid dmId, unauthorised member or start >
     messages in channel
     Returns an array of messages, start and end indexes if successful
 
 */
 export function channelMessagesV2(token: string, channelId: number, start: number) {
-    let data = getData();
+  const data = getData();
 
-    //checking for valid channelId
-    const channelIndex = data.channel.findIndex(a => a.channelId === channelId)
-    if (channelIndex === -1) return {error: 'error'};
+  // checking for valid channelId
+  const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
+  if (channelIndex === -1) return { error: 'error' };
 
-    //checking that member is authorised user of channel
-    const tokenIndex = data.token.findIndex(a => a.token === token);
-    if (tokenIndex === -1) return {error: 'error'}; 
-    
-    const uId = data.token[tokenIndex].uId;
-    const memberIndex = data.channel[channelIndex].members.findIndex(a => a.uId === uId);
+  // checking that member is authorised user of channel
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  if (tokenIndex === -1) return { error: 'error' };
 
-    if (memberIndex === -1) return {error: 'error'};
+  const uId = data.token[tokenIndex].uId;
+  const memberIndex = data.channel[channelIndex].members.findIndex(a => a.uId === uId);
 
-    //checking whether start index is greater than the amount of messages
-    
-    const messageAmount = data.channel[channelIndex].messages.length;
+  if (memberIndex === -1) return { error: 'error' };
 
-    if (start > messageAmount) {
-        return {error: 'error'};
-    } 
+  // checking whether start index is greater than the amount of messages
 
-    //Storing start + 50 amount of messages in a new array to be returned 
-    let returnMessages = [];
+  const messageAmount = data.channel[channelIndex].messages.length;
 
-    for (let i = 0; i < start + 50; i++) {
-        returnMessages[i] = data.channel[channelIndex].messages[i];
-    }
-    
-    //Checking whether there are less messages than the endIndex
-    let endIndex = start + 50;
-    if (messageAmount < endIndex) endIndex = -1;
+  if (start > messageAmount) {
+    return { error: 'error' };
+  }
 
+  // Storing start + 50 amount of messages in a new array to be returned
+  const messages = [];
 
-    return {returnMessages, start, endIndex};
+  for (let i = start; i < start + 50; i++) {
+    if (i >= data.channel[channelIndex].messages.length) break;
+    messages.push(data.channel[channelIndex].messages[i]);
+  }
+
+  // Checking whether there are less messages than the endIndex
+  let endIndex = start + 50;
+  if (messageAmount < endIndex) endIndex = -1;
+
+  return { messages, start, endIndex };
 }
 
 interface Database {
@@ -336,4 +336,3 @@ Return Value:
 
 // export { channelPublic, globalPermissions, channelPermissions, uIdExists, channelExists, memberExists, channelDetailsV2, channelJoinV1, channelInviteV1, channelMessagesV1 };
 export { channelDetailsV2 };
-

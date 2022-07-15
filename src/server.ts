@@ -91,7 +91,7 @@ app.get('/channels/listall/v2', (req, res) => {
 });
 
 app.get('/users/all/v1', (req, res) => {
-  const token = req.query.token
+  const token = req.query.token as string;
   res.json(usersAll(token));
 });
 

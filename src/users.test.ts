@@ -324,9 +324,9 @@ describe('Testing for requestUsersAll', () => {
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
     const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
-    const response = requestUsersAll(testToken, 'something@gmail.com');
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expectedObject(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrict([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
@@ -352,9 +352,9 @@ describe('Testing for requestUsersAll', () => {
   test('Test 1 affirmitive one user', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
-    const response = requestUsersAll(testToken, 'something@gmail.com');
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expectedObject(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrict([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',

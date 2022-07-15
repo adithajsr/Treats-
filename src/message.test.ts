@@ -49,17 +49,6 @@ function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(String(res.getBody()));
-}
-
 /*
 Generates a random string of length 1004
 

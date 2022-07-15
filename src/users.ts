@@ -171,3 +171,28 @@ export function userProfileSetHandle(token: string, handleStr: string) {
   }
   return findAndSet(handleStr, token, 'handle');
 }
+
+/* <Gets a list of all users>
+
+Arguments:
+token (string) - <uuidV4>
+Return Value:
+returns <an array of users with their uId, email, full name and handle> on <success>
+returns <{ error: 'error' }> on <invalid token> */
+export function usersAll(token: string) {
+  if (!doesTokenExist(token)) {
+    return { error: 'error' };
+  }
+  const dataSet = getData();
+  const returnObject = [];
+  for (const item of dataSet.user) {
+    returnObject.push({
+      uId: item.uId,
+      email: item.email,
+      nameFirst: item.nameFirst,
+      nameLast: item.nameLast,
+      handleStr: item.handle,
+    });
+  }
+  return returnObject;
+}

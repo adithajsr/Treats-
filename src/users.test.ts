@@ -1,6 +1,6 @@
+import { requestAuthRegister } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
-import { requestAuthRegister } from './auth.test';
 
 const OK = 200;
 const url = config.url;
@@ -70,6 +70,22 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
       json: {
         token: token,
         handleStr: handleStr,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestUsersAll(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/users/all/v1`,
+    {
+      qs: {
+        token: token,
       }
     }
   );
@@ -294,5 +310,58 @@ describe('Testing for requestUserProfileSetHandle', () => {
       handleStr: 'johnsmith'
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+});
+
+// ======================================== requestUsersAll Testing ========================================
+
+describe('Testing for requestUsersAll', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive multiple users', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
+    const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
+    const response = requestUsersAll(returnObject.bodyObj.token);
+    expect(response.res.statusCode).toBe(OK);
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
+      {
+        uId: returnObject.bodyObj.authUserId,
+        email: 'who.is.joe@is.the.question.com',
+        nameFirst: 'John',
+        nameLast: 'Smith',
+        handleStr: 'johnsmith',
+      }, {
+        uId: uId2,
+        email: 'z5420895@ad.unsw.edu.au',
+        nameFirst: 'Jonathan',
+        nameLast: 'Schmidt',
+        handleStr: 'jonathanschmidt',
+      }, {
+        uId: uId3,
+        email: 'validemail@gmail.com',
+        nameFirst: 'John',
+        nameLast: 'Doe',
+        handleStr: 'johndoe',
+      }
+    ]);
+  });
+
+  test('Test 1 affirmitive one user', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll(returnObject.bodyObj.token);
+    expect(response.res.statusCode).toBe(OK);
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
+      {
+        uId: returnObject.bodyObj.authUserId,
+        email: 'who.is.joe@is.the.question.com',
+        nameFirst: 'John',
+        nameLast: 'Smith',
+        handleStr: 'johnsmith',
+      }
+    ]);
   });
 });

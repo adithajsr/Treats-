@@ -1,5 +1,7 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestClear } from './users.test';
+import { requestAuthRegister } from './auth.test';
 
 const OK = 200;
 const port = config.port;
@@ -227,20 +229,6 @@ setData(database);
   });
 */
 
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: { email, password, nameFirst, nameLast },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
 function requestChannelDetails(token: string, channelId: number) {
   const res = request(
     'GET',
@@ -269,17 +257,6 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
     res: res,
     bodyObj: JSON.parse(res.getBody() as string),
   };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(res.getBody() as string);
 }
 
 const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {

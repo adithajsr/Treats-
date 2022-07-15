@@ -1,5 +1,6 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestClear } from './users.test';
 
 const OK = 200;
 const port = config.port;
@@ -92,17 +93,6 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
     res: res,
     bodyObj: JSON.parse(String(res.getBody())),
   };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(String(res.getBody()));
 }
 
 describe('dm capabilities', () => {

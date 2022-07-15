@@ -72,6 +72,15 @@ function requestClear() {
   return JSON.parse(String(res.getBody()));
 }
 
+/*
+Generates a random string of length 1004
+
+Arguments:
+{}
+
+Return Value:
+  Returns { string }      - consists of letters
+*/
 function generateString() {
   const length = 1005;
   const set = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';

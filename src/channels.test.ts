@@ -1,7 +1,13 @@
 // ======================================== Imports ========================================
 import request from 'sync-request';
 import config from './config.json';
+<<<<<<< HEAD
 import {requestClear} from './auth.test' 
+=======
+import { requestClear } from './users.test';
+import { requestAuthRegister } from './auth.test';
+
+>>>>>>> 8de349ac3389b7d98dee6fc52a4038f318537250
 const OK = 200;
 const port = config.port;
 const url = config.url;
@@ -603,10 +609,48 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
       json: { token, name, isPublic },
     }
   );
+<<<<<<< HEAD
   return JSON.parse(res.getBody() as string);
 }
 
 // ======================================== channel/join/v2 ========================================
+=======
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestChannelsList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/list/v2`,
+    {
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestChannelsListall(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/listall/v2`,
+    {
+      qs: {
+        token
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+>>>>>>> 8de349ac3389b7d98dee6fc52a4038f318537250
 
 describe('Testing for channel/join/v2', () => {
   test('channel/join/v2 channel does not exist error', () => {

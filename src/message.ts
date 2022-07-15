@@ -7,6 +7,18 @@ interface Database {
   dm: any[];
 }
 
+/*
+Checks validity of a tkoen
+
+Arguments:
+  token (string)         - represents the session of the user who is creating the channel
+  data (database)     - database that is being interacted with
+  message (string)      - message they want to send
+
+Return Value:
+  Returns { true } if token is valid
+  Returns { false } if token is invalid
+*/
 function checkToken(token: string, data: Database) {
   if (data.token.find((a: any) => a.token === token) === undefined) {
     return false;
@@ -14,6 +26,16 @@ function checkToken(token: string, data: Database) {
   return true;
 }
 
+/*
+Converts a token to its relevant uid
+
+Arguments:
+  token (string)         - represents the session of the user who is creating the channel
+  data (database)     - database that is being interacted with
+
+Return Value:
+  Returns { uId }      - relevant uId corresponding to token
+*/
 function tokenToUid(token: string, data: Database) {
   const index = data.token.findIndex(a => a.token === token);
   const uId = data.token[index].uId;

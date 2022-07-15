@@ -141,7 +141,7 @@ test('Testing default case', () => {
   expect(obj1.bodyObj).toMatchObject(maiyaInfo);
   expect(obj1.res.statusCode).toBe(OK);
 });
-/*
+
 // ======================================== requestUserProfileSetName Testing ========================================
 
 describe('Testing for requestUserProfileSetName', () => {
@@ -239,4 +239,4 @@ describe('Testing for requestUserProfileSetEmail', () => {
     });
   });
 });
-*/
+

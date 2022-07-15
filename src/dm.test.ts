@@ -144,10 +144,10 @@ test('Default case', () => {
   const maiyaToken = maiyaUser.token;
   const maiyaId = maiyaUser.authUserId;
 
-  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  // const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
-  // expect(returnObject.name).toEqual('danielyung, maiyataylor'); //NEED TO FIX DM CREATE OR DOUBLE CHECK IT
+   const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
+   expect(returnObject.name).toEqual('danielyung, maiyataylor'); //NEED TO FIX DM CREATE OR DOUBLE CHECK IT
 
   requestDMLeave(maiyaToken, dmId);
 
@@ -164,10 +164,10 @@ test('When all members leave', () => {
   const maiyaToken = maiyaUser.token;
   const maiyaId = maiyaUser.authUserId;
 
-  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  // const returnObject = requestDMDetails(danielToken, dmId);
-  // expect(returnObject.name).toEqual('danielyung, maiyataylor');
+   const returnObject = requestDMDetails(danielToken, dmId);
+   expect(returnObject.bodyObj.name).toEqual('danielyung, maiyataylor');
 
   requestDMLeave(danielToken, dmId);
   requestDMLeave(maiyaToken, dmId);

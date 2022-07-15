@@ -47,6 +47,23 @@ function requestUserProfileSetName(token: string, nameFirst: string, nameLast: s
   }
 }
 
+function requestUserProfileSetEmail(token: string, email: string) {
+  const res = request(
+    'PUT',
+    `${url}:${port}/user/profile/email/v1`,
+    {
+      json: {
+        token: token,
+        email: email,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
 // AWAITING ADITHA TO IMPLEMENT
 /*
 test('Testing invalid uId', () => {
@@ -125,6 +142,46 @@ describe('Testing for requestUserProfileSetName', () => {
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     const response = requestUserProfileSetName(testToken, 'Jonathan', 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz');
+    expect(response.res.statusCode).toBe(OK);
+    expect(response.bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      email: 'who.is.joe@is.the.question.com',
+      uId: testUserId,
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+    });
+  });
+});
+
+// ======================================== requestUserProfileSetEmail Testing ========================================
+describe('Testing for requestUserProfileSetEmail', () => {
+  afterEach(() => {
+    requestClear();
+  });
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetEmail(testToken, 'something@gmail.com');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'something@gmail.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
+
+  test('Test 2 invalid email', () => {
+    // error
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetEmail(testToken, '');
     expect(response.res.statusCode).toBe(OK);
     expect(response.bodyObj).toStrictEqual({ error: 'error' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({

@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-// import { doesEmailExist, isHandleValid } from './auth';
-// import validator from 'validator';
+import { doesEmailExist } from './auth'; // isHandleValid
+import validator from 'validator';
 
 /* This function returns the important information about a user's profile.
 
@@ -115,4 +115,18 @@ export function userProfileSetName(token: string, nameFirst: string, nameLast: s
     return { error: 'error' };
   }
   return findAndSet(nameFirst, token, 'names', nameLast);
+}
+
+/* <Update the authorised user's email address>
+
+Arguments:
+email (string) - <valid email string>
+Return Value:
+returns <void> on <success>
+returns <{ error: 'error' }> on <invalid arguments> */
+export function userProfileSetEmail(token: string, email: string) {
+  if ((!validator.isEmail(email)) || (doesEmailExist(email))) {
+    return { error: 'error' };
+  }
+  return findAndSet(email, token, 'email');
 }

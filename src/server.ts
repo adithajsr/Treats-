@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 
-import { channelDetailsV2 } from './channel';
+import { channelDetailsV2, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1, userProfileSetName, userProfileSetEmail } from './users'; // TO COME: userProfileSetHandle
-import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
+import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { dmMessagesV1, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
@@ -26,6 +26,28 @@ app.get('/echo', (req, res, next) => {
   try {
     const data = req.query.echo as string;
     return res.json(echo(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/dm/messages/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    const start = parseInt(req.query.start as string);
+    return res.json(dmMessagesV1(token, dmId, start));
+  } catch (err) {
+    next(err);
+  }
+});
+// for logging errors
+app.use(morgan('dev'));
+app.get('/dm/details/v1', (req, res, next) => {
+  try {
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
+    return res.json(dmDetailsV1(token, dmId));
   } catch (err) {
     next(err);
   }
@@ -79,6 +101,56 @@ app.get('/channels/listall/v2', (req, res) => {
   res.json(channelsListallV2(token as string));
 });
 
+app.post('/channel/join/v2', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+    return res.json(channelJoinV2(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/invite/v2', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelInviteV2(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/leave/v1', (req, res, next) => {
+  try {
+    const { token, channelId } = req.body;
+    return res.json(channelLeaveV1(token, channelId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/addowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelAddownerV1(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/channel/removeowner/v1', (req, res, next) => {
+  try {
+    const { token, channelId, uId } = req.body;
+    return res.json(channelRemoveownerV1(token, channelId, uId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/users/all/v1', (req, res) => {
+  const token = req.query.token as string;
+  res.json(usersAll(token));
+});
+
 app.get('/user/profile/v2', (req, res) => {
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
@@ -95,12 +167,10 @@ app.put('/user/profile/email/v1', (req, res) => {
   res.json(userProfileSetEmail(token, email));
 });
 
-/*
 app.put('/user/profile/handle/v1', (req, res) => {
-  const { token, handle } = req.body;
+  const { token, handleStr } = req.body;
   res.json(userProfileSetHandle(token, handleStr));
 });
-*/
 
 app.post('/message/send/v1', (req, res) => {
   const { token, channelId, message } = req.body;
@@ -159,6 +229,19 @@ app.get('/dm/details/v1', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/dm/leave/v1', (req, res, next) => {
+  try {
+    const { token, dmId } = req.body;
+    return res.json(dmLeaveV1(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
 });
 
 app.post('/dm/leave/v1', (req, res, next) => {

@@ -1,6 +1,4 @@
-
-import { getData } from './dataStore';
-import { setData } from './dataStore';
+import { getData, setData } from './dataStore';
 
 /*
 This function clears the data

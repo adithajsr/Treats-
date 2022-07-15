@@ -25,7 +25,6 @@ Return Value:
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
 export function channelJoinV2(token: string, channelId: number){
-  console.log(getData());
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
 		uIdExists(authUserId) === false ||
@@ -49,7 +48,6 @@ Return Value:
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
 export function channelInviteV2(token: string, channelId: number, uId: number){
-  console.log(getData());
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
 		uIdExists(uId) === false ||
@@ -72,7 +70,6 @@ Return Value:
     Returns <{error: 'error'}> on <user couldn't be removed from channel.>
 */
 export function channelLeaveV1(token: string, channelId: number){
-  console.log(getData());
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     memberExists(channelId, authUserId) === false) {
@@ -94,19 +91,13 @@ Return Value:
     Returns <{error: 'error'}> on <user was not made an owner>
 */
 export function channelAddownerV1(token: string, channelId: number, uId: number){
-  console.log(getData());
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
 		uIdExists(uId) === false ||
 		memberExists(channelId, uId) === false ||
     channelPermissions(channelId, uId) === OWNER ||
     channelPermissions(channelId, authUserId) !== OWNER) {
-    return {channelExists: channelExists(channelId),
-            uIdExists: uIdExists(uId),
-            memberExists: memberExists(channelId, uId),
-            channelPermissions: channelPermissions(channelId, uId),
-            channelPerms2: channelPermissions(channelId, authUserId),
-            authUserId: authUserId,};
+    return { error: 'error' };
   } else {
     changePerms(channelId, uId, OWNER);
     return {};
@@ -124,19 +115,13 @@ Return Value:
     Returns <{error: 'error'}> on <user was not removed as an owner>
 */
 export function channelRemoveownerV1(token: string, channelId: number, uId: number){
-  console.log(getData());
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
 		uIdExists(uId) === false ||
 		channelPermissions(channelId, uId) !== OWNER ||
 		numOwners(channelId) <= 1 ||
 		channelPermissions(channelId, authUserId) !== OWNER) {
-    return { channelExists: channelExists(channelId),
-             uIdExists: uIdExists(uId),
-             channelPermissions: channelPermissions(channelId, uId),
-             numOwners: numOwners(channelId),
-             channelPermissions2: channelPermissions(channelId, authUserId),
-             authUserId: authUserId};
+    return { error: 'error' }
   } else {
     changePerms(channelId, uId, USER);
     return {};

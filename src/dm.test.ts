@@ -1,20 +1,33 @@
 
-import request from 'sync-request'
-import config from './config.json'
+import request from 'sync-request';
+import config from './config.json';
 
 const OK = 200;
 const port = config.port;
 const url = config.url;
 
-
-let authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
-let authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
-let authSamuel = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer'];
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+const authSam = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer'];
 
 type wrapperOutput = {
   res: any,
   bodyObj: any,
 };
+
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
 function requestDMCreate(token: string, uIds: number[]) {
   const res = request(
@@ -99,46 +112,49 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
     bodyObj: JSON.parse(String(res.getBody())),
   };
 }
-//Test case not in interface - still test?
+
 test('Invalid token', () => {
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
-  let dmId = requestDmCreate(danielToken, maiyaId);
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
 
-  expect(requestDmDetails(danielToken/2, dmId)).toMatchObject({error: 'error'});
-
+  expect(requestDMDetails(danielToken + 'a', dmId).bodyObj).toMatchObject({ error: 'error' });
 });
 
 test('Invalid dmId', () => {
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
-  let dmId = requestDmCreate(danielToken, maiyaId);
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
 
-  expect(requestDmDetails(danielToken, dmId/2)).toMatchObject({error: 'error'});
+  expect(requestDMDetails(danielToken, dmId / 2).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMDetails(danielToken, dmId / 2).res.statusCode).toBe(OK);
 });
 
 test('Unauthorised access request', () => {
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
-  let SamToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).token;
-  let dmId = requestDmCreate(danielToken, maiyaId);
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
 
-  expect(requestDmDetails(samToken, dmId)).toMatchObject({error: 'error'});
+  expect(requestDMDetails(samToken, dmId).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMDetails(samToken, dmId).res.statusCode).toBe(OK);
 });
 
 test('Default case', () => {
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).authUserId
-  let dmId = requestDmCreate(danielToken, maiyaId);
+  requestClear();
+  const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj;
+  const danielToken = danielUser.token;
+  const danielId = danielUser.authUserId;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaId = maiyaUser.authUserId;
 
-  let returnObject = requestDmDetails(danielToken, dmId);
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
+  const returnObject = requestDMDetails(danielToken, dmId).bodyObj;
+  expect(returnObject.name).toEqual('danielyung, maiyataylor');
 
-  expect(returnObject.name).toEqual('danielyung, maiyataylor'); // is this how the names are concatenated?
-  expectObject(returnObject.members[0].uId).toEqual(danielId); // how do we know which one will be first - same applies for above line
-  expectObject(returnObject.members[1].uId).toEqual(maiyaId);
-
+  expect(returnObject.members[0].uId).toEqual(danielId); // how do we know which one will be first - same applies for above line
+  expect(returnObject.members[1].uId).toEqual(maiyaId);
 });
-
 
 describe('dm capabilities', () => {
   beforeEach(() => {
@@ -414,4 +430,3 @@ describe('dm capabilities', () => {
     });
   });
 });
->>>>>>> 8de349ac3389b7d98dee6fc52a4038f318537250

@@ -12,8 +12,6 @@ import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
-import {dmDetailsV1} from './dm.ts'
-
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -33,33 +31,20 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-app.get('/user/profile/v2', (req, res, next) => {
-  try {
-    const token = req.query.token as string;
-    const uId = Number(req.query.uId) as number;
-
-<<<<<<< HEAD
 app.get('/dm/details/v1', (req, res, next) => {
   try {
-    const token = req.query.token;
-    const dmId = req.query.dmId;
+    const token = req.query.token as string;
+    const dmId = parseInt(req.query.dmId as string);
     return res.json(dmDetailsV1(token, dmId));
-  }
-
-  catch(err) {
+  } catch (err) {
     next(err);
   }
-});
-// start server
-app.listen(PORT, HOST, () => {
-  console.log(`⚡️ Server listening on port ${PORT} at ${HOST}`);
 });
 
 app.get('/channel/details/v2', (req, res) => {
   const token = req.query.token as string;
   const channelId = req.query.channelId as string;
   res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
-
 });
 
 app.post('/auth/register/v2', (req, res) => {

@@ -31,12 +31,11 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-app.get('/user/profile/v2', (req, res, next) => {
+app.get('/dm/details/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;
-    const uId = Number(req.query.uId) as number;
-
-    return res.json(userProfileV1(token, uId));
+    const dmId = parseInt(req.query.dmId as string);
+    return res.json(dmDetailsV1(token, dmId));
   } catch (err) {
     next(err);
   }

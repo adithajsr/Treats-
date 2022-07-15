@@ -319,7 +319,7 @@ describe('Testing for requestUsersAll', () => {
   afterEach(() => {
     requestClear();
   });
-  test('Test 1 affirmitive', () => {
+  test('Test 1 affirmitive multiple users', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
@@ -349,20 +349,19 @@ describe('Testing for requestUsersAll', () => {
     ]);
   });
 
-  test('Test 2 invalid email', () => {
-    // error
-    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
-    const testUserId = returnObject.authUserId;
-    const testToken = returnObject.token;
-    const response = requestUserProfileSetEmail(testToken, '');
+  test('Test 1 affirmitive one user', () => {
+    // all should be well
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll(testToken, 'something@gmail.com');
     expect(response.res.statusCode).toBe(OK);
-    expect(response.bodyObj).toStrictEqual({ error: 'error' });
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
-      email: 'who.is.joe@is.the.question.com',
-      uId: testUserId,
-      nameFirst: 'John',
-      nameLast: 'Smith',
-      handleStr: 'johnsmith',
-    });
+    expectedObject(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrict([
+      {
+        uId: returnObject.bodyObj.authUserId,
+        email: 'who.is.joe@is.the.question.com',
+        nameFirst: 'John',
+        nameLast: 'Smith',
+        handleStr: 'johnsmith',
+      }
+    ]);
   });
 });

@@ -31,14 +31,11 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-
 app.post('/dm/leave/v1', (req, res, next) => {
   try {
-    const {token, dmId} = req.body;
+    const { token, dmId } = req.body;
     return res.json(dmLeaveV1(token, dmId));
-  }
-
-  catch(err) {
+  } catch (err) {
     next(err);
   }
 });

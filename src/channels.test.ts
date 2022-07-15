@@ -1,4 +1,4 @@
-/*import request from 'sync-request';
+import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
@@ -497,4 +497,3 @@ describe('channels functions testing', () => {
     });
   });
 });
-*/

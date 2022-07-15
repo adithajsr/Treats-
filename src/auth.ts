@@ -13,7 +13,7 @@ uuid (string) - <any>
 Return Value:
 returns <true> on <valid uuid>
 returns <false> on <in-use or inccorectly structured uuid> */
-function isUuidValid(uuid: string) : boolean {
+export function isUuidValid(uuid: string) : boolean {
   if (!validateV4uuid(uuid)) {
     return false;
   }
@@ -193,4 +193,48 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     authUserId: newUserId,
     token: uuid,
   };
+}
+
+/*
+Helper function: finds the index of the given token in the tokens array
+in the database
+
+Arguments:
+    token (string)          - represents a user session
+
+Return Value:
+    Returns tokenIndex
+*/
+const findTokenIndex = (token: string) => {
+  const data = getData();
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  return tokenIndex;
+};
+
+/*
+Given an active token, invalidates the token to log the user out
+
+Arguments:
+    token (string)  - represents the session of the user who is logging out
+
+Return Value:
+    Returns {} if no error
+    Returns { error: 'error' } on invalid token
+*/
+export function authLogoutV1(token: string) {
+  const data = getData();
+
+  const tokenIndex = findTokenIndex(token);
+
+  // Token was invalid
+  if (tokenIndex === -1) {
+    return { error: 'error' };
+  }
+
+  // Invalidate the token
+  data.token.splice(tokenIndex, 1);
+
+  setData(data);
+
+  return {};
 }

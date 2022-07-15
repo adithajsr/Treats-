@@ -62,7 +62,6 @@ export function requestClear() {
   };
 }
 
-
 export function requestUserProfileSetEmail(token: string, email: string) {
   const res = request(
     'PUT',

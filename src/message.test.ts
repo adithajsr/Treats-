@@ -102,7 +102,6 @@ let testChannel: wrapperOutput;
 let testDm: wrapperOutput;
 
 describe('messages capabilities', () => {
-  /*
   describe('message/send/v1 test', () => {
     beforeEach(() => {
       // requestClear();
@@ -269,7 +268,7 @@ describe('messages capabilities', () => {
       expect(testRequest.bodyObj).toStrictEqual({ });
     });
   });
-*/
+  
   describe('message/senddm/v1 test', () => {
     let testUser2: wrapperOutput;
 

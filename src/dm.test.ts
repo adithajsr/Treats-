@@ -1,5 +1,6 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestClear } from './users.test';
 
 const OK = 200;
 const port = config.port;
@@ -97,6 +98,7 @@ function requestAuthRegister(email: string, password: string, nameFirst: string,
     bodyObj: JSON.parse(String(res.getBody())),
   };
 }
+
 
 function requestClear() {
   const res = request(

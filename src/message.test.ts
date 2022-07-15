@@ -1,23 +1,11 @@
 import request from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister } from './auth.test';
+import { requestClear } from './users.test';
 
 const OK = 200;
 const port = config.port;
 const url = config.url;
-
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: { email, password, nameFirst, nameLast },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -59,17 +47,6 @@ function requestDMCreate(token: string, uIds: number[]) {
     res: res,
     bodyObj: JSON.parse(String(res.getBody())),
   };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(String(res.getBody()));
 }
 
 /*

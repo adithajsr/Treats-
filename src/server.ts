@@ -7,7 +7,7 @@ import cors from 'cors';
 import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1, userProfileSetName } from './users'; // TO COME: userProfileSetEmail & userProfileSetHandle
+import { userProfileV1, userProfileSetName, userProfileSetEmail } from './users'; // TO COME: userProfileSetHandle
 import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
@@ -90,12 +90,12 @@ app.put('/user/profile/setname/v1', (req, res) => {
   res.json(userProfileSetName(token, nameFirst, nameLast));
 });
 
-/*
 app.put('/user/profile/email/v1', (req, res) => {
   const { token, email } = req.body;
   res.json(userProfileSetEmail(token, email));
 });
 
+/*
 app.put('/user/profile/handle/v1', (req, res) => {
   const { token, handle } = req.body;
   res.json(userProfileSetHandle(token, handleStr));

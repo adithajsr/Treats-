@@ -12,8 +12,6 @@ import { dmMessagesV1, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 
-
-
 // Set up web app, use JSON
 const app = express();
 app.use(express.json());
@@ -37,14 +35,12 @@ app.get('/dm/messages/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
-    const start = parseInt(req.query.start as string);  
+    const start = parseInt(req.query.start as string);
     return res.json(dmMessagesV1(token, dmId, start));
-  }
-
-  catch (err) {
+  } catch (err) {
     next(err);
   }
-})
+});
 // for logging errors
 app.use(morgan('dev'));
 app.get('/dm/details/v1', (req, res, next) => {

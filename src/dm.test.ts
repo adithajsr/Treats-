@@ -34,7 +34,7 @@ function requestDMMessages(token: string, dmId: number, start: number) {
     'GET',
     `${url}:${port}/dm/messages/v1`,
     {
-      qs: {token, dmId, start}
+      qs: { token, dmId, start }
     }
   );
   return {
@@ -42,7 +42,6 @@ function requestDMMessages(token: string, dmId: number, start: number) {
     bodyObj: JSON.parse(String(res.getBody())),
   };
 }
-
 
 function requestMessageSendDM(token: string, dmId: number, message: string) {
   const res = request(
@@ -141,82 +140,67 @@ function requestClear() {
 
 test('Start is greater than total number of messages', () => {
   requestClear();
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId
-  let dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
-  console.log(dmId);
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  requestMessageSendDM(danielToken, dmId, "First message");
-  requestMessageSendDM(danielToken, dmId, "Second message");
+  requestMessageSendDM(danielToken, dmId, 'First message');
+  requestMessageSendDM(danielToken, dmId, 'Second message');
 
-  expect(requestDMMessages(danielToken, dmId, 4).bodyObj).toMatchObject({error: 'error'});
+  expect(requestDMMessages(danielToken, dmId, 4).bodyObj).toMatchObject({ error: 'error' });
 });
 
 test('Requesting user is not member of DM', () => {
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId
-  let samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
-  let dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  expect(requestDMMessages(samToken, dmId, 0).bodyObj).toMatchObject({error: 'error'});
+  expect(requestDMMessages(samToken, dmId, 0).bodyObj).toMatchObject({ error: 'error' });
 });
 
 test('Default case', () => {
-  // requestClear();
-  // let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  // let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
-  // let maiyaId = maiyaUser.authUserId;
-  // let maiyaToken = maiyaUser.token;
-  // let dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
-
-  // requestMessageSendDM(danielToken, dmId, "First message");
-  // requestMessageSendDM(danielToken, dmId, "Second message");
-  // requestMessageSendDM(danielToken, dmId, "Third message");
-  // requestMessageSendDM(danielToken, dmId, "Fourth message");
-  // requestMessageSendDM(maiyaToken, dmId, "Fifth message");
-  // requestMessageSendDM(maiyaToken, dmId, "Sixth message");
-
-  // let returnObject = {messages: ["First message, Second message, Third message, Fourth message, Fifth message, Sixth message"], start: 0, end: -1};
-
-  // expect(requestDMMessages(danielToken, dmId, 0).bodyObj).toMatchObject(returnObject);
-
   requestClear();
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
-  let maiyaId = maiyaUser.authUserId;
-  let maiyaToken = maiyaUser.token;
-  let dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaId = maiyaUser.authUserId;
+  const maiyaToken = maiyaUser.token;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  requestMessageSendDM(danielToken, dmId, "First message");
-  requestMessageSendDM(danielToken, dmId, "Second message");
-  requestMessageSendDM(danielToken, dmId, "Third message");
-  requestMessageSendDM(danielToken, dmId, "Fourth message");
-  requestMessageSendDM(maiyaToken, dmId, "Fifth message");
-  requestMessageSendDM(maiyaToken, dmId, "Sixth message");
+  requestMessageSendDM(danielToken, dmId, 'First message');
+  requestMessageSendDM(danielToken, dmId, 'Second message');
+  requestMessageSendDM(danielToken, dmId, 'Third message');
+  requestMessageSendDM(danielToken, dmId, 'Fourth message');
+  requestMessageSendDM(maiyaToken, dmId, 'Fifth message');
+  requestMessageSendDM(maiyaToken, dmId, 'Sixth message');
 
-  let returnObject = {messages: ["First message, Second message, Third message, Fourth message, Fifth message, Sixth message"], start: 0, end: -1};
+  const returnObject = ['First message', 'Second message', 'Third message', 'Fourth message', 'Fifth message', 'Sixth message'];
 
-  expect(requestDMMessages(danielToken, dmId, 0).bodyObj).toMatchObject(returnObject);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0].message).toStrictEqual(returnObject[0]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[1].message).toStrictEqual(returnObject[1]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[2].message).toStrictEqual(returnObject[2]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[4].message).toStrictEqual(returnObject[4]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[5].message).toStrictEqual(returnObject[5]);
 });
 
-test ('Start at integer > 0', () => {
+test('Start at integer > 0', () => {
   requestClear();
-  let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  let maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
-  let maiyaId = maiyaUser.authId;
-  let maiyaToken = maiyaUser.token;
-  let dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaId = maiyaUser.authId;
+  const maiyaToken = maiyaUser.token;
+  const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
-  requestMessageSendDM(danielToken, dmId, "First message");
-  requestMessageSendDM(danielToken, dmId, "Second message");
-  requestMessageSendDM(danielToken, dmId, "Third message");
-  requestMessageSendDM(danielToken, dmId, "Fourth message");
-  requestMessageSendDM(maiyaToken, dmId, "Fifth message");
-  requestMessageSendDM(maiyaToken, dmId, "Sixth message");
+  requestMessageSendDM(danielToken, dmId, 'First message');
+  requestMessageSendDM(danielToken, dmId, 'Second message');
+  requestMessageSendDM(danielToken, dmId, 'Third message');
+  requestMessageSendDM(danielToken, dmId, 'Fourth message');
+  requestMessageSendDM(maiyaToken, dmId, 'Fifth message');
+  requestMessageSendDM(maiyaToken, dmId, 'Sixth message');
 
-  expect(requestDMMessages(danielToken, dmId, 3).bodyObj).toMatchObject({error: 'error'});
+  expect(requestDMMessages(danielToken, dmId, 3).bodyObj).toMatchObject({ error: 'error' });
 });
-
 
 describe('dm capabilities', () => {
   beforeEach(() => {
@@ -494,12 +478,10 @@ describe('dm capabilities', () => {
 });
 
 test('Invalid dmId', () => {
-    requestClear();
-    let danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-    let maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId
-    let dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
 
-    expect(requestDMMessages(danielToken, dmId/2, 0).bodyObj).toMatchObject({error: 'error'});
-
+  expect(requestDMMessages(danielToken, dmId / 2, 0).bodyObj).toMatchObject({ error: 'error' });
 });
-

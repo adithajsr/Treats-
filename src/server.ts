@@ -7,7 +7,7 @@ import cors from 'cors';
 import { channelDetailsV2 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1 } from './users';
+import { userProfileV1, userProfileSetName } from './users'; // TO COME: userProfileSetEmail & userProfileSetHandle
 import { dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
@@ -84,6 +84,23 @@ app.get('/user/profile/v2', (req, res) => {
   const uId = Number(req.query.uId) as number;
   res.json(userProfileV1(token, uId));
 });
+
+app.put('/user/profile/setname/v1', (req, res) => {
+  const { token, nameFirst, nameLast } = req.body;
+  res.json(userProfileSetName(token, nameFirst, nameLast));
+});
+
+/*
+app.put('/user/profile/email/v1', (req, res) => {
+  const { token, email } = req.body;
+  res.json(userProfileSetEmail(token, email));
+});
+
+app.put('/user/profile/handle/v1', (req, res) => {
+  const { token, handle } = req.body;
+  res.json(userProfileSetHandle(token, handleStr));
+});
+*/
 
 app.post('/message/send/v1', (req, res) => {
   const { token, channelId, message } = req.body;

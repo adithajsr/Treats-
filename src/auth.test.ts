@@ -108,9 +108,9 @@ describe('Testing for requestAuthRegister', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handle: 'johnsmith',
+      handleStr: 'johnsmith',
     };
-    expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handle)).toBe(true);
+    expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
     expect(validateV4uuid(testToken)).toBe(true);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
@@ -189,7 +189,7 @@ describe('Testing for requestAuthLogin', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handle: 'johnsmith',
+      handleStr: 'johnsmith',
     };
     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj).toStrictEqual({ error: 'error' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);

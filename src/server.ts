@@ -50,7 +50,6 @@ app.get('/user/profile/v2', (req, res) => {
   return res.json(userProfileV1(token, uId));
 });
 
-
 app.get('/dm/messages/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;

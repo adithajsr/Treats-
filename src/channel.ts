@@ -1,5 +1,5 @@
 
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint

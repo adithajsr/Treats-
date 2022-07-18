@@ -1,0 +1,21 @@
+{
+    "user": [
+        {
+            "uId": 1,
+            "email": "who.is.joe@is.the.question.com",
+            "password": "yourmumma",
+            "nameFirst": "John",
+            "nameLast": "Smith",
+            "handle": "johnsmith",
+            "globalPerms": 2
+        }
+    ],
+    "channel": [],
+    "token": [
+        {
+            "token": "184091ab-f50b-4a9d-9f3e-4df2b9674b8b",
+            "uId": 1
+        }
+    ],
+    "dm": []
+}

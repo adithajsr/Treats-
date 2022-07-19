@@ -1,11 +1,60 @@
+
 import request from 'sync-request';
 import config from './config.json';
-import { requestClear } from './users.test';
-import { requestAuthRegister } from './auth.test';
 
 const OK = 200;
 const port = config.port;
 const url = config.url;
+
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authSam = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer'];
+
+export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+} function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v2`,
+    {
+      json: { token, name, isPublic },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestChannelMessages(token: string, channelId: number, start: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channel/messages/v2`,
+    {
+      qs: {
+        token, channelId, start,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
 type user = {
   email: string,
@@ -32,12 +81,12 @@ function requestChannelDetails(token: string, channelId: number) {
   };
 }
 
-function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+function requestMessageSend(token: string, channelId: number, message: string) {
   const res = request(
     'POST',
-    `${url}:${port}/channels/create/v2`,
+    `${url}:${port}/message/send/v1`,
     {
-      json: { token, name, isPublic },
+      json: { token, channelId, message },
     }
   );
   return {
@@ -45,6 +94,72 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
     bodyObj: JSON.parse(res.getBody() as string),
   };
 }
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
+
+test('Invalid channelId', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  expect(requestChannelMessages(danielToken, channelId + 20, 0).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestChannelMessages(danielToken, channelId + 20, 0).res.statusCode).toBe(OK);
+});
+
+test('Requesting user is not member of channel', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  expect(requestChannelMessages(samToken, channelId, 0).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestChannelMessages(samToken, channelId, 0).res.statusCode).toBe(OK);
+});
+
+test('Default case', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+  requestMessageSend(danielToken, channelId, 'Third message');
+  requestMessageSend(danielToken, channelId, 'Fourth message');
+  requestMessageSend(danielToken, channelId, 'Fifth message');
+  requestMessageSend(danielToken, channelId, 'Sixth message');
+
+  const returnObject = ['First message', 'Second message', 'Third message', 'Fourth message', 'Fifth message', 'Sixth message'];
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual(returnObject[0]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[1].message).toStrictEqual(returnObject[1]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[2].message).toStrictEqual(returnObject[2]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[4].message).toStrictEqual(returnObject[4]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[5].message).toStrictEqual(returnObject[5]);
+  expect(requestChannelMessages(danielToken, channelId, 0).res.statusCode).toBe(OK);
+});
+
+test('Start at integer > 0', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+  requestMessageSend(danielToken, channelId, 'Third message');
+  requestMessageSend(danielToken, channelId, 'Fourth message');
+  requestMessageSend(danielToken, channelId, 'Fifth message');
+  requestMessageSend(danielToken, channelId, 'Sixth message');
+
+  expect(requestChannelMessages(danielToken, channelId, 3).bodyObj.messages[0].message).toStrictEqual('Fourth message');
+  expect(requestChannelMessages(danielToken, channelId, 3).res.statusCode).toBe(OK);
+});
 
 const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
   // auth/register/v2 returns { token, authUserId }

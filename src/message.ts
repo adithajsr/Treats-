@@ -230,6 +230,8 @@ function messageRemoveV1(token: string, messageId: number) {
 
   setData(data);
 
+  setData(data);
+
   return { };
 }
 

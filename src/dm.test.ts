@@ -148,6 +148,7 @@ test('Start is greater than total number of messages', () => {
   requestMessageSendDM(danielToken, dmId, 'Second message');
 
   expect(requestDMMessages(danielToken, dmId, 4).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMMessages(danielToken, dmId, 4).res.statusCode).toBe(OK);
 });
 
 test('Requesting user is not member of DM', () => {
@@ -157,6 +158,7 @@ test('Requesting user is not member of DM', () => {
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
   expect(requestDMMessages(samToken, dmId, 0).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMMessages(samToken, dmId, 0).res.statusCode).toBe(OK);
 });
 
 test('Default case', () => {
@@ -182,24 +184,24 @@ test('Default case', () => {
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[4].message).toStrictEqual(returnObject[4]);
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[5].message).toStrictEqual(returnObject[5]);
+  expect(requestDMMessages(danielToken, dmId, 0).res.statusCode).toBe(OK);
 });
 
 test('Start at integer > 0', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
-  const maiyaId = maiyaUser.authId;
-  const maiyaToken = maiyaUser.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
 
   requestMessageSendDM(danielToken, dmId, 'First message');
   requestMessageSendDM(danielToken, dmId, 'Second message');
   requestMessageSendDM(danielToken, dmId, 'Third message');
   requestMessageSendDM(danielToken, dmId, 'Fourth message');
-  requestMessageSendDM(maiyaToken, dmId, 'Fifth message');
-  requestMessageSendDM(maiyaToken, dmId, 'Sixth message');
+  requestMessageSendDM(danielToken, dmId, 'Fifth message');
+  requestMessageSendDM(danielToken, dmId, 'Sixth message');
 
-  expect(requestDMMessages(danielToken, dmId, 3).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestDMMessages(danielToken, dmId, 3).bodyObj.messages[0].message).toStrictEqual('Fourth message');
+  expect(requestDMMessages(danielToken, dmId, 3).res.statusCode).toBe(OK);
 });
 
 describe('dm capabilities', () => {

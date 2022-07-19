@@ -38,9 +38,9 @@ export function dmMessagesV1(token: string, dmId: number, start: number) {
   // Storing start + 50 amount of messages in a new array to be returned
   const messages = [];
 
-  for (let i = 0; i < start + 50; i++) {
+  for (let i = start; i < start + 50; i++) {
     if (i >= data.dm[dmIndex].messages.length) break;
-    messages[i] = data.dm[dmIndex].messages[i];
+    messages.push(data.dm[dmIndex].messages[i]);
   }
 
   let endIndex = start + 50;

@@ -1,4 +1,4 @@
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 
 interface Database {
   user: any[];
@@ -8,7 +8,7 @@ interface Database {
 }
 
 /*
-Checks validity of a tkoen
+Checks validity of a token
 
 Arguments:
   token (string)         - represents the session of the user who is creating the channel
@@ -91,6 +91,8 @@ function messageSendV1 (token: string, channelId: number, message: string) {
     }
   );
 
+  setData(data);
+
   return { messageId: messageId };
 }
 
@@ -156,6 +158,8 @@ function messageEditV1 (token: string, messageId: number, message: string) {
     channel[channelIndex].messages[messageIndex].message = message;
   }
 
+  setData(data);
+
   return { };
 }
 
@@ -209,21 +213,22 @@ function messageRemoveV1(token: string, messageId: number) {
     a => a.messageId === messageId
   );
 
+  setData(data);
+
   return { };
 }
 
 /*
-Creates a new channel with the given name that is either a public
-or private channel
+Send a message from the authorised user to a specified DM
 
 Arguments:
     token (string)          - represents the session of the user who is creating the channel
-    name (string)           - name of new channel
-    isPublic (boolean)      - publicness of new channel
+    dmId (number)           - id of the DM they want to send a message to
+    message (string)        - message they want to send
 
 Return Value:
-    Returns { channelId } if no error
-    Returns { error: 'error' } on invalid token or invalid channel name
+    Returns { messageId } if no error
+    Returns { error: 'error' } on invalid token, invalid dmId, or invalid message length
 */
 
 function messageSendDmV1 (token: string, dmId: number, message: string) {
@@ -257,6 +262,8 @@ function messageSendDmV1 (token: string, dmId: number, message: string) {
       timeSent: time
     }
   );
+
+  setData(data);
 
   return { messageId: messageId };
 }

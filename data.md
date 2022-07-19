@@ -18,7 +18,6 @@ let data = {
       channelId: 999,
       channelName: 'channel',
       isPublic: true,
-      start: 0,
       members: [
         {
           uId: -999,
@@ -30,7 +29,7 @@ let data = {
           messageId: 1,
           uId: -999,
           message: 'Hello world',
-          timestamp: '001',
+          timeSent: '001',
         },
       ],
     },

@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 interface user {
   uId: number,
   email: string,
@@ -53,7 +55,7 @@ interface database {
 }
 
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data: database = {
+const emptyData: database = {
   user: [],
   channel: [],
   token: [],
@@ -78,12 +80,21 @@ Example usage
 
 // Use get() to access the data
 function getData() {
-  return data;
+  if (fs.existsSync('database.json') === false) {
+    // No data stored yet, so use empty data base
+    return emptyData;
+  }
+
+  // Data has been stored in 'database.json'
+  const storedData = fs.readFileSync('database.json', { flag: 'r' });
+  const fileData: database = JSON.parse(String(storedData));
+
+  return fileData;
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: database) {
-  data = newData;
+  fs.writeFileSync('database.json', JSON.stringify(newData, null, 4), { flag: 'w' });
 }
 
 export { getData, setData };

@@ -7,6 +7,8 @@ interface Database {
   dm: any[];
 }
 
+const NOTFOUND = -50;
+
 /*
 Checks validity of a token
 
@@ -111,8 +113,6 @@ Return Value:
                                owner permission
 */
 
-const NOTFOUND = -50;
-
 function messageEditV1 (token: string, messageId: number, message: string) {
   const data = getData();
 
@@ -138,14 +138,15 @@ function messageEditV1 (token: string, messageId: number, message: string) {
           return { error: 'error' };
         }
         // check if uId has owner permissions
-        for (let k = 0; k < channel[i].members.length; k++) {
-          if (channel[i].members[k].uId === uId && channel[i].members[k].channelPerms !== 1) {
-            return { error: 'error' };
-          }
+        // and no global permissions
+        const memberIndex = channel[i].members.findIndex(a => a.uId === uId);
+        if (channel[i].members[memberIndex].channelPerms !== 1) {
+          return { error: 'error' };
         }
       }
     }
   }
+
   if (channelIndex === NOTFOUND) {
     return { error: 'error' };
   }
@@ -159,7 +160,6 @@ function messageEditV1 (token: string, messageId: number, message: string) {
   }
 
   setData(data);
-
   return { };
 }
 
@@ -185,28 +185,43 @@ function messageRemoveV1(token: string, messageId: number) {
   }
 
   const uId = tokenToUid(token, data);
-  let channelIndex = NOTFOUND;
+  let channelIndex, dmIndex;
   const { channel } = data;
+  const { dm } = data;
 
-  for (let i = 0; i < channel.length; i++) {
-    for (let j = 0; j < channel[i].messages.length; j++) {
-      if (channel[i].messages[j].messageId === messageId) {
-        channelIndex = i;
-        // auth uid didn't send the message
-        if (channel[i].messages[j].uId !== uId) {
-          return { error: 'error' };
-        }
-        // check if uId has owner permissions
-        for (let k = 0; k < channel[i].members.length; k++) {
-          if (channel[i].members[k].uId === uId && channel[i].members[k].channelPerms !== 1) {
-            return { error: 'error' };
-          }
-        }
-      }
-    }
+  // check if messageId in channel or dm
+  for (const i in channel) {
+    channelIndex = channel[i].messages.findIndex(a => a.messageId === messageId);
   }
-  if (channelIndex === NOTFOUND) {
+  for (const i in dm) {
+    dmIndex = dm[i].messages.findIndex(a => a.messageId === messageId);
+  }
+  if (channelIndex && dmIndex === undefined) {
     return { error: 'error' };
+  }
+
+  // check info surrounding message
+  if (channelIndex === undefined) {
+    const messageIndex = dm[dmIndex].messages.findIndex(a => a.messageId === messageId);
+    if (dm[dmIndex].messages[messageIndex].uId !== uId) {
+      return { error: 'error' };
+    }
+    const memberIndex = dm[dmIndex].members.findIndex(a => a.uId === uId);
+    if (dm[dmIndex].members[memberIndex].dmPerms !== 1) {
+      return { error: 'error' };
+    }
+  } else if (dmIndex === undefined) {
+    const messageIndex = channel[channelIndex].messages.findIndex(a => a.messageId === messageId);
+    if (channel[channelIndex].messages[messageIndex].uId !== uId) {
+      return { error: 'error' };
+    }
+    const memberIndex = channel[channelIndex].members.findIndex(a => a.uId === uId);
+    if (channel[channelIndex].members[memberIndex].channelPerms !== 1) {
+      return { error: 'error' };
+    }
+    channel[channelIndex].messages = channel[channelIndex].messages.filter(
+      a => a.messageId === messageId
+    );
   }
 
   channel[channelIndex].messages = channel[channelIndex].messages.filter(

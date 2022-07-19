@@ -180,7 +180,7 @@ function channelDetailsV2(token: string, channelId: number) {
 
 // Constants
 const OWNER = 1;
-const USER = 0;
+const USER = 2;
 
 /* Description: Adds a user to a channel
 Arguments:

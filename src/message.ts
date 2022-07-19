@@ -226,7 +226,7 @@ function messageRemoveV1(token: string, messageId: number) {
 
   channel[channelIndex].messages = channel[channelIndex].messages.filter(
     a => a.messageId === messageId
-  )
+  );
 
   setData(data);
 

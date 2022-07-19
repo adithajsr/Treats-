@@ -3,6 +3,7 @@ import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
+import errorHandler from 'middleware-http-errors';
 
 import { channelDetailsV2, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
@@ -33,6 +34,12 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
+// handles errors nicely
+app.use(errorHandler());
+
+// for logging errors
+app.use(morgan('dev'));
+
 app.get('/channel/messages/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;
@@ -60,8 +67,7 @@ app.get('/dm/messages/v1', (req, res, next) => {
     next(err);
   }
 });
-// for logging errors
-app.use(morgan('dev'));
+
 app.get('/dm/details/v1', (req, res, next) => {
   try {
     const token = req.query.token as string;
@@ -275,9 +281,6 @@ app.post('/dm/leave/v1', (req, res, next) => {
 app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());
 });
-
-// for logging errors
-app.use(morgan('dev'));
 
 // start server
 app.listen(PORT, HOST, () => {

@@ -1,21 +1,6 @@
 {
-    "user": [
-        {
-            "uId": 1,
-            "email": "danielYung@gmail.com",
-            "password": "password",
-            "nameFirst": "Daniel",
-            "nameLast": "Yung",
-            "handle": "danielyung",
-            "globalPerms": 2
-        }
-    ],
+    "user": [],
     "channel": [],
-    "token": [
-        {
-            "token": "5dae53a3-b539-4ebb-a89f-41a1a7331abb",
-            "uId": 1
-        }
-    ],
+    "token": [],
     "dm": []
 }

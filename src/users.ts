@@ -13,7 +13,7 @@ Return Value:
 {info} if the authUserId and uId are valid, returns
 important info about a user's profile */
 
-export function userProfileV1(token: string, uId: number) {
+export function userProfileV3(token: string, uId: number) {
   const data = getData();
   // Determining whether token is valid
   let count = 0;

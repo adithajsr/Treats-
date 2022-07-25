@@ -18,21 +18,21 @@ export function dmMessagesV1(token: string, dmId: number, start: number) {
   const data = getData();
   // checking for valid dmId
   const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);
-  if (dmIndex === -1) return { error: 'error' };
+  if (dmIndex === -1) throw HTTPError(400, 'Invalid dmId');
 
   // checking that member is authorised user of DM
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
 
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
 
   const messageAmount = data.dm[dmIndex].messages.length;
 
   if (start > messageAmount) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Start is greater than the total number of messages in the DM');
   }
 
   // Storing start + 50 amount of messages in a new array to be returned

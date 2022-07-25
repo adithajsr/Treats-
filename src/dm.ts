@@ -14,7 +14,7 @@ Return:
     Returns an array of messages, start and end indexes if successful
 
 */
-export function dmMessagesV1(token: string, dmId: number, start: number) {
+export function dmMessagesV2(token: string, dmId: number, start: number) {
   const data = getData();
   // checking for valid dmId
   const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);

@@ -79,13 +79,13 @@ Creates a new channel with the given name that is either a public
 or private channel
 
 Arguments:
-    authUserId (integer)    - user ID of the user who is creating the channel
+    token (string)          - represents the session of the user creating the channel
     name (string)           - name of new channel
     isPublic (boolean)      - publicness of new channel
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid channel name
+    Returns { error: 'error' } on invalid token or invalid channel name
 */
 
 function channelsCreateV2(token: string, name: string, isPublic: boolean) {

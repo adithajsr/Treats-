@@ -15,7 +15,7 @@ Return:
     Returns an array of messages, start and end indexes if successful
 
 */
-export function channelMessagesV2(token: string, channelId: number, start: number) {
+export function channelMessagesV3(token: string, channelId: number, start: number) {
   const data = getData();
 
   // checking for valid channelId

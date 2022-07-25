@@ -26,7 +26,7 @@ export function userProfileV1(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
-    return { error: 'error' };
+    throwHTTPError(403, 'Invalid token');
   }
 
   // Searching for the uId
@@ -43,7 +43,7 @@ export function userProfileV1(token: string, uId: number) {
   }
 
   // If uId doesn't match any uId in data object
-  return { error: 'error' };
+  throw HTTPError(400, 'Invalid uId');
 }
 
 /* <checks if a Token is in use>

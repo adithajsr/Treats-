@@ -366,25 +366,22 @@ Return:
     Returns the name and members of the specified DM if successful
 */
 
-export function dmDetailsV1(token: string, dmId: number) {
+export function dmDetailsV2(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid
 
   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
 
-  if (dmIndex === -1) return { error: 'error' };
+  if (dmIndex === -1) throw HTTPError(400, 'Invalid dmId');
 
   // checking that member is authorised user of DM
 
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
-  // console.log(uId);
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
-  // console.log(memberIndex);
-
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM'); 
 
   return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }

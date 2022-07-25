@@ -161,17 +161,16 @@ function channelDetailsV2(token: string, channelId: number) {
         }
       );
     // members
-    } else if (members[i].channelPerms === 2) {
-      details.allMembers.push(
-        {
-          uId: user[index].uId,
-          email: user[index].email,
-          nameFirst: user[index].nameFirst,
-          nameLast: user[index].nameLast,
-          handle: user[index].handle,
-        }
-      );
-    }
+    } 
+    details.allMembers.push(
+      {
+        uId: user[index].uId,
+        email: user[index].email,
+        nameFirst: user[index].nameFirst,
+        nameLast: user[index].nameLast,
+        handle: user[index].handle,
+      }
+    );
   }
   return details;
 }

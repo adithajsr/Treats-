@@ -32,14 +32,14 @@ function requestDMCreate(token: string, uIds: number[]) {
 function requestDMMessages(token: string, dmId: number, start: number) {
   const res = request(
     'GET',
-    `${url}:${port}/dm/messages/v1`,
+    `${url}:${port}/dm/messages/v2`,
     {
       qs: { token, dmId, start }
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(String(res.body)),
   };
 }
 
@@ -88,28 +88,28 @@ function requestDMRemove(token: string, dmId: number) {
 function requestDMDetails(token: string, dmId: number) {
   const res = request(
     'GET',
-    `${url}:${port}/dm/details/v1`,
+    `${url}:${port}/dm/details/v2`,
     {
       qs: { token, dmId },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(String(res.body)),
   };
 }
 
 function requestDMLeave(token: string, dmId: number) {
   const res = request(
     'POST',
-    `${url}:${port}/dm/leave/v1`,
+    `${url}:${port}/dm/leave/v2`,
     {
       json: { token, dmId },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(String(res.body)),
   };
 }
 
@@ -137,6 +137,14 @@ function requestClear() {
   );
   return JSON.parse(String(res.getBody()));
 }
+test('Invalid dmId', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  expect(requestDMMessages(danielToken, dmId + 20, 0).res.statusCode).toBe(400);
+});
 
 test('Start is greater than total number of messages', () => {
   requestClear();
@@ -146,19 +154,16 @@ test('Start is greater than total number of messages', () => {
 
   requestMessageSendDM(danielToken, dmId, 'First message');
   requestMessageSendDM(danielToken, dmId, 'Second message');
-
-  expect(requestDMMessages(danielToken, dmId, 4).bodyObj).toMatchObject({ error: 'error' });
-  expect(requestDMMessages(danielToken, dmId, 4).res.statusCode).toBe(OK);
+  expect(requestDMMessages(danielToken, dmId, 4).res.statusCode).toBe(400);
 });
 
 test('Requesting user is not member of DM', () => {
+  requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
   const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
-
-  expect(requestDMMessages(samToken, dmId, 0).bodyObj).toMatchObject({ error: 'error' });
-  expect(requestDMMessages(samToken, dmId, 0).res.statusCode).toBe(OK);
+  expect(requestDMMessages(samToken, dmId, 0).res.statusCode).toBe(403);
 });
 
 test('Default case', () => {
@@ -427,7 +432,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDetails.res.statusCode).toBe(403);
     });
 
     test('Success remove DM, more than two users in DM', () => {
@@ -442,7 +447,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDetails.res.statusCode).toBe(403);
     });
 
     test('Fail remove DM, invalid token', () => {
@@ -477,13 +482,4 @@ describe('dm capabilities', () => {
       expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
     });
   });
-});
-
-test('Invalid dmId', () => {
-  requestClear();
-  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
-  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
-
-  expect(requestDMMessages(danielToken, dmId / 2, 0).bodyObj).toMatchObject({ error: 'error' });
 });

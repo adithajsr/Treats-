@@ -1,4 +1,5 @@
 import { getData, setData } from './dataStore';
+import HTTPError from 'http-errors';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
@@ -14,25 +15,26 @@ Return:
     Returns an array of messages, start and end indexes if successful
 
 */
-export function dmMessagesV1(token: string, dmId: number, start: number) {
+
+export function dmMessagesV2(token: string, dmId: number, start: number) {
   const data = getData();
   // checking for valid dmId
   const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);
-  if (dmIndex === -1) return { error: 'error' };
+  if (dmIndex === -1) throw HTTPError(400, 'Invalid dmId');
 
   // checking that member is authorised user of DM
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
 
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
 
   const messageAmount = data.dm[dmIndex].messages.length;
 
   if (start > messageAmount) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Start is greater than the total number of messages in the DM');
   }
 
   // Storing start + 50 amount of messages in a new array to be returned
@@ -366,25 +368,22 @@ Return:
     Returns the name and members of the specified DM if successful
 */
 
-export function dmDetailsV1(token: string, dmId: number) {
+export function dmDetailsV2(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid
 
   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
 
-  if (dmIndex === -1) return { error: 'error' };
+  if (dmIndex === -1) throw HTTPError(400, 'Invalid dmId');
 
   // checking that member is authorised user of DM
 
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
-  // console.log(uId);
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
-  // console.log(memberIndex);
-
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
 
   return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }
@@ -399,21 +398,21 @@ Reurns:
     {error: 'error'} if the token or dmId are invalid
     {} if successful
 */
-export function dmLeaveV1(token: string, dmId: number) {
+export function dmLeaveV2(token: string, dmId: number) {
   const data = getData();
 
   // checking for valid dmId
   const dmIndex = data.dm.findIndex(channel => channel.dmId === dmId);
-  if (dmIndex === -1) return { error: 'error' };
+  if (dmIndex === -1) throw HTTPError(400, 'Invalid dmId');
 
   // checking that member is authorised user of DM
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
 
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
   // removes member from members array in DM array
   data.dm[dmIndex].members.splice(memberIndex, 1);
 

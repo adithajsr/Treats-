@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
 import validator from 'validator';
+import HTTPError from 'http-errors';
 
 /* This function returns the important information about a user's profile.
 
@@ -26,7 +27,7 @@ export function userProfileV3(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
-    throwHTTPError(403, 'Invalid token');
+    throw HTTPError(403, 'Invalid token');
   }
 
   // Searching for the uId

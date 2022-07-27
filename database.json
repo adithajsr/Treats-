@@ -1,6 +1,21 @@
 {
-    "user": [],
+    "user": [
+        {
+            "uId": 1,
+            "email": "validemail@gmail.com",
+            "password": "123abc!@#",
+            "nameFirst": "John",
+            "nameLast": "Doe",
+            "handle": "johndoe",
+            "globalPerms": 2
+        }
+    ],
     "channel": [],
-    "token": [],
+    "token": [
+        {
+            "token": "113d683e-2134-4c93-95a6-dddb086a54ad",
+            "uId": 1
+        }
+    ],
     "dm": []
 }

@@ -8,11 +8,10 @@ import errorHandler from 'middleware-http-errors';
 import { channelDetailsV2, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
-import { userProfileV1, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
-import { dmMessagesV1, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV1, dmLeaveV1 } from './dm';
+import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { dmMessagesV2, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
-
 import { channelMessagesV2 } from './channel';
 
 // Set up web app, use JSON
@@ -34,13 +33,10 @@ app.get('/echo', (req, res, next) => {
   }
 });
 
-// handles errors nicely
-app.use(errorHandler());
-
 // for logging errors
 app.use(morgan('dev'));
 
-app.get('/channel/messages/v2', (req, res, next) => {
+app.get('/channel/messages/v3', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const channelId = Number(req.query.channelId) as number;
@@ -51,31 +47,44 @@ app.get('/channel/messages/v2', (req, res, next) => {
   }
 });
 
-app.get('/user/profile/v2', (req, res) => {
+app.get('/user/profile/v3', (req, res) => {
   const token = req.query.token as string;
   const uId = Number(req.query.uId) as number;
-  return res.json(userProfileV1(token, uId));
+  return res.json(userProfileV3(token, uId));
 });
 
-app.get('/dm/messages/v1', (req, res, next) => {
+app.get('/dm/messages/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
     const start = parseInt(req.query.start as string);
-    return res.json(dmMessagesV1(token, dmId, start));
+    return res.json(dmMessagesV2(token, dmId, start));
   } catch (err) {
     next(err);
   }
 });
 
-app.get('/dm/details/v1', (req, res, next) => {
+app.get('/dm/details/v2', (req, res, next) => {
   try {
     const token = req.query.token as string;
     const dmId = parseInt(req.query.dmId as string);
-    return res.json(dmDetailsV1(token, dmId));
+    return res.json(dmDetailsV2(token, dmId));
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/dm/leave/v2', (req, res, next) => {
+  try {
+    const { token, dmId } = req.body;
+    return res.json(dmLeaveV2(token, dmId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/clear/v1', (req, res) => {
+  res.json(clearV1());
 });
 
 app.get('/channel/details/v2', (req, res) => {
@@ -176,12 +185,6 @@ app.get('/users/all/v1', (req, res) => {
   res.json(usersAll(token));
 });
 
-app.get('/user/profile/v2', (req, res) => {
-  const token = req.query.token as string;
-  const uId = Number(req.query.uId) as number;
-  return res.json(userProfileV1(token, uId));
-});
-
 app.put('/user/profile/setname/v1', (req, res) => {
   const { token, nameFirst, nameLast } = req.body;
   res.json(userProfileSetName(token, nameFirst, nameLast));
@@ -246,41 +249,8 @@ app.delete('/dm/remove/v1', (req, res, next) => {
   }
 });
 
-app.get('/dm/details/v1', (req, res, next) => {
-  try {
-    const token = req.query.token as string;
-    const dmId = parseInt(req.query.dmId as string);
-    return res.json(dmDetailsV1(token, dmId));
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.post('/dm/leave/v1', (req, res, next) => {
-  try {
-    const { token, dmId } = req.body;
-    return res.json(dmLeaveV1(token, dmId));
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.delete('/clear/v1', (req, res) => {
-  res.json(clearV1());
-});
-
-app.post('/dm/leave/v1', (req, res, next) => {
-  try {
-    const { token, dmId } = req.body;
-    return res.json(dmLeaveV1(token, dmId));
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.delete('/clear/v1', (req, res) => {
-  res.json(clearV1());
-});
+// handles errors nicely
+app.use(errorHandler());
 
 // start server
 const server = app.listen(PORT, HOST, () => {

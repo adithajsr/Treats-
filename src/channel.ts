@@ -1,5 +1,5 @@
-
 import { getData, setData } from './dataStore';
+import HTTPError from 'http-errors';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint

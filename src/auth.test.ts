@@ -1,6 +1,6 @@
 import validator from 'validator';
 import { requestClear, requestUserProfile } from './users.test';
-import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
+import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
 
@@ -69,8 +69,6 @@ export function isHandleValid(handle: string) : boolean {
   const regex = /^[a-z]{0,20}[0-9]*/;
   return regex.test(handle);
 }
-
-import { getData } from './dataStore';
 
 // ======================================== requestAuthRegister Testing ========================================
 
@@ -257,7 +255,7 @@ describe('Testing for requestAuthLogin', () => {
     const returnObject = response.bodyObj;
     const testUserId = returnObject.authUserId;
     let testToken = returnObject.token;
-    let firstNum: any = String(testToken.substr(0 ,1));
+    let firstNum: any = String(testToken.substr(0, 1));
     if (Number(firstNum.charCodeAt(0)) === 57) {
       firstNum = 0;
     } else {
@@ -273,7 +271,7 @@ describe('Testing for requestAuthLogin', () => {
     expect(response.res.statusCode).toBe(OK);
     const returnObject = response.bodyObj;
     const testUserId = returnObject.authUserId;
-    let testToken = 'incorrecttokenform';
+    const testToken = 'incorrecttokenform';
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
   });
 });

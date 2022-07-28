@@ -386,7 +386,7 @@ describe('Testing for requestUsersAll', () => {
     const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
     let testToken = returnObject.bodyObj.token;
-    let firstNum: any = String(testToken.substr(0 ,1));
+    let firstNum: any = String(testToken.substr(0, 1));
     if (Number(firstNum.charCodeAt(0)) === 57) {
       firstNum = 0;
     } else {
@@ -400,7 +400,7 @@ describe('Testing for requestUsersAll', () => {
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    let testToken = 'incorrecttokenform';
+    const testToken = 'incorrecttokenform';
     expect(requestUsersAll(testToken).bodyObj).toStrictEqual({ error: 'error' });
   });
 });

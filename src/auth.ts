@@ -1,10 +1,7 @@
 import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
 import validator from 'validator';
-
-interface ErrorType {
-  error: 'error';
-}
+import HTTPError from 'http-errors';
 
 /* <checks if a uuid is in use and is of the correct structure>
 
@@ -127,7 +124,7 @@ password (string) - <any>
 Return Value:
 returns <true> on <email is valid>
 returns <false> on <email is invalid> */
-export function authLoginV1(email: string, password: string) : { authUserId: number, token: string } | ErrorType {
+export function authLoginV1(email: string, password: string) : { authUserId: number, token: string } {
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
@@ -145,12 +142,14 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
         };
       } else {
         // If password doesn't match the email's
-        return { error: 'error' };
+        throw HTTPError(400, 'password is not correct');
+        return;
       }
     }
   }
   // If no email matches the 1st argument
-  return { error: 'error' };
+  throw HTTPError(400, 'email entered does not belong to a user');
+  return;
 }
 
 /* <Creates a new user and fills out their details and puts it into "dataStore.js">
@@ -169,7 +168,8 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   if ((password.length < 6) || (!validator.isEmail(email)) ||
     (doesEmailExist(email)) || (nameFirst.length < 1) ||
     (nameFirst.length > 50) || (nameLast.length < 1) || (nameLast.length > 50)) {
-    return { error: 'error' };
+      throw HTTPError(400, 'invalid input details');
+      return;
   }
 
   // CREATE user Id

@@ -79,13 +79,13 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
-function requestUsersAll(token: string) {
+function requestUsersAll() {
   const res = request(
     'GET',
     `${url}:${port}/users/all/v1`,
     {
       qs: {
-        token: token,
+
       }
     }
   );
@@ -100,7 +100,7 @@ function requestUsersAll(token: string) {
 export function requestUserProfile(token: string, uId: number) {
   const res = request(
     'GET',
-    `${url}:${port}/user/profile/v2`,
+    `${url}:${port}/user/profile/v3`,
     {
       qs: {
         token: token,
@@ -110,7 +110,7 @@ export function requestUserProfile(token: string, uId: number) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -119,10 +119,8 @@ test('Invalid uId', () => {
   const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
   const maiyaToken = maiyaUser.bodyObj.token;
   const maiyaId = maiyaUser.bodyObj.authUserId;
-  const returnObject = requestUserProfile(maiyaToken, maiyaId + 20);
-  expect(returnObject.res.statusCode).toBe(OK);
-
-  expect(returnObject.bodyObj).toMatchObject({ error: 'error' });
+  expect(requestUserProfile(maiyaToken, maiyaId + 20).res.statusCode).toEqual(400);
+  // expect(returnObject.res.statusCode).toBe(400);
 });
 
 test('Testing default case', () => {

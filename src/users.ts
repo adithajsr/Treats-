@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
 import validator from 'validator';
+import HTTPError from 'http-errors';
 
 /* This function returns the important information about a user's profile.
 
@@ -13,7 +14,7 @@ Return Value:
 {info} if the authUserId and uId are valid, returns
 important info about a user's profile */
 
-export function userProfileV1(token: string, uId: number) {
+export function userProfileV3(token: string, uId: number) {
   const data = getData();
   // Determining whether token is valid
   let count = 0;
@@ -26,7 +27,7 @@ export function userProfileV1(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
-    return { error: 'error' };
+    throw HTTPError(403, 'Invalid token');
   }
 
   // Searching for the uId
@@ -43,7 +44,7 @@ export function userProfileV1(token: string, uId: number) {
   }
 
   // If uId doesn't match any uId in data object
-  return { error: 'error' };
+  throw HTTPError(400, 'Invalid uId');
 }
 
 /* <checks if a Token is in use>
@@ -94,7 +95,8 @@ returns <{ error: 'error' }> on <invalid token/uId> */
 function findAndSet(var1: string, token: string, dataKey: string, var2?: string) {
   const dataSet = getData();
   if (!doesTokenExist(token)) {
-    return { error: 'error' };
+    throw HTTPError(403, 'Invalid token');
+    return;
   }
   // uuid assiociated to token is found here
   let uId: number;
@@ -120,7 +122,8 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
     }
   }
   // this below line cannot be accessed for coverage if uuid in token object is a valid uId, in other words, no way of running this line in working code
-  return { error: 'error' };
+  throw HTTPError(403, 'Invalid token');
+  return;
 }
 
 /* <Update the authorised user's first and last name>
@@ -134,7 +137,8 @@ returns <{ error: 'error' }> on <invalid arguments> */
 export function userProfileSetName(token: string, nameFirst: string, nameLast: string) {
   if ((nameFirst.length < 1) || (nameFirst.length > 50) ||
       (nameLast.length < 1) || (nameLast.length > 50)) {
-    return { error: 'error' };
+        throw HTTPError(400, 'invalid input details');
+        return;
   }
   return findAndSet(nameFirst, token, 'names', nameLast);
 }
@@ -148,7 +152,8 @@ returns <void> on <success>
 returns <{ error: 'error' }> on <invalid arguments> */
 export function userProfileSetEmail(token: string, email: string) {
   if ((!validator.isEmail(email)) || (doesEmailExist(email))) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid input details');
+    return;
   }
   return findAndSet(email, token, 'email');
 }
@@ -163,7 +168,8 @@ returns <{ error: 'error' }> on <invalid arguments> */
 export function userProfileSetHandle(token: string, handleStr: string) {
   if ((handleStr.length < 3) || (handleStr.length > 20) ||
       !isHandleAllowed(handleStr)) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid input details');
+    return;
   }
   return findAndSet(handleStr, token, 'handle');
 }
@@ -175,10 +181,7 @@ token (string) - <uuidV4>
 Return Value:
 returns <an array of users with their uId, email, full name and handle> on <success>
 returns <{ error: 'error' }> on <invalid token> */
-export function usersAll(token: string) {
-  if (!doesTokenExist(token)) {
-    return { error: 'error' };
-  }
+export function usersAll() {
   const dataSet = getData();
   const returnObject = [];
   for (const item of dataSet.user) {

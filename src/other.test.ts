@@ -62,7 +62,7 @@ test('Clearing users', () => {
   // Clearing and testing
   const object = requestClear();
   expect(object.res.statusCode).toBe(OK);
-  expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestUserProfile(danielToken, danielId).res.statusCode).toBe(403);
 });
 
 test('Clearing channels containing users', () => {
@@ -76,7 +76,7 @@ test('Clearing channels containing users', () => {
   const object = requestClear();
   expect(object.res.statusCode).toBe(OK);
 
-  expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestUserProfile(danielToken, danielId).res.statusCode).toBe(403);
   const danielToken2 = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   expect(requestChannelsListAll(danielToken2).bodyObj.channels).toMatchObject([]);
 });
@@ -103,8 +103,8 @@ test('Clearing channels containing multiple users', () => {
   const object = requestClear();
   expect(object.res.statusCode).toBe(OK);
 
-  expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject({ error: 'error' });
-  expect(requestUserProfile(maiyaToken, maiyaId).bodyObj).toMatchObject({ error: 'error' });
+  expect(requestUserProfile(danielToken, danielId).res.statusCode).toBe(403);
+  expect(requestUserProfile(maiyaToken, maiyaId).res.statusCode).toBe(403);
 
   const danielToken2 = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
 

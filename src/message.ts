@@ -1,4 +1,5 @@
 import { getData, setData } from './dataStore';
+import HTTPError from 'http-errors';
 
 interface Database {
   user: any[];
@@ -24,6 +25,8 @@ Return Value:
 function checkToken(token: string, data: Database) {
   if (data.token.find((a: any) => a.token === token) === undefined) {
     return false;
+    // return { error: 'error' };
+    // throw HTTPError(403, 'invalid token!');
   }
   return true;
 }
@@ -64,10 +67,12 @@ function messageSendV1 (token: string, channelId: number, message: string) {
     return { error: 'error' };
   }
   const data = getData();
-  // check for token validity
+  // checkToken(token, data);
   if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
+
+
   const uId = tokenToUid(token, data);
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
@@ -116,9 +121,11 @@ Return Value:
 function messageEditV1 (token: string, messageId: number, message: string) {
   const data = getData();
 
+  // checkToken(token, data);
   if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
+
   if (message.length > 1000) {
     return { error: 'error' };
   }
@@ -152,9 +159,7 @@ function messageEditV1 (token: string, messageId: number, message: string) {
   }
 
   if (message === '') {
-    channel[channelIndex].messages = channel[channelIndex].messages.filter(
-      a => a.messageId === messageId
-    );
+    channel[channelIndex].messages.splice(messageIndex, 1);
   } else {
     channel[channelIndex].messages[messageIndex].message = message;
   }
@@ -180,6 +185,7 @@ Return Value:
 function messageRemoveV1(token: string, messageId: number) {
   const data = getData();
 
+  // checkToken(token, data);
   if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
@@ -200,9 +206,10 @@ function messageRemoveV1(token: string, messageId: number) {
     return { error: 'error' };
   }
 
+  let messageIndex;
   // check info surrounding message
   if (channelIndex === undefined) {
-    const messageIndex = dm[dmIndex].messages.findIndex(a => a.messageId === messageId);
+    messageIndex = dm[dmIndex].messages.findIndex(a => a.messageId === messageId);
     if (dm[dmIndex].messages[messageIndex].uId !== uId) {
       return { error: 'error' };
     }
@@ -211,7 +218,7 @@ function messageRemoveV1(token: string, messageId: number) {
       return { error: 'error' };
     }
   } else if (dmIndex === undefined) {
-    const messageIndex = channel[channelIndex].messages.findIndex(a => a.messageId === messageId);
+    messageIndex = channel[channelIndex].messages.findIndex(a => a.messageId === messageId);
     if (channel[channelIndex].messages[messageIndex].uId !== uId) {
       return { error: 'error' };
     }
@@ -224,9 +231,7 @@ function messageRemoveV1(token: string, messageId: number) {
     );
   }
 
-  channel[channelIndex].messages = channel[channelIndex].messages.filter(
-    a => a.messageId === messageId
-  );
+  channel[channelIndex].messages.splice(messageIndex, 1);
 
   setData(data);
 
@@ -251,10 +256,12 @@ function messageSendDmV1 (token: string, dmId: number, message: string) {
   if (message.length < 1 || message === '' || message.length > 1000) {
     return { error: 'error' };
   }
-  // token validity
+
+  // checkToken(token, data);
   if (checkToken(token, data) === false) {
     return { error: 'error' };
   }
+
   const uId = tokenToUid(token, data);
   // check for dm in channel
   if (data.dm.find(a => a.dmId === dmId) === undefined) {

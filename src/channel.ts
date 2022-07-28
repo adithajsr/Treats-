@@ -160,7 +160,6 @@ function channelDetailsV2(token: string, channelId: number) {
           handle: user[index].handle,
         }
       );
-    // members
     } 
     details.allMembers.push(
       {

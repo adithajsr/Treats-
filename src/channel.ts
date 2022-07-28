@@ -1,5 +1,5 @@
-
 import { getData, setData } from './dataStore';
+import HTTPError from 'http-errors';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
@@ -20,23 +20,23 @@ export function channelMessagesV2(token: string, channelId: number, start: numbe
 
   // checking for valid channelId
   const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
-  if (channelIndex === -1) return { error: 'error' };
+  if (channelIndex === -1) throw HTTPError(400, 'Invalid channelId');
 
   // checking that member is authorised user of channel
   const tokenIndex = data.token.findIndex(a => a.token === token);
-  if (tokenIndex === -1) return { error: 'error' };
+  if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
 
   const uId = data.token[tokenIndex].uId;
   const memberIndex = data.channel[channelIndex].members.findIndex(a => a.uId === uId);
 
-  if (memberIndex === -1) return { error: 'error' };
+  if (memberIndex === -1) throw HTTPError(403, 'User does not have access to channel');
 
   // checking whether start index is greater than the amount of messages
 
   const messageAmount = data.channel[channelIndex].messages.length;
 
   if (start > messageAmount) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Start is greater than the total amount of messages in the channel');
   }
 
   // Storing start + 50 amount of messages in a new array to be returned

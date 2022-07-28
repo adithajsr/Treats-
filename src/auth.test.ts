@@ -1,7 +1,6 @@
-import { isHandleValid } from './auth';
 import validator from 'validator';
 import { requestClear, requestUserProfile } from './users.test';
-import { validate as validateV4uuid } from 'uuid';
+import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
 
@@ -59,6 +58,20 @@ function requestAuthLogout(token: string) {
   };
 }
 
+/* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
+
+Arguments:
+handle (string) - <minimum length 2, with posibility of >
+Return Value:
+returns <true> on <handle meeting requirements>
+returns <false> on <handle not meeting requirements> */
+export function isHandleValid(handle: string) : boolean {
+  const regex = /^[a-z]{0,20}[0-9]*/;
+  return regex.test(handle);
+}
+
+import { getData } from './dataStore';
+
 // ======================================== requestAuthRegister Testing ========================================
 
 describe('Testing for requestAuthRegister', () => {
@@ -68,6 +81,7 @@ describe('Testing for requestAuthRegister', () => {
 
   test('Test 1 affirmitive', () => {
     // all should be well
+    requestClear();
     const response = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     expect(response.res.statusCode).toBe(OK);
     const returnObject = response.bodyObj;
@@ -138,6 +152,51 @@ describe('Testing for requestAuthRegister', () => {
     expect(returnObject).toStrictEqual({ error: 'error' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
+
+  test('Test 6 extra-long name', () => {
+    const testUserEmail = 'almost.having.fun@writing.tests.com';
+    const testUserPw = 'thispasswordismorethanlongenough';
+    const testUserFN = 'Sebastian';
+    const testUserLN = 'Fitzagamemnon';
+    const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
+    expect(response.res.statusCode).toBe(OK);
+    const returnObject = response.bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      uId: 0,
+      email: testUserEmail,
+      nameFirst: testUserFN,
+      nameLast: testUserLN,
+      handleStr: 'sebastianfitzagamemn',
+    });
+  });
+
+  test('Test 7 duplicate handles', () => {
+    requestClear();
+    requestAuthRegister('blank@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    requestAuthRegister('zero@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    requestAuthRegister('one@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    requestAuthRegister('two@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    requestAuthRegister('three@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestAuthRegister('four@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    expect(response.res.statusCode).toBe(OK);
+    const returnObject = response.bodyObj;
+
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const testUserObject = {
+      uId: testUserId,
+      email: 'four@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith4',
+    };
+    expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
+    expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
+    expect(validateV4uuid(testToken)).toBe(true);
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
+  });
 });
 
 // ======================================== requestAuthLogin Testing ========================================
@@ -189,6 +248,33 @@ describe('Testing for requestAuthLogin', () => {
     expect(returnObject).toStrictEqual({ error: 'error' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
     expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith').bodyObj).not.toBe({ error: 'error' });
+  });
+
+  test('Test 4 invalid token - does not exist', () => {
+    requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestAuthLogin('who.is.joe@is.the.question.com', 'yourmumma');
+    expect(response.res.statusCode).toBe(OK);
+    const returnObject = response.bodyObj;
+    const testUserId = returnObject.authUserId;
+    let testToken = returnObject.token;
+    let firstNum: any = String(testToken.substr(0 ,1));
+    if (Number(firstNum.charCodeAt(0)) === 57) {
+      firstNum = 0;
+    } else {
+      firstNum++;
+    }
+    testToken = String(firstNum) + testToken.slice(1);
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
+  });
+
+  test('Test 5 invalid token - incorrect form', () => {
+    requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestAuthLogin('who.is.joe@is.the.question.com', 'yourmumma');
+    expect(response.res.statusCode).toBe(OK);
+    const returnObject = response.bodyObj;
+    const testUserId = returnObject.authUserId;
+    let testToken = 'incorrecttokenform';
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
   });
 });
 

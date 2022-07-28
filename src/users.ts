@@ -26,7 +26,6 @@ export function userProfileV1(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
-    console.log('ERROR - 1');
     return { error: 'error' };
   }
 
@@ -44,7 +43,6 @@ export function userProfileV1(token: string, uId: number) {
   }
 
   // If uId doesn't match any uId in data object
-  console.log('ERROR - 2');
   return { error: 'error' };
 }
 
@@ -98,6 +96,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
   if (!doesTokenExist(token)) {
     return { error: 'error' };
   }
+  // uuid assiociated to token is found here
   let uId: number;
   for (const item of dataSet.token) {
     if (item.token === token) {
@@ -105,6 +104,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
     }
   }
 
+  // that uuid is then used to fund associated user
   for (const user of dataSet.user) {
     if (user.uId === uId) {
       if (dataKey === 'names') {
@@ -119,6 +119,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       return {};
     }
   }
+  // this below line cannot be accessed for coverage if uuid in token object is a valid uId, in other words, no way of running this line in working code
   return { error: 'error' };
 }
 
@@ -163,13 +164,6 @@ export function userProfileSetHandle(token: string, handleStr: string) {
   if ((handleStr.length < 3) || (handleStr.length > 20) ||
       !isHandleAllowed(handleStr)) {
     return { error: 'error' };
-  }
-  // Check if handle is in use
-  const dataSet = getData();
-  for (const item of dataSet.user) {
-    if (item.handle === handleStr) {
-      return { error: 'error' };
-    }
   }
   return findAndSet(handleStr, token, 'handle');
 }

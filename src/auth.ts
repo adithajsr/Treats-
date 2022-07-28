@@ -14,12 +14,15 @@ Return Value:
 returns <true> on <valid uuid>
 returns <false> on <in-use or inccorectly structured uuid> */
 export function isUuidValid(uuid: string) : boolean {
+  // this function is only called after a random uuidv4 is generated so it is unlikely to access line # and is impossible to access line $
   if (!validateV4uuid(uuid)) {
+    // line $ is below
     return false;
   }
   const dataSet = getData();
   for (const item of dataSet.token) {
     if (item.token === uuid) {
+      // line # is below
       return false;
     }
   }
@@ -34,21 +37,10 @@ returns <uid> on <finding a valid uuid> */
 function newUuid() {
   let uuid: string = generateV4uuid();
   while (!isUuidValid(uuid)) {
+    // above function is only caleld here 'isUuidValid' and always* returns true because it is given a brand new random uuidv4 so below line cannot be accessed via coverage
     uuid = generateV4uuid();
   }
   return uuid;
-}
-
-/* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
-
-Arguments:
-handle (string) - <minimum length 2, with posibility of >
-Return Value:
-returns <true> on <handle meeting requirements>
-returns <false> on <handle not meeting requirements> */
-export function isHandleValid(handle: string) : boolean {
-  const regex = /^[a-z]{0,20}$[0-9]*/;
-  return regex.test(handle);
 }
 
 /* <Checks if a email is already used by another user>
@@ -188,7 +180,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 
   // PEFORM RETURN & UPDATE "dataStore"
   let globalPermissions: number;
-  if (dataSet.user === []) {
+  if (dataSet.user.length === 0) {
     globalPermissions = 1; // owner
   } else {
     globalPermissions = 2; // memeber

@@ -311,6 +311,22 @@ describe('Testing for requestUserProfileSetHandle', () => {
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
+
+  test('Test 4 negative non-existant token', () => {
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUserProfileSetHandle('incorrecttoken', 'bigchungas');
+    expect(response.res.statusCode).toBe(OK);
+    const expectedObject = {
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith'
+    };
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+  });
 });
 
 // ======================================== requestUsersAll Testing ========================================
@@ -349,7 +365,7 @@ describe('Testing for requestUsersAll', () => {
     ]);
   });
 
-  test('Test 1 affirmitive one user', () => {
+  test('Test 2 affirmitive one user', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const response = requestUsersAll(returnObject.bodyObj.token);
@@ -363,5 +379,28 @@ describe('Testing for requestUsersAll', () => {
         handleStr: 'johnsmith',
       }
     ]);
+  });
+
+  test('Test 3 negative non-existant token', () => {
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll(returnObject.bodyObj.token);
+    expect(response.res.statusCode).toBe(OK);
+    let testToken = returnObject.bodyObj.token;
+    let firstNum: any = String(testToken.substr(0 ,1));
+    if (Number(firstNum.charCodeAt(0)) === 57) {
+      firstNum = 0;
+    } else {
+      firstNum++;
+    }
+    testToken = String(firstNum) + testToken.slice(1);
+    expect(requestUsersAll(testToken).bodyObj).toStrictEqual({ error: 'error' });
+  });
+
+  test('Test 4 negative invalid token form', () => {
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll(returnObject.bodyObj.token);
+    expect(response.res.statusCode).toBe(OK);
+    let testToken = 'incorrecttokenform';
+    expect(requestUsersAll(testToken).bodyObj).toStrictEqual({ error: 'error' });
   });
 });

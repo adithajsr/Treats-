@@ -1,4 +1,7 @@
 import { getData, setData } from './dataStore';
+import { checkToken } from './message'
+import HTTPError from 'http-errors';
+
 
 interface channelMember {
   uId: number,
@@ -167,20 +170,9 @@ interface Database {
   dm: any[];
 }
 
-function checkToken(token: string, data: Database) {
-  if (data.token.find(a => a.token === token) === undefined) {
-    return false;
-  }
-  return true;
-}
-
-function channelsListallV2(token: string) {
+export function channelsListallV3(token: string) {
   const data = getData();
-
-  // invalid token - invalid, or token is not in database
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
+  checkToken(token, data);
 
   const foundChannels = [];
   for (const i in data.channel) {
@@ -192,4 +184,4 @@ function channelsListallV2(token: string) {
   };
 }
 
-export { channelsCreateV2, channelsListV2, channelsListallV2 };
+export { channelsCreateV2, channelsListV2 };

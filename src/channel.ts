@@ -1,5 +1,7 @@
 
 import { getData, setData } from './dataStore';
+import { checkToken } from './message'
+import HTTPError from 'http-errors';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
@@ -69,25 +71,6 @@ interface Details {
 }
 
 /*
-Checks validity of a token
-
-Arguments:
-  token (string)         - represents the session of the user who is creating the channel
-  data (database)     - database that is being interacted with
-  message (string)      - message they want to send
-
-Return Value:
-  Returns { true } if token is valid
-  Returns { false } if token is invalid
-*/
-function checkToken(token: string, data: Database) {
-  if (data.token.find((a: any) => a.token === token) === undefined) {
-    return false;
-  }
-  return true;
-}
-
-/*
 Converts a token to its relevant uid
 
 Arguments:
@@ -113,13 +96,9 @@ Return Value:
     Returns <error otherwise>
 */
 
-function channelDetailsV2(token: string, channelId: number) {
+export function channelDetailsV3(token: string, channelId: number) {
   const data = getData();
-
-  // check for token validity
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
+  checkToken(token, data);
 
   const uId = tokenToUid(token, data);
 
@@ -128,11 +107,11 @@ function channelDetailsV2(token: string, channelId: number) {
 
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid channelId');
     // check for user in channel
   } else {
     if (channel[i].members.find(a => a.uId === uId) === undefined) {
-      return { error: 'error' };
+      throw HTTPError(403, 'auth user is not a member!');
     }
   }
 
@@ -171,7 +150,7 @@ function channelDetailsV2(token: string, channelId: number) {
       }
     );
   }
-  return details;
+  return {channelDetails: details};
 }
 
 // ======================================== Main Functions. ========================================
@@ -461,5 +440,3 @@ function addUser(channelId: number, uId: number) {
   data.channel[i].members.push(newUser);
   setData(data);
 }
-
-export { channelDetailsV2 };

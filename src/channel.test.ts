@@ -1,6 +1,7 @@
 
-import request from 'sync-request';
+import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister, requestChannelsCreate, requestMessageSend } from './message.test'
 
 const OK = 200;
 const port = config.port;
@@ -9,52 +10,43 @@ const url = config.url;
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authSam = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer'];
 
-export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v2`,
-    {
-      json: {
-        email: email,
-        password: password,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-      }
-    }
-  );
+// -------------------------------------------------------------------------//
+
+function requestHelper(method: HttpVerb, path: string, payload: object) {
+  let qs = {};
+  let json = {};
+  let res;
+  if (method === 'GET' || method === 'DELETE') {
+    qs = payload;
+    res = request(method, `${url}:${port}` + path, { qs });
+  } else {
+    json = payload;
+    res = request(method, `${url}:${port}` + path, { json });
+  }
+  if (res.statusCode === 400 || res.statusCode === 403) {
+    return res;
+  }
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-} function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channels/create/v2`,
-    {
-      json: { token, name, isPublic },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.getBody() as string)
   };
 }
 
-function requestChannelMessages(token: string, channelId: number, start: number) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channel/messages/v2`,
-    {
-      qs: {
-        token, channelId, start,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
+// -------------------------------------------------------------------------//
+
+export function requestChannelMessages(token: string, channelId: number, start: number) {
+  return requestHelper('GET', '/channel/messages/v2', { token, channelId, start });
 }
+
+function requestChannelDetails(token: string, channelId: number) {
+  return requestHelper('GET', '/channel/details/v3', { token, channelId });
+}
+
+function requestClear() {
+  return requestHelper('DELETE', '/clear/v1', {});
+}
+
+// -------------------------------------------------------------------------//
 
 type user = {
   email: string,
@@ -64,46 +56,6 @@ type user = {
   res: any,
   bodyObj: any,
 };
-
-function requestChannelDetails(token: string, channelId: number) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channel/details/v2`,
-    {
-      qs: {
-        token, channelId
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-function requestMessageSend(token: string, channelId: number, message: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/message/send/v1`,
-    {
-      json: { token, channelId, message },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(String(res.getBody()));
-}
 
 test('Invalid channelId', () => {
   requestClear();
@@ -175,7 +127,7 @@ const createTestUser = (email: string, password: string, nameFirst: string, name
   };
 };
 
-describe('channel/details/v2 testing', () => {
+describe('channel/details/v3 testing', () => {
   let testUser: user;
 
   beforeEach(() => {
@@ -192,29 +144,26 @@ describe('channel/details/v2 testing', () => {
   test('invalid token, fail channel details', () => {
     const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
     const testRequest = requestChannelDetails(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId);
-    expect(testRequest.res.statusCode).toBe(OK);
-    expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    expect(testRequest.statusCode).toBe(403);
   });
 
   test('channelId does not refer to valid channel, valid token, fail channel details', () => {
     const testRequest = requestChannelDetails(testUser.bodyObj.token, 9999);
-    expect(testRequest.res.statusCode).toBe(OK);
-    expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    expect(testRequest.statusCode).toBe(400);
   });
 
   test('channelId valid but authorised user is not a member of the channel, fail channel details', () => {
     const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
     const testUser2 = requestAuthRegister('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
     const testRequest = requestChannelDetails(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
-    expect(testRequest.res.statusCode).toBe(OK);
-    expect(testRequest.bodyObj).toStrictEqual({ error: 'error' });
+    expect(testRequest.statusCode).toBe(403);
   });
 
   test('successful channel details return', () => {
     const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
     const testRequest = requestChannelDetails(testUser.bodyObj.token, testChannel.bodyObj.channelId);
     expect(testRequest.res.statusCode).toBe(OK);
-    expect(testRequest.bodyObj).toStrictEqual({
+    expect(testRequest.bodyObj.channelDetails).toStrictEqual({
       name: 'name',
       isPublic: true,
       ownerMembers: expect.any(Array),

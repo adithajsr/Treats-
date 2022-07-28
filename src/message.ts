@@ -22,13 +22,10 @@ Return Value:
   Returns { true } if token is valid
   Returns { false } if token is invalid
 */
-function checkToken(token: string, data: Database) {
+export function checkToken(token: string, data: Database) {
   if (data.token.find((a: any) => a.token === token) === undefined) {
-    return false;
-    // return { error: 'error' };
-    // throw HTTPError(403, 'invalid token!');
+    throw HTTPError(403, 'invalid token!');
   }
-  return true;
 }
 
 /*
@@ -41,7 +38,7 @@ Arguments:
 Return Value:
   Returns { uId }      - relevant uId corresponding to token
 */
-function tokenToUid(token: string, data: Database) {
+export function tokenToUid(token: string, data: Database) {
   const index = data.token.findIndex(a => a.token === token);
   const uId = data.token[index].uId;
   return uId;
@@ -62,26 +59,22 @@ Return Value:
                               owner permission
 */
 
-function messageSendV1 (token: string, channelId: number, message: string) {
+export function messageSendV2 (token: string, channelId: number, message: string) {
   if (message.length < 1 || message.length > 1000) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid message length!');
   }
   const data = getData();
-  // checkToken(token, data);
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
-
+  checkToken(token, data);
 
   const uId = tokenToUid(token, data);
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid channelId!');
     // check for user in channel
   } else {
     const i = data.channel.findIndex(data => data.channelId === channelId);
     if (data.channel[i].members.find(a => a.uId === uId) === undefined) {
-      return { error: 'error' };
+      throw HTTPError(403, 'authorised user is not a member!');
     }
   }
 
@@ -89,6 +82,9 @@ function messageSendV1 (token: string, channelId: number, message: string) {
   const messageId = Math.floor(Math.random() * 100);
   const time = Math.floor((new Date()).getTime() / 1000);
 
+  // console.log('before push')
+  // console.log(data)
+  // console.log(data.channel[1]);
   data.channel[channelIndex].messages.push(
     {
       messageId: messageId,
@@ -97,9 +93,16 @@ function messageSendV1 (token: string, channelId: number, message: string) {
       timeSent: time,
     }
   );
-
+  
   setData(data);
 
+  // console.log('data.channel[0].messages')
+  // console.log(data.channel[0].messages);
+  // console.log(data.channel[0].messages);
+
+  // console.log('attempt recall')
+  // const m = data.channel[0].findIndex(a => a.messageId === messageId);
+  // console.log(data.channel[0].messages[m]);
   return { messageId: messageId };
 }
 
@@ -118,16 +121,12 @@ Return Value:
                                owner permission
 */
 
-function messageEditV1 (token: string, messageId: number, message: string) {
+export function messageEditV2 (token: string, messageId: number, message: string) {
   const data = getData();
-
-  // checkToken(token, data);
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
+  checkToken(token, data);
 
   if (message.length > 1000) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid message length!');
   }
 
   const uId = tokenToUid(token, data);
@@ -142,20 +141,22 @@ function messageEditV1 (token: string, messageId: number, message: string) {
         messageIndex = j;
         // auth uid didn't send the message
         if (channel[i].messages[j].uId !== uId) {
-          return { error: 'error' };
+          throw HTTPError(403, 'message was not sent by auth user!');
         }
         // check if uId has owner permissions
         // and no global permissions
         const memberIndex = channel[i].members.findIndex(a => a.uId === uId);
-        if (channel[i].members[memberIndex].channelPerms !== 1) {
-          return { error: 'error' };
+        const globalPermIndex = data.user.findIndex(a => a.uId === uId);
+        if (channel[i].members[memberIndex].channelPerms !== 1 &&
+            data.user[globalPermIndex].globalPerms !== 1) {
+          throw HTTPError(403, 'user has not have owner or gloabl permissions!');
         }
       }
     }
   }
 
   if (channelIndex === NOTFOUND) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid channelId!');
   }
 
   if (message === '') {
@@ -165,7 +166,7 @@ function messageEditV1 (token: string, messageId: number, message: string) {
   }
 
   setData(data);
-  return { };
+  return {};
 }
 
 /*
@@ -182,13 +183,9 @@ Return Value:
                                owner permission
 */
 
-function messageRemoveV1(token: string, messageId: number) {
+export function messageRemoveV2(token: string, messageId: number) {
   const data = getData();
-
-  // checkToken(token, data);
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
+  checkToken(token, data);
 
   const uId = tokenToUid(token, data);
   let channelIndex, dmIndex;
@@ -203,7 +200,7 @@ function messageRemoveV1(token: string, messageId: number) {
     dmIndex = dm[i].messages.findIndex(a => a.messageId === messageId);
   }
   if (channelIndex && dmIndex === undefined) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid messageId!');
   }
 
   let messageIndex;
@@ -211,31 +208,31 @@ function messageRemoveV1(token: string, messageId: number) {
   if (channelIndex === undefined) {
     messageIndex = dm[dmIndex].messages.findIndex(a => a.messageId === messageId);
     if (dm[dmIndex].messages[messageIndex].uId !== uId) {
-      return { error: 'error' };
+      throw HTTPError(403, 'no permissions!');
     }
     const memberIndex = dm[dmIndex].members.findIndex(a => a.uId === uId);
-    if (dm[dmIndex].members[memberIndex].dmPerms !== 1) {
-      return { error: 'error' };
+    const globalPermIndex = data.user.findIndex(a => a.uId === uId);
+    if (dm[dmIndex].members[memberIndex].dmPerms !== 1 &&
+      data.user[globalPermIndex].globalPerms !== 1) {
+      throw HTTPError(403, 'no permissions!');
     }
+    dm[dmIndex].messages.splice(messageIndex, 1);
   } else if (dmIndex === undefined) {
     messageIndex = channel[channelIndex].messages.findIndex(a => a.messageId === messageId);
     if (channel[channelIndex].messages[messageIndex].uId !== uId) {
-      return { error: 'error' };
+      throw HTTPError(403, 'no permissions!');
     }
     const memberIndex = channel[channelIndex].members.findIndex(a => a.uId === uId);
-    if (channel[channelIndex].members[memberIndex].channelPerms !== 1) {
-      return { error: 'error' };
+    const globalPermIndex = data.user.findIndex(a => a.uId === uId);
+    if (channel[channelIndex].members[memberIndex].channelPerms !== 1 &&
+      data.user[globalPermIndex].globalPerms !== 1) {
+      throw HTTPError(403, 'no permissions!');
     }
-    channel[channelIndex].messages = channel[channelIndex].messages.filter(
-      a => a.messageId === messageId
-    );
+    channel[channelIndex].messages.splice(messageIndex, 1);
   }
 
-  channel[channelIndex].messages.splice(messageIndex, 1);
-
   setData(data);
-
-  return { };
+  return {};
 }
 
 /*
@@ -251,26 +248,23 @@ Return Value:
     Returns { error: 'error' } on invalid token, invalid dmId, or invalid message length
 */
 
-function messageSendDmV1 (token: string, dmId: number, message: string) {
-  const data = getData();
+export function messageSendDmV2 (token: string, dmId: number, message: string) {
   if (message.length < 1 || message === '' || message.length > 1000) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid message length!');
   }
 
-  // checkToken(token, data);
-  if (checkToken(token, data) === false) {
-    return { error: 'error' };
-  }
+  const data = getData();
+  checkToken(token, data);
 
   const uId = tokenToUid(token, data);
   // check for dm in channel
   if (data.dm.find(a => a.dmId === dmId) === undefined) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid dmId!');
   }
   // dm valid, but auth user is not a member
   const i = data.dm.findIndex(data => data.dmId === dmId);
   if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
-    return { error: 'error' };
+    throw HTTPError(403, 'auth user is not a member!');
   }
 
   const messageId = Math.floor(Math.random() * 100);
@@ -286,8 +280,5 @@ function messageSendDmV1 (token: string, dmId: number, message: string) {
   );
 
   setData(data);
-
   return { messageId: messageId };
 }
-
-export { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 };

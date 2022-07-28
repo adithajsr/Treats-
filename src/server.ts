@@ -121,7 +121,7 @@ app.get('/channels/list/v2', (req, res, next) => {
   }
 });
 
-app.get('/channels/listall/v3', (req, res) => {
+app.get('/channels/listall/v2', (req, res) => {
   const token = req.query.token;
   res.json(channelsListallV3(token as string));
 });
@@ -199,23 +199,23 @@ app.put('/user/profile/handle/v1', (req, res) => {
 
 app.post('/message/send/v2', (req, res) => {
   const { token, channelId, message } = req.body;
-  return res.json(messageSendV2(token, channelId, message));
+  res.json(messageSendV2(token, channelId, message));
 });
 
 app.put('/message/edit/v2', (req, res) => {
   const { token, messageId, message } = req.body;
-  return res.json(messageEditV2(token, messageId, message));
+  res.json(messageEditV2(token, messageId, message));
 });
 
 app.delete('/message/remove/v2', (req, res) => {
   const token = req.query.token as string;
   const messageId = parseInt(req.query.messageId as string);
-  return res.json(messageRemoveV2(token, messageId));
+  res.json(messageRemoveV2(token, messageId));
 });
 
 app.post('/message/senddm/v2', (req, res) => {
   const { token, dmId, message } = req.body;
-  return res.json(messageSendDmV2(token, dmId, message));
+  res.json(messageSendDmV2(token, dmId, message));
 });
 
 app.post('/dm/create/v1', (req, res, next) => {

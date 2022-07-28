@@ -268,22 +268,21 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
     res = request(method, `${url}:${port}` + path, { json });
   }
   if (res.statusCode === 400 || res.statusCode === 403) {
-    return res;
+    return res.statusCode;
   }
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string)
-  };
+  if (res.statusCode === 200) {
+    return JSON.parse(res.getBody() as string);
+  }
 }
 
 // -------------------------------------------------------------------------//
 
 function requestChannelsListall(token: string) {
-  return requestHelper('GET', '/channels/listall/v3', { token });
+  return requestHelper('GET', '/channels/listall/v2', { token });
 }
 
 describe('channels functions testing', () => {
-  describe('channels/listall/v3 test', () => {
+  describe('channels/listall/v2 test', () => {
     let testUser: user;
     beforeEach(() => {
       requestClear();
@@ -297,13 +296,12 @@ describe('channels functions testing', () => {
 
     test('invalid token, fail channels list all', () => {
       const testRequest = requestChannelsListall(testUser.bodyObj.token + 'a');
-      expect(testRequest.statusCode).toBe(403);
+      expect(testRequest).toBe(403);
     });
 
     test('no channels in database, channels list all success', () => {
       const testRequest = requestChannelsListall(testUser.bodyObj.token);
-      expect(testRequest.res.statusCode).toBe(OK);
-      expect(testRequest.bodyObj).toStrictEqual({
+      expect(testRequest).toStrictEqual({
         channels: []
       });
     });
@@ -311,8 +309,7 @@ describe('channels functions testing', () => {
     test('return one channel, channels list all success', () => {
       const testChannel = createTestChannel(testUser.bodyObj.token, 'channelName', true);
       const testRequest = requestChannelsListall(testUser.bodyObj.token);
-      expect(testRequest.res.statusCode).toBe(OK);
-      expect(testRequest.bodyObj).toStrictEqual({
+      expect(testRequest).toStrictEqual({
         channels: [
           {
             channelId: testChannel.bodyObj.channelId,
@@ -341,10 +338,8 @@ describe('channels functions testing', () => {
         },
       ]);
       const testRequest = requestChannelsListall(testUser.bodyObj.token);
-
-      expect(testRequest.res.statusCode).toBe(OK);
-      const received = new Set(testRequest.bodyObj.channels);
-      expect(received).toStrictEqual(expected);
+      const received = new Set(testRequest.channels);
+      expect(received).toEqual(expected);
     });
   });
 

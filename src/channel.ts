@@ -1,6 +1,6 @@
 
 import { getData, setData } from './dataStore';
-import { checkToken } from './message'
+import { checkToken } from './message';
 import HTTPError from 'http-errors';
 
 /*
@@ -139,7 +139,7 @@ export function channelDetailsV3(token: string, channelId: number) {
           handle: user[index].handle,
         }
       );
-    } 
+    }
     details.allMembers.push(
       {
         uId: user[index].uId,
@@ -150,7 +150,7 @@ export function channelDetailsV3(token: string, channelId: number) {
       }
     );
   }
-  return {channelDetails: details};
+  return { channelDetails: details };
 }
 
 // ======================================== Main Functions. ========================================

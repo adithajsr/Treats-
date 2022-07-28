@@ -1,7 +1,7 @@
 
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-import { requestAuthRegister, requestChannelsCreate, requestMessageSend } from './message.test'
+import { requestAuthRegister, requestChannelsCreate, requestMessageSend } from './message.test';
 
 const OK = 200;
 const port = config.port;
@@ -24,12 +24,11 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
     res = request(method, `${url}:${port}` + path, { json });
   }
   if (res.statusCode === 400 || res.statusCode === 403) {
-    return res;
+    return res.statusCode;
   }
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string)
-  };
+  if (res.statusCode === 200) {
+    return JSON.parse(res.getBody() as string);
+  }
 }
 
 // -------------------------------------------------------------------------//
@@ -127,14 +126,13 @@ const createTestUser = (email: string, password: string, nameFirst: string, name
   };
 };
 
-describe('channel/details/v3 testing', () => {
-  let testUser: user;
+describe('channel/details/v2 testing', () => {
+  let testUser: any;
 
   beforeEach(() => {
     requestClear();
     // Create a test user
-    testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-    expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
+    testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
   });
 
   afterEach(() => {
@@ -142,32 +140,47 @@ describe('channel/details/v3 testing', () => {
   });
 
   test('invalid token, fail channel details', () => {
-    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
-    const testRequest = requestChannelDetails(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId);
-    expect(testRequest.statusCode).toBe(403);
+    const testChannel = requestChannelsCreate(testUser.token, 'channelName', true);
+    const testRequest = requestChannelDetails(testUser.token + 'a', testChannel.channelId);
+    expect(testRequest).toBe(403);
   });
 
   test('channelId does not refer to valid channel, valid token, fail channel details', () => {
-    const testRequest = requestChannelDetails(testUser.bodyObj.token, 9999);
-    expect(testRequest.statusCode).toBe(400);
+    const testRequest = requestChannelDetails(testUser.token, 9999);
+    expect(testRequest).toBe(400);
   });
 
   test('channelId valid but authorised user is not a member of the channel, fail channel details', () => {
-    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+    const testChannel = requestChannelsCreate(testUser.token, 'name', true);
     const testUser2 = requestAuthRegister('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
-    const testRequest = requestChannelDetails(testUser2.bodyObj.token, testChannel.bodyObj.channelId);
-    expect(testRequest.statusCode).toBe(403);
+    const testRequest = requestChannelDetails(testUser2.token, testChannel.channelId);
+    expect(testRequest).toBe(403);
   });
 
   test('successful channel details return', () => {
-    const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
-    const testRequest = requestChannelDetails(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-    expect(testRequest.res.statusCode).toBe(OK);
-    expect(testRequest.bodyObj.channelDetails).toStrictEqual({
+    const testChannel = requestChannelsCreate(testUser.token, 'name', true);
+    const testRequest = requestChannelDetails(testUser.token, testChannel.channelId);
+    expect(testRequest.channelDetails).toStrictEqual({
       name: 'name',
       isPublic: true,
-      ownerMembers: expect.any(Array),
-      allMembers: expect.any(Array),
+      ownerMembers: [
+        {
+          email: "validemail@gmail.com",
+          handle: "johndoe",
+          nameFirst: "John",
+          nameLast: "Doe",
+          uId: 1,
+        },
+      ],
+      allMembers: [
+        {
+          email: "validemail@gmail.com",
+          handle: "johndoe",
+          nameFirst: "John",
+          nameLast: "Doe",
+          uId: 1,
+        },
+      ],
     });
   });
 });

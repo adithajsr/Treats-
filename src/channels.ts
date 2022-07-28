@@ -1,7 +1,5 @@
 import { getData, setData } from './dataStore';
-import { checkToken } from './message'
-import HTTPError from 'http-errors';
-
+import { checkToken } from './message';
 
 interface channelMember {
   uId: number,
@@ -162,13 +160,6 @@ Return Value:
     Returns <[{channels}]> on <token was valid and there were channels in data>
     Returns <[]> on <no channels in data>
 Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
-
-interface Database {
-  user: any[];
-  channel: any[];
-  token: any[];
-  dm: any[];
-}
 
 export function channelsListallV3(token: string) {
   const data = getData();

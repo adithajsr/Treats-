@@ -81,23 +81,24 @@ export function makeHandle(nameFirst: string, nameLast: string): string {
   // make new handle
   const fullName: string = nameFirst + nameLast;
   let newHandle: string = fullName.toLowerCase();
+  newHandle = newHandle.replace(/[^a-z0-9]/g, '');
   if (newHandle.length > 20) {
     newHandle = newHandle.slice(0, 20);
   }
   // test if handle is already in use, find highest number at the end
-  let highestIndex = 0;
+  let highestIndex = -2;
   let isDupplicate = false;
   for (const item of dataSet.user) {
     if (item.handle.search(newHandle) === 0) {
-      if (item.handle.search(/[0-9]{1,}$/) === -1) {
-        newHandle = newHandle + '0';
+      if (item.handle.search(/[0-9]{1,}$/) === -1 && highestIndex < -1) {
+        highestIndex = -1;
       } else {
-        isDupplicate = true;
-        const strDigit: string = newHandle.replace(/^[a-z]{0,20}/, '');
+        const strDigit: string = item.handle.replace(/^[a-z]{0,20}/, '');
         if (parseInt(strDigit) > highestIndex) {
           highestIndex = parseInt(strDigit);
         }
       }
+      isDupplicate = true;
     }
   }
 
@@ -106,6 +107,25 @@ export function makeHandle(nameFirst: string, nameLast: string): string {
     newHandle = newHandle + `${highestIndex}`;
   }
   return newHandle;
+}
+
+/* <Makes a new, valid and unique authUserId>
+
+Arguments:
+Return Value:
+returns <uId: number> on <all cases> */
+export function makeUserId(): number {
+  const dataSet = getData();
+
+  let highestUid = -1;
+  for (const item of dataSet.user) {
+    if (highestUid < item.uId) {
+      highestUid = item.uId;
+    }
+  }
+
+  highestUid++;
+  return highestUid;
 }
 
 /* <Authorises a user to Login>
@@ -162,7 +182,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   }
 
   // CREATE user Id
-  const newUserId: number = dataSet.user.length + 1;
+  const newUserId: number = makeUserId();
 
   // MAKE handle
   const newHandle = makeHandle(nameFirst, nameLast);

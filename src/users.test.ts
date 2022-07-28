@@ -326,7 +326,7 @@ describe('Testing for requestUsersAll', () => {
     const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
     const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
@@ -354,7 +354,7 @@ describe('Testing for requestUsersAll', () => {
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',

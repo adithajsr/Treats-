@@ -225,5 +225,6 @@ describe('test /auth/logout/v1', () => {
     const testLogout = requestAuthLogout(testUser.bodyObj.token + 'a');
     expect(testLogout.res.statusCode).toBe(OK);
     expect(testLogout.bodyObj).toStrictEqual({ error: 'error' });
+    requestClear();
   });
 });

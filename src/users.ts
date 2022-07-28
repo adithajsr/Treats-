@@ -26,6 +26,7 @@ export function userProfileV1(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
+    console.log('ERROR - 1');
     return { error: 'error' };
   }
 
@@ -43,6 +44,7 @@ export function userProfileV1(token: string, uId: number) {
   }
 
   // If uId doesn't match any uId in data object
+  console.log('ERROR - 2');
   return { error: 'error' };
 }
 
@@ -194,5 +196,5 @@ export function usersAll(token: string) {
       handleStr: item.handle,
     });
   }
-  return returnObject;
+  return { users: returnObject };
 }

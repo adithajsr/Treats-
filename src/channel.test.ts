@@ -163,6 +163,20 @@ test('Start at integer > 0', () => {
   expect(requestChannelMessages(danielToken, channelId, 3).res.statusCode).toBe(OK);
 });
 
+// const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
+//   // auth/register/v2 returns { token, authUserId }
+//   const requestOutput = requestAuthRegister(email, password, nameFirst, nameLast);
+
+//   return {
+//     email: email,
+//     password: password,
+//     nameFirst: nameFirst,
+//     nameLast: nameLast,
+//     res: requestOutput.res,
+//     bodyObj: requestOutput.bodyObj,
+//   };
+// };
+
 describe('channel/details/v3 testing', () => {
   let testUser: any;
 

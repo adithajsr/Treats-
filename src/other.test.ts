@@ -27,7 +27,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
 function requestChannelsListAll(token: string) {
   const res = request(
     'GET',
-    `${url}:${port}/channels/listall/v3`,
+    `${url}:${port}/channels/listall/v2`,
     {
       qs: {
         token,

@@ -45,8 +45,6 @@ export function tokenToUid(token: string, data: Database) {
 }
 
 /*
-Finds the index of the channel, if existing, according to channel id
-
 Arguments:
   messageId (number)         - messageId to find in channel
   channel (channel [])     - channel to search through
@@ -64,8 +62,6 @@ export function getChannelIndex(messageId: number, channel: channel[]) {
 }
 
 /*
-Finds the index of the dm, if existing, according to dm id
-
 Arguments:
   messageId (number)         - messageId to find in channel
   dm (dm [])     - channel to search through

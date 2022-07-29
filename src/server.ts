@@ -5,13 +5,13 @@ import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
 
-import { channelDetailsV2, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
+import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1, passwordRequest } from './auth';
-import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
+import { channelsListallV3, channelsCreateV2, channelsListV2 } from './channels';
+import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmMessagesV2, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
-import { messageSendV1, messageEditV1, messageRemoveV1, messageSendDmV1 } from './message';
 import { channelMessagesV2 } from './channel';
 
 // Set up web app, use JSON
@@ -87,10 +87,10 @@ app.delete('/clear/v1', (req, res) => {
   res.json(clearV1());
 });
 
-app.get('/channel/details/v2', (req, res) => {
+app.get('/channel/details/v3', (req, res) => {
   const token = req.query.token as string;
   const channelId = req.query.channelId as string;
-  res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
+  res.json(channelDetailsV3(token as string, parseInt(channelId as string)));
 });
 
 app.post('/auth/register/v3', (req, res, next) => {
@@ -143,9 +143,9 @@ app.get('/channels/list/v2', (req, res, next) => {
   }
 });
 
-app.get('/channels/listall/v2', (req, res) => {
+app.get('/channels/listall/v3', (req, res) => {
   const token = req.query.token;
-  res.json(channelsListallV2(token as string));
+  res.json(channelsListallV3(token as string));
 });
 
 app.post('/channel/join/v2', (req, res, next) => {
@@ -224,25 +224,25 @@ app.put('/user/profile/handle/v2', (req, res, next) => {
   }
 });
 
-app.post('/message/send/v1', (req, res) => {
+app.post('/message/send/v2', (req, res) => {
   const { token, channelId, message } = req.body;
-  return res.json(messageSendV1(token, channelId, message));
+  res.json(messageSendV2(token, channelId, message));
 });
 
-app.put('/message/edit/v1', (req, res) => {
+app.put('/message/edit/v2', (req, res) => {
   const { token, messageId, message } = req.body;
-  return res.json(messageEditV1(token, messageId, message));
+  res.json(messageEditV2(token, messageId, message));
 });
 
-app.delete('/message/remove/v1', (req, res) => {
+app.delete('/message/remove/v2', (req, res) => {
   const token = req.query.token as string;
   const messageId = parseInt(req.query.messageId as string);
-  return res.json(messageRemoveV1(token, messageId));
+  res.json(messageRemoveV2(token, messageId));
 });
 
-app.post('/message/senddm/v1', (req, res) => {
+app.post('/message/senddm/v2', (req, res) => {
   const { token, dmId, message } = req.body;
-  return res.json(messageSendDmV1(token, dmId, message));
+  res.json(messageSendDmV2(token, dmId, message));
 });
 
 app.post('/dm/create/v1', (req, res, next) => {

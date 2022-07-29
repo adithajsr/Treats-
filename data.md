@@ -18,7 +18,7 @@ let data = {
         }
       ],
     },
-  ]
+  ],
 
   channel: [
     {

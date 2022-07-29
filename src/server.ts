@@ -6,7 +6,7 @@ import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
 
 import { channelDetailsV2, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
-import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
+import { authRegisterV1, authLoginV1, authLogoutV1, passwordRequest } from './auth';
 import { channelsListallV2, channelsCreateV2, channelsListV2 } from './channels';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmMessagesV2, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV2, dmLeaveV2 } from './dm';
@@ -118,6 +118,11 @@ app.post('/auth/logout/v1', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/auth/passwordreset/request/v1', (req, res) => {
+  const email = req.body.email;
+  res.json(passwordRequest(email));
 });
 
 app.post('/channels/create/v2', (req, res, next) => {

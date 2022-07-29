@@ -58,6 +58,22 @@ function requestAuthLogout(token: string) {
   };
 }
 
+function requestPasswordRequest(email: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/passwordreset/request/v1`,
+    {
+      json: {
+        email: email,
+      },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
 /* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
 
 Arguments:
@@ -162,7 +178,7 @@ describe('Testing for requestAuthRegister', () => {
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
-      uId: 0,
+      uId: 1,
       email: testUserEmail,
       nameFirst: testUserFN,
       nameLast: testUserLN,
@@ -283,6 +299,22 @@ type wrapperOutput = {
   bodyObj: any,
 };
 
+function requestUsersAll() {
+  const res = request(
+    'GET',
+    `${url}:${port}/users/all/v2`,
+    {
+      qs: {
+
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
 describe('test /auth/logout/v1', () => {
   beforeEach(() => {
     requestClear();
@@ -314,3 +346,4 @@ describe('test /auth/logout/v1', () => {
     requestClear();
   });
 });
+

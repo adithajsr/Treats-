@@ -23,7 +23,7 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -40,7 +40,7 @@ export function requestAuthLogin(email: string, password: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -106,9 +106,9 @@ describe('Testing for requestAuthRegister', () => {
     const testUserFN = 'Jonathan';
     const testUserLN = 'Schmidt';
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
     expect(validator.isEmail(testUserEmail)).toBe(false);
   });
 
@@ -119,9 +119,9 @@ describe('Testing for requestAuthRegister', () => {
     const testUserFN = 'Jean';
     const testUserLN = 'McQueen';
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -132,9 +132,9 @@ describe('Testing for requestAuthRegister', () => {
     const testUserFN = '';
     const testUserLN = 'Tou';
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -145,9 +145,9 @@ describe('Testing for requestAuthRegister', () => {
     const testUserFN = 'Tim';
     const testUserLN = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'; // 52 characters long
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -219,7 +219,7 @@ describe('Testing for requestAuthLogin', () => {
       nameLast: 'Smith',
       handleStr: 'johnsmith',
     };
-    expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: "invalid input details" });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 
@@ -229,10 +229,10 @@ describe('Testing for requestAuthLogin', () => {
     const testUserPw = 'myrealpassword';
     requestAuthRegister('z5420895$ad.unsw.edu.au', testUserPw, 'Jonathan', 'Schmidt');
     const response = requestAuthLogin(testUserEmail, testUserPw);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
-    expect(requestAuthRegister(testUserEmail, testUserPw, 'Jonathan', 'Schmidt').bodyObj).not.toBe({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "email entered does not belong to a user" });
+    expect(requestAuthRegister(testUserEmail, testUserPw, 'Jonathan', 'Schmidt').bodyObj.error).not.toBe(expect.any(Object));
   });
 
   test('Test 3 invalid password', () => {
@@ -241,11 +241,11 @@ describe('Testing for requestAuthLogin', () => {
     const testUserPw = 'yourdad';
     requestAuthRegister(testUserEmail, 'yourmumma', 'John', 'Smith');
     const response = requestAuthLogin(testUserEmail, testUserPw);
-    expect(response.res.statusCode).toBe(OK);
+    expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject).toStrictEqual({ error: 'error' });
+    expect(returnObject.error).toStrictEqual({ message: "password is not correct" });
     expect(validator.isEmail(testUserEmail)).toBe(true);
-    expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith').bodyObj).not.toBe({ error: 'error' });
+    expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith').bodyObj.error).not.toBe(expect.any(Object));
   });
 
   test('Test 4 invalid token - does not exist', () => {
@@ -262,17 +262,19 @@ describe('Testing for requestAuthLogin', () => {
       firstNum++;
     }
     testToken = String(firstNum) + testToken.slice(1);
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
+    expect(requestUserProfile(testToken, testUserId).bodyObj.error).toStrictEqual({ message: "Invalid token" });
   });
 
   test('Test 5 invalid token - incorrect form', () => {
     requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
-    const response = requestAuthLogin('who.is.joe@is.the.question.com', 'yourmumma');
-    expect(response.res.statusCode).toBe(OK);
-    const returnObject = response.bodyObj;
+    const response1 = requestAuthLogin('who.is.joe@is.the.question.com', 'yourmumma');
+    expect(response1.res.statusCode).toBe(OK);
+    const returnObject = response1.bodyObj;
     const testUserId = returnObject.authUserId;
     const testToken = 'incorrecttokenform';
-    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({ error: 'error' });
+    const response2 = requestUserProfile(testToken, testUserId);
+    expect(response2.res.statusCode).toBe(403);
+    expect(response2.bodyObj.error).toStrictEqual({ message: "Invalid token" });
   });
 });
 

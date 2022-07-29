@@ -11,7 +11,7 @@ const url = config.url;
 export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
     'POST',
-    `${url}:${port}/auth/register/v2`,
+    `${url}:${port}/auth/register/v3`,
     {
       json: {
         email: email,
@@ -30,7 +30,7 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
 export function requestAuthLogin(email: string, password: string) {
   const res = request(
     'POST',
-    `${url}:${port}/auth/login/v2`,
+    `${url}:${port}/auth/login/v3`,
     {
       json: {
         email: email,
@@ -108,7 +108,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
+    expect(returnObject.error).toStrictEqual({ message: 'invalid input details' });
     expect(validator.isEmail(testUserEmail)).toBe(false);
   });
 
@@ -121,7 +121,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
+    expect(returnObject.error).toStrictEqual({ message: 'invalid input details' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -134,7 +134,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
+    expect(returnObject.error).toStrictEqual({ message: 'invalid input details' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -147,7 +147,7 @@ describe('Testing for requestAuthRegister', () => {
     const response = requestAuthRegister(testUserEmail, testUserPw, testUserFN, testUserLN);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "invalid input details" });
+    expect(returnObject.error).toStrictEqual({ message: 'invalid input details' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
   });
 
@@ -219,7 +219,7 @@ describe('Testing for requestAuthLogin', () => {
       nameLast: 'Smith',
       handleStr: 'johnsmith',
     };
-    expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: "invalid input details" });
+    expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: 'invalid input details' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 
@@ -231,7 +231,7 @@ describe('Testing for requestAuthLogin', () => {
     const response = requestAuthLogin(testUserEmail, testUserPw);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "email entered does not belong to a user" });
+    expect(returnObject.error).toStrictEqual({ message: 'email entered does not belong to a user' });
     expect(requestAuthRegister(testUserEmail, testUserPw, 'Jonathan', 'Schmidt').bodyObj.error).not.toBe(expect.any(Object));
   });
 
@@ -243,7 +243,7 @@ describe('Testing for requestAuthLogin', () => {
     const response = requestAuthLogin(testUserEmail, testUserPw);
     expect(response.res.statusCode).toBe(400);
     const returnObject = response.bodyObj;
-    expect(returnObject.error).toStrictEqual({ message: "password is not correct" });
+    expect(returnObject.error).toStrictEqual({ message: 'password is not correct' });
     expect(validator.isEmail(testUserEmail)).toBe(true);
     expect(requestAuthRegister(testUserEmail, testUserPw, 'John', 'Smith').bodyObj.error).not.toBe(expect.any(Object));
   });
@@ -262,7 +262,7 @@ describe('Testing for requestAuthLogin', () => {
       firstNum++;
     }
     testToken = String(firstNum) + testToken.slice(1);
-    expect(requestUserProfile(testToken, testUserId).bodyObj.error).toStrictEqual({ message: "Invalid token" });
+    expect(requestUserProfile(testToken, testUserId).bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
 
   test('Test 5 invalid token - incorrect form', () => {
@@ -274,7 +274,7 @@ describe('Testing for requestAuthLogin', () => {
     const testToken = 'incorrecttokenform';
     const response2 = requestUserProfile(testToken, testUserId);
     expect(response2.res.statusCode).toBe(403);
-    expect(response2.bodyObj.error).toStrictEqual({ message: "Invalid token" });
+    expect(response2.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
 });
 

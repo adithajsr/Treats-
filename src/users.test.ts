@@ -14,7 +14,7 @@ const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 export function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/setname/v1`,
+    `${url}:${port}/user/profile/setname/v2`,
     {
       json: {
         token: token,
@@ -47,7 +47,7 @@ export function requestClear() {
 export function requestUserProfileSetEmail(token: string, email: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/email/v1`,
+    `${url}:${port}/user/profile/email/v2`,
     {
       json: {
         token: token,
@@ -65,7 +65,7 @@ export function requestUserProfileSetEmail(token: string, email: string) {
 export function requestUserProfileSetHandle(token: string, handleStr: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/handle/v1`,
+    `${url}:${port}/user/profile/handle/v2`,
     {
       json: {
         token: token,
@@ -82,7 +82,7 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
 function requestUsersAll() {
   const res = request(
     'GET',
-    `${url}:${port}/users/all/v1`,
+    `${url}:${port}/users/all/v2`,
     {
       qs: {
 

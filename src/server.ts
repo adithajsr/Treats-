@@ -93,7 +93,7 @@ app.get('/channel/details/v2', (req, res) => {
   res.json(channelDetailsV2(token as string, parseInt(channelId as string)));
 });
 
-app.post('/auth/register/v2', (req, res, next) => {
+app.post('/auth/register/v3', (req, res, next) => {
   try {
     const { email, password, nameFirst, nameLast } = req.body;
     return res.json(authRegisterV1(email, password, nameFirst, nameLast));
@@ -102,7 +102,7 @@ app.post('/auth/register/v2', (req, res, next) => {
   }
 });
 
-app.post('/auth/login/v2', (req, res, next) => {
+app.post('/auth/login/v3', (req, res, next) => {
   try {
     const { email, password } = req.body;
     return res.json(authLoginV1(email, password));
@@ -188,11 +188,11 @@ app.post('/channel/removeowner/v1', (req, res, next) => {
   }
 });
 
-app.get('/users/all/v1', (req, res) => {
+app.get('/users/all/v2', (req, res) => {
   res.json(usersAll());
 });
 
-app.put('/user/profile/setname/v1', (req, res, next) => {
+app.put('/user/profile/setname/v2', (req, res, next) => {
   try {
     const { token, nameFirst, nameLast } = req.body;
     return res.json(userProfileSetName(token, nameFirst, nameLast));
@@ -201,7 +201,7 @@ app.put('/user/profile/setname/v1', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/email/v1', (req, res, next) => {
+app.put('/user/profile/email/v2', (req, res, next) => {
   try {
     const { token, email } = req.body;
     return res.json(userProfileSetEmail(token, email));
@@ -210,7 +210,7 @@ app.put('/user/profile/email/v1', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/handle/v1', (req, res, next) => {
+app.put('/user/profile/handle/v2', (req, res, next) => {
   try {
     const { token, handleStr } = req.body;
     return res.json(userProfileSetHandle(token, handleStr));

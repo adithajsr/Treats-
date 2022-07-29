@@ -122,8 +122,8 @@ Arguments:
 email (string) - <any>
 password (string) - <any>
 Return Value:
-returns <true> on <email is valid>
-returns <false> on <email is invalid> */
+returns <return { authUserId: item.uId, token: uuid }> on <correct credentials for an existant user>
+throws HTTP Error on <incorrect credentials> */
 export function authLoginV1(email: string, password: string) : { authUserId: number, token: string } {
   const dataSet = getData();
   for (const item of dataSet.user) {
@@ -143,13 +143,11 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
       } else {
         // If password doesn't match the email's
         throw HTTPError(400, 'password is not correct');
-        return;
       }
     }
   }
   // If no email matches the 1st argument
   throw HTTPError(400, 'email entered does not belong to a user');
-  return;
 }
 
 /* <Creates a new user and fills out their details and puts it into "dataStore.js">
@@ -160,7 +158,7 @@ password (string) - <greater than 5 characters long>
 nameFirst (string) - <1-50 characters long>
 nameLast (string) - <1-50 characters long>
 Return Value:
-returns <{ error: 'error' }> on <in valid arguments being inputted or already existing email>
+throws HTTP Error on <invalid arguments being inputted or already existing email>
 returns <uID> on <if all arguments are valid and a user is created and store> */
 export function authRegisterV1(email: string, password: string, nameFirst: string, nameLast: string) {
   const dataSet = getData();
@@ -168,8 +166,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   if ((password.length < 6) || (!validator.isEmail(email)) ||
     (doesEmailExist(email)) || (nameFirst.length < 1) ||
     (nameFirst.length > 50) || (nameLast.length < 1) || (nameLast.length > 50)) {
-      throw HTTPError(400, 'invalid input details');
-      return;
+    throw HTTPError(400, 'invalid input details');
   }
 
   // CREATE user Id

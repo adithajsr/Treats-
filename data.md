@@ -10,8 +10,15 @@ let data = {
       nameLast: 'Doe',
       handle: 'johndoe0',
       globalPerms: 1,
+      notifications: [
+        {
+          channelId: 999,
+          dmId: -1,
+          notificationMessage: 'johndoe0 tagged you in channel: Hello to myself',
+        }
+      ],
     },
-  ],
+  ]
 
   channel: [
     {

@@ -58,22 +58,6 @@ function requestAuthLogout(token: string) {
   };
 }
 
-function requestPasswordRequest(email: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/passwordreset/request/v1`,
-    {
-      json: {
-        email: email,
-      },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
 /* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
 
 Arguments:

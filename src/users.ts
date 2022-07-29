@@ -10,7 +10,7 @@ import HTTPError from 'http-errors';
 <uId> This is the uId that is searched for to return the user's profile
 
 Return Value:
-{error: 'error'} if the authUserId or uId are invalid
+throws HTTP Error if the authUserId or uId are invalid
 {info} if the authUserId and uId are valid, returns
 important info about a user's profile */
 
@@ -91,12 +91,13 @@ dataKey (string) - <names, email or handle>
 var1 (string) - <optional>
 Return Value:
 returns <dataSet> on <success>
-returns <{ error: 'error' }> on <invalid token/uId> */
+throws HTTP Error on <invalid token/uId> */
 function findAndSet(var1: string, token: string, dataKey: string, var2?: string) {
   const dataSet = getData();
   if (!doesTokenExist(token)) {
-    return { error: 'error' };
+    throw HTTPError(403, 'Invalid token');
   }
+  // uuid assiociated to token is found here
   let uId: number;
   for (const item of dataSet.token) {
     if (item.token === token) {
@@ -104,6 +105,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
     }
   }
 
+  // that uuid is then used to fund associated user
   for (const user of dataSet.user) {
     if (user.uId === uId) {
       if (dataKey === 'names') {
@@ -118,7 +120,8 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       return {};
     }
   }
-  return { error: 'error' };
+  // this below line cannot be accessed for coverage if uuid in token object is a valid uId, in other words, no way of running this line in working code
+  throw HTTPError(403, 'Invalid token');
 }
 
 /* <Update the authorised user's first and last name>
@@ -128,11 +131,11 @@ nameFirst (string) - <1-50 characters long>
 nameLast (string) - <1-50 characters long>
 Return Value:
 returns <'empty'> on <success>
-returns <{ error: 'error' }> on <invalid arguments> */
+throws HTTP Error on <invalid arguments> */
 export function userProfileSetName(token: string, nameFirst: string, nameLast: string) {
   if ((nameFirst.length < 1) || (nameFirst.length > 50) ||
       (nameLast.length < 1) || (nameLast.length > 50)) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid input details');
   }
   return findAndSet(nameFirst, token, 'names', nameLast);
 }
@@ -143,10 +146,10 @@ Arguments:
 email (string) - <valid email string>
 Return Value:
 returns <void> on <success>
-returns <{ error: 'error' }> on <invalid arguments> */
+throws HTTP Error on <invalid arguments> */
 export function userProfileSetEmail(token: string, email: string) {
   if ((!validator.isEmail(email)) || (doesEmailExist(email))) {
-    return { error: 'error' };
+    throw HTTPError(400, 'invalid input details');
   }
   return findAndSet(email, token, 'email');
 }
@@ -157,18 +160,11 @@ Arguments:
 newHandle (string) - <any>
 Return Value:
 returns <void> on <success>
-returns <{ error: 'error' }> on <invalid arguments> */
+throws HTTP Error on <invalid arguments> */
 export function userProfileSetHandle(token: string, handleStr: string) {
   if ((handleStr.length < 3) || (handleStr.length > 20) ||
       !isHandleAllowed(handleStr)) {
-    return { error: 'error' };
-  }
-  // Check if handle is in use
-  const dataSet = getData();
-  for (const item of dataSet.user) {
-    if (item.handle === handleStr) {
-      return { error: 'error' };
-    }
+    throw HTTPError(400, 'invalid input details');
   }
   return findAndSet(handleStr, token, 'handle');
 }
@@ -179,11 +175,8 @@ Arguments:
 token (string) - <uuidV4>
 Return Value:
 returns <an array of users with their uId, email, full name and handle> on <success>
-returns <{ error: 'error' }> on <invalid token> */
-export function usersAll(token: string) {
-  if (!doesTokenExist(token)) {
-    return { error: 'error' };
-  }
+throws HTTP Error on <invalid token> */
+export function usersAll() {
   const dataSet = getData();
   const returnObject = [];
   for (const item of dataSet.user) {
@@ -195,5 +188,5 @@ export function usersAll(token: string) {
       handleStr: item.handle,
     });
   }
-  return returnObject;
+  return { users: returnObject };
 }

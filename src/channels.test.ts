@@ -278,11 +278,11 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
 // -------------------------------------------------------------------------//
 
 function requestChannelsListall(token: string) {
-  return requestHelper('GET', '/channels/listall/v2', { token });
+  return requestHelper('GET', '/channels/listall/v3', { token });
 }
 
 describe('channels functions testing', () => {
-  describe('channels/listall/v2 test', () => {
+  describe('channels/listall/v3 test', () => {
     let testUser: user;
     beforeEach(() => {
       requestClear();

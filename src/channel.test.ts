@@ -67,7 +67,7 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
     res: res,
     bodyObj: JSON.parse(res.getBody() as string),
   };
-} 
+}
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
@@ -109,16 +109,6 @@ function requestClear() {
   );
   return JSON.parse(String(res.getBody()));
 }
-
-
-type user = {
-  email: string,
-  password: string,
-  nameFirst: string,
-  nameLast: string,
-  res: any,
-  bodyObj: any,
-};
 
 test('Invalid channelId', () => {
   requestClear();
@@ -173,20 +163,6 @@ test('Start at integer > 0', () => {
   expect(requestChannelMessages(danielToken, channelId, 3).res.statusCode).toBe(OK);
 });
 
-const createTestUser = (email: string, password: string, nameFirst: string, nameLast: string) => {
-  // auth/register/v2 returns { token, authUserId }
-  const requestOutput = requestAuthRegister(email, password, nameFirst, nameLast);
-
-  return {
-    email: email,
-    password: password,
-    nameFirst: nameFirst,
-    nameLast: nameLast,
-    res: requestOutput.res,
-    bodyObj: requestOutput.bodyObj,
-  };
-};
-
 describe('channel/details/v3 testing', () => {
   let testUser: any;
 
@@ -226,19 +202,19 @@ describe('channel/details/v3 testing', () => {
       isPublic: true,
       ownerMembers: [
         {
-          email: "validemail@gmail.com",
-          handle: "johndoe",
-          nameFirst: "John",
-          nameLast: "Doe",
+          email: 'validemail@gmail.com',
+          handle: 'johndoe',
+          nameFirst: 'John',
+          nameLast: 'Doe',
           uId: 1,
         },
       ],
       allMembers: [
         {
-          email: "validemail@gmail.com",
-          handle: "johndoe",
-          nameFirst: "John",
-          nameLast: "Doe",
+          email: 'validemail@gmail.com',
+          handle: 'johndoe',
+          nameFirst: 'John',
+          nameLast: 'Doe',
           uId: 1,
         },
       ],

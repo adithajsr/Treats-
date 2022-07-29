@@ -45,12 +45,14 @@ export function tokenToUid(token: string, data: Database) {
 }
 
 /*
+Finds the index of the channel, if existing, according to channel id
+
 Arguments:
   messageId (number)         - messageId to find in channel
   channel (channel [])     - channel to search through
 
 Return Value:
-  Returns { index }      - undefined if non existent, else channel index of the messageId 
+  Returns { index }      - undefined if non existent, else channel index of the messageId
 */
 
 export function getChannelIndex(messageId: number, channel: channel[]) {
@@ -62,14 +64,15 @@ export function getChannelIndex(messageId: number, channel: channel[]) {
 }
 
 /*
+Finds the index of the dm, if existing, according to dm id
+
 Arguments:
   messageId (number)         - messageId to find in channel
   dm (dm [])     - channel to search through
 
 Return Value:
-  Returns { index }      - undefined if non existent, else dm index of the messageId 
+  Returns { index }      - undefined if non existent, else dm index of the messageId
 */
-
 
 export function getDmIndex(messageId: number, dm: dm[]) {
   let index;

@@ -130,7 +130,7 @@ app.get('/channels/list/v2', (req, res, next) => {
   }
 });
 
-app.get('/channels/listall/v2', (req, res) => {
+app.get('/channels/listall/v3', (req, res) => {
   const token = req.query.token;
   res.json(channelsListallV3(token as string));
 });

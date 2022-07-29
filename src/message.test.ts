@@ -104,11 +104,9 @@ describe('messages capabilities', () => {
       requestClear();
       // Create a test user
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser).not.toStrictEqual({ error: 'error' });
 
       // Create a test channel
       testChannel = requestChannelsCreate(testUser.token, 'name', true);
-      expect(testChannel).not.toStrictEqual({ error: 'error' });
     });
 
     afterEach(() => {

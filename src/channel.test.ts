@@ -1,7 +1,7 @@
 
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-import { requestAuthRegister, requestChannelsCreate, requestMessageSend } from './message.test';
+import { requestMessageSend } from './message.test';
 
 const OK = 200;
 const port = config.port;
@@ -33,19 +33,84 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
 
 // -------------------------------------------------------------------------//
 
-export function requestChannelMessages(token: string, channelId: number, start: number) {
-  return requestHelper('GET', '/channel/messages/v2', { token, channelId, start });
+function requestAuthRegisterHelper(email: string, password: string, nameFirst: string, nameLast: string) {
+  return requestHelper('POST', '/auth/register/v2', { email, password, nameFirst, nameLast });
 }
 
-function requestChannelDetails(token: string, channelId: number) {
+function requestChannelDetailsHelper(token: string, channelId: number) {
   return requestHelper('GET', '/channel/details/v3', { token, channelId });
 }
 
-function requestClear() {
+function requestChannelsCreateHelper(token: string, name: string, isPublic: boolean) {
+  return requestHelper('POST', '/channels/create/v2', { token, name, isPublic });
+}
+
+function requestClearHelper() {
   return requestHelper('DELETE', '/clear/v1', {});
 }
 
 // -------------------------------------------------------------------------//
+
+export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/register/v2`,
+    {
+      json: {
+        email: email,
+        password: password,
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+} 
+
+function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v2`,
+    {
+      json: { token, name, isPublic },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestChannelMessages(token: string, channelId: number, start: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channel/messages/v2`,
+    {
+      qs: {
+        token, channelId, start,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
+function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return JSON.parse(String(res.getBody()));
+}
+
 
 type user = {
   email: string,
@@ -126,40 +191,40 @@ const createTestUser = (email: string, password: string, nameFirst: string, name
   };
 };
 
-describe('channel/details/v2 testing', () => {
+describe('channel/details/v3 testing', () => {
   let testUser: any;
 
   beforeEach(() => {
-    requestClear();
+    requestClearHelper();
     // Create a test user
-    testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    testUser = requestAuthRegisterHelper('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
   });
 
   afterEach(() => {
-    requestClear();
+    requestClearHelper();
   });
 
   test('invalid token, fail channel details', () => {
-    const testChannel = requestChannelsCreate(testUser.token, 'channelName', true);
-    const testRequest = requestChannelDetails(testUser.token + 'a', testChannel.channelId);
+    const testChannel = requestChannelsCreateHelper(testUser.token, 'channelName', true);
+    const testRequest = requestChannelDetailsHelper(testUser.token + 'a', testChannel.channelId);
     expect(testRequest).toBe(403);
   });
 
   test('channelId does not refer to valid channel, valid token, fail channel details', () => {
-    const testRequest = requestChannelDetails(testUser.token, 9999);
+    const testRequest = requestChannelDetailsHelper(testUser.token, 9999);
     expect(testRequest).toBe(400);
   });
 
   test('channelId valid but authorised user is not a member of the channel, fail channel details', () => {
-    const testChannel = requestChannelsCreate(testUser.token, 'name', true);
-    const testUser2 = requestAuthRegister('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
-    const testRequest = requestChannelDetails(testUser2.token, testChannel.channelId);
+    const testChannel = requestChannelsCreateHelper(testUser.token, 'name', true);
+    const testUser2 = requestAuthRegisterHelper('validemail1@gmail.com', '123abc!@#1', 'Johna', 'Doea');
+    const testRequest = requestChannelDetailsHelper(testUser2.token, testChannel.channelId);
     expect(testRequest).toBe(403);
   });
 
   test('successful channel details return', () => {
-    const testChannel = requestChannelsCreate(testUser.token, 'name', true);
-    const testRequest = requestChannelDetails(testUser.token, testChannel.channelId);
+    const testChannel = requestChannelsCreateHelper(testUser.token, 'name', true);
+    const testRequest = requestChannelDetailsHelper(testUser.token, testChannel.channelId);
     expect(testRequest.channelDetails).toStrictEqual({
       name: 'name',
       isPublic: true,

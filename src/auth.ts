@@ -260,7 +260,7 @@ function isInSession(uId: number) : boolean {
   return false;
 }
 
-const nodemailer = require("nodemailer");
+import nodemailer from 'nodemailer';
 
 function sendEmail(email: string, encryptedCode: string) {
   let transporter = nodemailer.createTransport({

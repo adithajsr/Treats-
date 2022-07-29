@@ -299,22 +299,6 @@ type wrapperOutput = {
   bodyObj: any,
 };
 
-function requestUsersAll() {
-  const res = request(
-    'GET',
-    `${url}:${port}/users/all/v2`,
-    {
-      qs: {
-
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
 describe('test /auth/logout/v1', () => {
   beforeEach(() => {
     requestClear();
@@ -323,8 +307,8 @@ describe('test /auth/logout/v1', () => {
   let testUser: wrapperOutput;
 
   beforeEach(() => {
-    // Create a test user
-    testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    // Create a test user validemail@gmail.com
+    testUser = requestAuthRegister('jack.stuart.braga@gmail.com', '123abc!@#', 'John', 'Doe');
     expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
   });
 
@@ -332,6 +316,8 @@ describe('test /auth/logout/v1', () => {
     const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
     expect(testLogout1.res.statusCode).toBe(OK);
     expect(testLogout1.bodyObj).toStrictEqual({});
+
+    requestPasswordRequest('jack.stuart.braga@gmail.com');
 
     // Attempt to log out again with newly invalid token
     const testLogout2 = requestAuthLogout(testUser.bodyObj.token);

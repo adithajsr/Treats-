@@ -1,4 +1,3 @@
-
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestMessageSend } from './message.test';
@@ -87,7 +86,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
 function requestChannelMessages(token: string, channelId: number, start: number) {
   const res = request(
     'GET',
-    `${url}:${port}/channel/messages/v2`,
+    `${url}:${port}/channel/messages/v3`,
     {
       qs: {
         token, channelId, start,
@@ -96,7 +95,7 @@ function requestChannelMessages(token: string, channelId: number, start: number)
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -125,8 +124,7 @@ test('Invalid channelId', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
-  expect(requestChannelMessages(danielToken, channelId + 20, 0).bodyObj).toMatchObject({ error: 'error' });
-  expect(requestChannelMessages(danielToken, channelId + 20, 0).res.statusCode).toBe(OK);
+  expect(requestChannelMessages(danielToken, channelId + 20, 0).res.statusCode).toBe(400);
 });
 
 test('Requesting user is not member of channel', () => {
@@ -134,9 +132,7 @@ test('Requesting user is not member of channel', () => {
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
   const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
-
-  expect(requestChannelMessages(samToken, channelId, 0).bodyObj).toMatchObject({ error: 'error' });
-  expect(requestChannelMessages(samToken, channelId, 0).res.statusCode).toBe(OK);
+  expect(requestChannelMessages(samToken, channelId, 0).res.statusCode).toBe(403);
 });
 
 test('Default case', () => {

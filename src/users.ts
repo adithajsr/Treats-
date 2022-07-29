@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
 import validator from 'validator';
+import HTTPError from 'http-errors';
 
 /* This function returns the important information about a user's profile.
 
@@ -13,7 +14,7 @@ Return Value:
 {info} if the authUserId and uId are valid, returns
 important info about a user's profile */
 
-export function userProfileV1(token: string, uId: number) {
+export function userProfileV3(token: string, uId: number) {
   const data = getData();
   // Determining whether token is valid
   let count = 0;
@@ -26,7 +27,7 @@ export function userProfileV1(token: string, uId: number) {
 
   // If invalid token
   if (count === 0) {
-    return { error: 'error' };
+    throw HTTPError(403, 'Invalid token');
   }
 
   // Searching for the uId
@@ -43,7 +44,7 @@ export function userProfileV1(token: string, uId: number) {
   }
 
   // If uId doesn't match any uId in data object
-  return { error: 'error' };
+  throw HTTPError(400, 'Invalid uId');
 }
 
 /* <checks if a Token is in use>

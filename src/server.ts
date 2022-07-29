@@ -7,7 +7,7 @@ import errorHandler from 'middleware-http-errors';
 
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV1 } from './auth';
-import { channelsListallV3, channelsCreateV2, channelsListV2 } from './channels';
+import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmMessagesV2, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV2, dmLeaveV2 } from './dm';
@@ -120,19 +120,19 @@ app.post('/auth/logout/v1', (req, res, next) => {
   }
 });
 
-app.post('/channels/create/v2', (req, res, next) => {
+app.post('/channels/create/v3', (req, res, next) => {
   try {
     const { token, name, isPublic } = req.body;
-    return res.json(channelsCreateV2(token, name, isPublic));
+    return res.json(channelsCreateV3(token, name, isPublic));
   } catch (err) {
     next(err);
   }
 });
 
-app.get('/channels/list/v2', (req, res, next) => {
+app.get('/channels/list/v3', (req, res, next) => {
   try {
     const token = req.query.token as string;
-    return res.json(channelsListV2(token));
+    return res.json(channelsListV3(token));
   } catch (err) {
     next(err);
   }

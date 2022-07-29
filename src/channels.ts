@@ -8,7 +8,7 @@ interface channelMember {
 
 /*
 Helper function: finds the index of the given token in the tokens array
-in the database
+in the database and throws a 403 error if token is invalid
 
 Arguments:
     token (string)          - represents a user session
@@ -19,6 +19,12 @@ Return Value:
 const findTokenIndex = (token: string) => {
   const data = getData();
   const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
+    throw HTTPError(403, 'Invalid token');
+  };
+
   return tokenIndex;
 };
 
@@ -34,10 +40,6 @@ Return Value:
     Returns false if arguments are invalid
 */
 const areArgumentsValidChannelsCreate = (tokenIndex: number, name: string) => {
-  // Invalid token
-  if (tokenIndex === -1) {
-    return false;
-  }
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
     return false;
@@ -89,12 +91,12 @@ Return Value:
     Returns { error: 'error' } on invalid token or invalid channel name
 */
 
-function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+export function channelsCreateV3(token: string, name: string, isPublic: boolean) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
 
   if (areArgumentsValidChannelsCreate(tokenIndex, name) === false) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Invalid channel name');
   }
 
   // Generate channeId
@@ -133,14 +135,9 @@ Return Value:
     Returns { channels } if no error
     Returns { error: 'error' } on invalid token
 */
-function channelsListV2(token: string) {
+export function channelsListV3(token: string) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   const userId = data.token[tokenIndex].uId;
   const channelsList = createListChannelsList(userId);
@@ -174,5 +171,3 @@ export function channelsListallV3(token: string) {
     channels: foundChannels
   };
 }
-
-export { channelsCreateV2, channelsListV2 };

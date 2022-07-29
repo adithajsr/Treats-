@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import { findTokenIndex } from './channels';
 
 /* <checks if a uuid is in use and is of the correct structure>
 
@@ -205,22 +206,6 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 }
 
 /*
-Helper function: finds the index of the given token in the tokens array
-in the database
-
-Arguments:
-    token (string)          - represents a user session
-
-Return Value:
-    Returns tokenIndex
-*/
-const findTokenIndex = (token: string) => {
-  const data = getData();
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-  return tokenIndex;
-};
-
-/*
 Given an active token, invalidates the token to log the user out
 
 Arguments:
@@ -230,15 +215,10 @@ Return Value:
     Returns {} if no error
     Returns { error: 'error' } on invalid token
 */
-export function authLogoutV1(token: string) {
+export function authLogoutV2(token: string) {
   const data = getData();
 
   const tokenIndex = findTokenIndex(token);
-
-  // Token was invalid
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   // Invalidate the token
   data.token.splice(tokenIndex, 1);

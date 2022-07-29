@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import { checkToken } from './message';
+import HTTPError from 'http-errors';
 
 interface channelMember {
   uId: number,
@@ -8,15 +9,16 @@ interface channelMember {
 
 /*
 Helper function: finds the index of the given token in the tokens array
-in the database and throws a 403 error if token is invalid
+in the database 
 
 Arguments:
     token (string)          - represents a user session
 
 Return Value:
     Returns tokenIndex
+    Throws a 403 error if token is invalid
 */
-const findTokenIndex = (token: string) => {
+export const findTokenIndex = (token: string) => {
   const data = getData();
   const tokenIndex = data.token.findIndex(a => a.token === token);
 
@@ -88,7 +90,7 @@ Arguments:
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid token or invalid channel name
+    Throws an error on invalid token (403) or invalid channel name (400)
 */
 
 export function channelsCreateV3(token: string, name: string, isPublic: boolean) {
@@ -133,7 +135,7 @@ Arguments:
 
 Return Value:
     Returns { channels } if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
 export function channelsListV3(token: string) {
   const data = getData();

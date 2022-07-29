@@ -5,6 +5,7 @@ import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
+const INVALID_TOKEN = 403;
 const port = config.port;
 const url = config.url;
 
@@ -47,14 +48,14 @@ export function requestAuthLogin(email: string, password: string) {
 function requestAuthLogout(token: string) {
   const res = request(
     'POST',
-    `${url}:${port}/auth/logout/v1`,
+    `${url}:${port}/auth/logout/v2`,
     {
       json: { token },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.body)),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -283,8 +284,12 @@ type wrapperOutput = {
   bodyObj: any,
 };
 
-describe('test /auth/logout/v1', () => {
+describe('test /auth/logout/v2', () => {
   beforeEach(() => {
+    requestClear();
+  });
+
+  afterEach(() => {
     requestClear();
   });
 
@@ -293,7 +298,6 @@ describe('test /auth/logout/v1', () => {
   beforeEach(() => {
     // Create a test user
     testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-    expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
   });
 
   test('Success user log out', () => {
@@ -303,14 +307,13 @@ describe('test /auth/logout/v1', () => {
 
     // Attempt to log out again with newly invalid token
     const testLogout2 = requestAuthLogout(testUser.bodyObj.token);
-    expect(testLogout2.res.statusCode).toBe(OK);
-    expect(testLogout2.bodyObj).toStrictEqual({ error: 'error' });
+    expect(testLogout2.res.statusCode).toBe(INVALID_TOKEN);
+    expect(testLogout2.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
 
   test('Fail user log out, invalid token', () => {
     const testLogout = requestAuthLogout(testUser.bodyObj.token + 'a');
-    expect(testLogout.res.statusCode).toBe(OK);
-    expect(testLogout.bodyObj).toStrictEqual({ error: 'error' });
-    requestClear();
+    expect(testLogout.res.statusCode).toBe(INVALID_TOKEN);
+    expect(testLogout.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
 });

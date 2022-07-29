@@ -59,12 +59,15 @@ describe('channels capabilities', () => {
       requestClear();
     });
 
+    afterEach(() => {
+      requestClear();
+    });
+
     let testUser: user;
 
     beforeEach(() => {
       // Create a test user
       testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
     test('Success create new channel', () => {
@@ -107,23 +110,18 @@ describe('channels capabilities', () => {
     beforeEach(() => {
       // Create test user 1
       testUser1 = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 2
       testUser2 = createTestUser('student@unsw.com', 'password', 'Jane', 'Schmoe');
-      expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 3
       testUser3 = createTestUser('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
-      expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // Create test user 4
       testUser4 = createTestUser('jbloggs@proton.com', '111111', 'Jo', 'Bloggs');
-      expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
 
       // testUser1 created testChannel1 so they automatically join it
       testChannel1 = createTestChannel(testUser1.bodyObj.token, 'channelName', true);
-      expect(testChannel1.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
     test('Fail channels list, invalid token', () => {

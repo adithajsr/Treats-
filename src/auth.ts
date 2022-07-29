@@ -269,7 +269,7 @@ function sendEmail(email: string, encryptedCode: string) {
     secure: false,
     auth: {
       user: "m13a.areo@gmail.com",
-      pass: "M13A_AERO",
+      pass: "gkkuhqgntyfjulsq", // M13A_AERO
     },
     tls: {
       rejectUnauthorized: false,
@@ -278,8 +278,8 @@ function sendEmail(email: string, encryptedCode: string) {
   });
 
   let mailOptions = {
-    from: "m13a.areo@gmail.com",
-    to: email,
+    from: 'M13A_AERO <m13a.areo@gmail.com>',
+    to: `Jack <${email}>`,
     subject: 'Password Reset Request',
     text: `Reset code is ${encryptedCode}`,
   }

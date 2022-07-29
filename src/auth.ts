@@ -3,6 +3,8 @@ import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
 import codec from 'string-codec';
+import nodemailer from 'nodemailer';
+
 // import nodemailer from 'nodemailer';
 
 /* <checks if a uuid is in use and is of the correct structure>
@@ -250,6 +252,12 @@ export function authLogoutV1(token: string) {
   return {};
 }
 
+/* <Checks if a uId has an associated token already in the database>
+
+Arguments:
+uId (number) - <positive integer>
+Return Value:
+returns <boolean> on <depending on existence of uId in token array> */
 function isInSession(uId: number) : boolean {
   const dataSet = getData();
   for (const item of dataSet.token) {
@@ -260,8 +268,11 @@ function isInSession(uId: number) : boolean {
   return false;
 }
 
-import nodemailer from 'nodemailer';
+/* <Sends an encrypted code to a given email>
 
+Arguments:
+email (string) - <any>
+encryptedCode (string) - <an encrpted combination of a uuid and uId> */
 function sendEmail(email: string, encryptedCode: string) {
   let transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -293,7 +304,12 @@ function sendEmail(email: string, encryptedCode: string) {
   })
 }
 
+/* <Checks for a valid email, to which the user associated is logged out>
 
+Arguments:
+email (string) - <email structure>
+Return Value:
+returns <{}> on <all cases for security reasons> */
 export function passwordRequest(email: string) {
   const dataSet = getData();
   for (const item of dataSet.user) {

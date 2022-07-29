@@ -118,7 +118,6 @@ test('Invalid uId', () => {
   const maiyaToken = maiyaUser.bodyObj.token;
   const maiyaId = maiyaUser.bodyObj.authUserId;
   expect(requestUserProfile(maiyaToken, maiyaId + 20).res.statusCode).toEqual(400);
-  // expect(returnObject.res.statusCode).toBe(400);
 });
 
 test('Testing default case', () => {

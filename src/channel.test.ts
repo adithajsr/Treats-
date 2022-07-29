@@ -25,7 +25,7 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
     res: res,
     bodyObj: JSON.parse(res.getBody() as string),
   };
-} function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+} export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
     `${url}:${port}/channels/create/v2`,

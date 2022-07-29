@@ -29,11 +29,11 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
 // -------------------------------------------------------------------------//
 
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  return requestHelper('POST', '/auth/register/v2', { email, password, nameFirst, nameLast });
+  return requestHelper('POST', '/auth/register/v3', { email, password, nameFirst, nameLast });
 }
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  return requestHelper('POST', '/channels/create/v2', { token, name, isPublic });
+  return requestHelper('POST', '/channels/create/v3', { token, name, isPublic });
 }
 
 function requestMessageSend(token: string, channelId: number, message: string) {

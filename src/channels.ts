@@ -9,7 +9,7 @@ interface channelMember {
 
 /*
 Helper function: finds the index of the given token in the tokens array
-in the database 
+in the database
 
 Arguments:
     token (string)          - represents a user session
@@ -25,7 +25,7 @@ export const findTokenIndex = (token: string) => {
   // Invalid token
   if (tokenIndex === -1) {
     throw HTTPError(403, 'Invalid token');
-  };
+  }
 
   return tokenIndex;
 };

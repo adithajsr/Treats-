@@ -33,7 +33,7 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
 // -------------------------------------------------------------------------//
 
 function requestAuthRegisterHelper(email: string, password: string, nameFirst: string, nameLast: string) {
-  return requestHelper('POST', '/auth/register/v2', { email, password, nameFirst, nameLast });
+  return requestHelper('POST', '/auth/register/v3', { email, password, nameFirst, nameLast });
 }
 
 function requestChannelDetailsHelper(token: string, channelId: number) {
@@ -41,7 +41,7 @@ function requestChannelDetailsHelper(token: string, channelId: number) {
 }
 
 function requestChannelsCreateHelper(token: string, name: string, isPublic: boolean) {
-  return requestHelper('POST', '/channels/create/v2', { token, name, isPublic });
+  return requestHelper('POST', '/channels/create/v3', { token, name, isPublic });
 }
 
 function requestClearHelper() {
@@ -53,7 +53,7 @@ function requestClearHelper() {
 export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
     'POST',
-    `${url}:${port}/auth/register/v2`,
+    `${url}:${port}/auth/register/v3`,
     {
       json: {
         email: email,
@@ -65,21 +65,21 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
-    `${url}:${port}/channels/create/v2`,
+    `${url}:${port}/channels/create/v3`,
     {
       json: { token, name, isPublic },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -277,7 +277,7 @@ function sendPost(path:string, body: object) {
 function requestAuthRegisterNoRes(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
     'POST',
-      `${url}:${port}/auth/register/v2`,
+      `${url}:${port}/auth/register/v3`,
       {
         json: {
           email: email,
@@ -287,18 +287,18 @@ function requestAuthRegisterNoRes(email: string, password: string, nameFirst: st
         }
       }
   );
-  return JSON.parse(res.getBody() as string);
+  return JSON.parse(res.body as string);
 }
 
 function requestChannelsCreateNoRes(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
-    `${url}:${port}/channels/create/v2`,
+    `${url}:${port}/channels/create/v3`,
     {
       json: { token, name, isPublic },
     }
   );
-  return JSON.parse(res.getBody() as string);
+  return JSON.parse(res.body as string);
 }
 
 // ======================================== channel/join/v2 ========================================

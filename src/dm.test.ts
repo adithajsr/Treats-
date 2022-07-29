@@ -1,4 +1,3 @@
-
 import request from 'sync-request';
 import config from './config.json';
 
@@ -116,14 +115,14 @@ function requestDMLeave(token: string, dmId: number) {
 function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
     'POST',
-    `${url}:${port}/auth/register/v2`,
+    `${url}:${port}/auth/register/v3`,
     {
       json: { email, password, nameFirst, nameLast },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -222,19 +221,15 @@ describe('dm capabilities', () => {
   beforeEach(() => {
     // Create test user 1
     testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-    expect(testUser1.bodyObj).not.toStrictEqual({ error: 'error' });
 
     // Create test user 2
     testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
-    expect(testUser2.bodyObj).not.toStrictEqual({ error: 'error' });
 
     // Create test user 3
     testUser3 = requestAuthRegister('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
-    expect(testUser3.bodyObj).not.toStrictEqual({ error: 'error' });
 
     // Create test user 4
     testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
-    expect(testUser4.bodyObj).not.toStrictEqual({ error: 'error' });
   });
 
   describe('test /dm/create/v1', () => {

@@ -114,7 +114,7 @@ app.post('/auth/login/v3', (req, res, next) => {
 app.post('/auth/logout/v2', (req, res, next) => {
   try {
     const { token } = req.body;
-    return res.json(authLogoutV1(token));
+    return res.json(authLogoutV2(token));
   } catch (err) {
     next(err);
   }

@@ -103,8 +103,6 @@ describe('channels capabilities', () => {
 
     let testUser1: user;
     let testUser2: user;
-    let testUser3: user;
-    let testUser4: user;
     let testChannel1: channel;
 
     beforeEach(() => {
@@ -113,12 +111,6 @@ describe('channels capabilities', () => {
 
       // Create test user 2
       testUser2 = createTestUser('student@unsw.com', 'password', 'Jane', 'Schmoe');
-
-      // Create test user 3
-      testUser3 = createTestUser('tsmith@yahoo.com', 'qwerty', 'Tom', 'Smith');
-
-      // Create test user 4
-      testUser4 = createTestUser('jbloggs@proton.com', '111111', 'Jo', 'Bloggs');
 
       // testUser1 created testChannel1 so they automatically join it
       testChannel1 = createTestChannel(testUser1.bodyObj.token, 'channelName', true);

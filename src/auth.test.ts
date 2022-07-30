@@ -331,3 +331,17 @@ describe('test /auth/logout/v1', () => {
   });
 });
 
+describe('test /auth/passwordreset/request/v1', () => {
+  requestClear();
+  const testUser = requestAuthRegister('z5420895@ad.unsw.edu.au', '123abc!@#', 'John', 'Doe');
+
+  test('Success user log out', () => {
+    const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout1.res.statusCode).toBe(OK);
+    expect(testLogout1.bodyObj).toStrictEqual({});
+
+    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    requestClear();
+  });
+});

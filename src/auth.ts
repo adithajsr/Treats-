@@ -2,6 +2,8 @@ import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+// eslint-disable-next-line
+// @ts-ignore
 import codec from 'string-codec';
 import nodemailer from 'nodemailer';
 
@@ -261,7 +263,7 @@ returns <boolean> on <depending on existence of uId in token array> */
 function isInSession(uId: number) : boolean {
   const dataSet = getData();
   for (const item of dataSet.token) {
-    if (item.uId = uId) {
+    if (item.uId === uId) {
       return true;
     }
   }
@@ -274,26 +276,26 @@ Arguments:
 email (string) - <any>
 encryptedCode (string) - <an encrpted combination of a uuid and uId> */
 function sendEmail(email: string, encryptedCode: string) {
-  let transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     auth: {
-      user: "m13a.areo@gmail.com",
-      pass: "gkkuhqgntyfjulsq", // M13A_AERO
+      user: 'm13a.areo@gmail.com',
+      pass: 'gkkuhqgntyfjulsq', // M13A_AERO
     },
     tls: {
       rejectUnauthorized: false,
-        minVersion: "TLSv1.2",
+      minVersion: 'TLSv1.2',
     },
   });
 
-  let mailOptions = {
+  const mailOptions = {
     from: 'M13A_AERO <m13a.areo@gmail.com>',
     to: `Jack <${email}>`,
     subject: 'Password Reset Request',
     text: `Reset code is ${encryptedCode}`,
-  }
+  };
 
   transporter.sendMail(mailOptions, function(err, success) {
     if (err) {
@@ -301,7 +303,7 @@ function sendEmail(email: string, encryptedCode: string) {
     } else {
       console.log('Email sent successfully!');
     }
-  })
+  });
 }
 
 /* <Checks for a valid email, to which the user associated is logged out>
@@ -314,8 +316,8 @@ export function passwordRequest(email: string) {
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email && !isInSession(item.uId)) {
-      let uuidV4Code = generateV4uuid();
-      let passwordUid = -1 * item.uId;
+      const uuidV4Code = generateV4uuid();
+      const passwordUid = -1 * item.uId;
       const encryptedCode = codec.encoder(String(uuidV4Code + String(passwordUid)), 'base64');
       sendEmail(email, encryptedCode);
       dataSet.token.push({

@@ -1,7 +1,5 @@
 // In the database, there are arrays of object user, and arrays of object channel
 
-// In the database, there are arrays of object user, and arrays of object channel
-
 let data = {
   user: [
     {
@@ -22,31 +20,31 @@ let data = {
       channelsJoined: [
         {
           numChannelsJoined: 0,
-          timeStamp: 1658848908,
+          timeStamp: 1500000000,
         },
         {
           numChannelsJoined: 1,
-          timeStamp: 2323221432,
+          timeStamp: 1658848908,
         },
       ],
       dmsJoined: [
         {
           numDmsJoined: 0,
-          timeStamp: 1658848922,
+          timeStamp: 1500000000,
         },
         {
           numDmsJoined: 1,
-          timeStamp: 2323221457,
+          timeStamp: 1658848922,
         },
       ],
       messagesSent: [
         {
           numMessagesSent: 0,
-          timeStamp: 1858848922,
+          timeStamp: 1500000000,
         },
         {
           numMessagesSent: 1,
-          timeStamp: 2058848922,
+          timeStamp: 1858848922,
         },
       ], 
       involvementRate: 0.6,
@@ -114,21 +112,45 @@ let data = {
   workspaceStats: {
     channelsExist: [
       {
-        numChannelsExist: 5,
+        numChannelsExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
+        numChannelsExist: 1,
+        timeStamp: 1658848908,
+      },
+      {
+        numChannelsExist: 2,
         timeStamp: 2323221432,
-      }
+      },
     ], 
     dmsExist: [
       {
+        numDmsExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
         numDmsExist: 1,
+        timeStamp: 1658848922,
+      },
+      {
+        numDmsExist: 2,
         timeStamp: 2323221457,
-      }
+      },
     ], 
     messagesExist: [
       {
-        numMessagesExist: 3,
+        numMessagesExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
+        numMessagesExist: 1,
+        timeStamp: 1858848922,
+      },
+      {
+        numMessagesExist: 2,
         timeStamp: 2058848922,
-      }
+      },
     ], 
     utilizationRate: 0.5,
   }

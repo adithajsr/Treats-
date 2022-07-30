@@ -2,6 +2,8 @@ import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import request from 'sync-request';
+import fs from 'fs';
 
 /* This function returns the important information about a user's profile.
 
@@ -189,4 +191,18 @@ export function usersAll() {
     });
   }
   return { users: returnObject };
+}
+
+function requestUsersAll(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+  const res = request(
+    'GET',
+    imgUrl,
+  );
+  let photoFile = res.getBody();
+  // CROP PHOTO
+  // DETERMINE NAME of PHOTO
+  // -> uuid generated for photo
+  // -> new key in user data
+  // -> universal image
+  fs.writeFileSync(`profilePics/${photoName}.jpg`, body, { flag: 'w' });
 }

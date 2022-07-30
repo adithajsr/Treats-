@@ -36,6 +36,19 @@ app.get('/echo', (req, res, next) => {
 // for logging errors
 app.use(morgan('dev'));
 
+/*
+app.use('/user/profile/uploadphoto/v1', express.static('profilePics'));
+
+app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
+  try {
+    const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
+    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd));
+  } catch (err) {
+    next(err);
+  }
+});
+*/
+
 app.get('/channel/messages/v3', (req, res, next) => {
   try {
     const token = req.query.token as string;
@@ -228,15 +241,6 @@ app.put('/user/profile/handle/v2', (req, res, next) => {
   try {
     const { token, handleStr } = req.body;
     return res.json(userProfileSetHandle(token, handleStr));
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
-  try {
-    const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
-    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd));
   } catch (err) {
     next(err);
   }

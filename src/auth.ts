@@ -331,13 +331,15 @@ export function passwordReset(resetCode: string, newPassword: string) {
   if (newPassword.length < 6) {
     throw HTTPError(400, 'password entered is less than 6 characters long');
   }
-  let decryptedCode = codec.decoder(resetCode, 'base64');
-  let uId = decryptedCode.replace(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}-/i, '');
-  let token  = decryptedCode.replace('-' + uId, '');
+  console.log(resetCode);
+  const decryptedCode = codec.decoder(resetCode, 'base64');
+  const uId = decryptedCode.replace(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}-/i, '');
+  const token = decryptedCode.replace('-' + uId, '');
 
   const dataSet = getData();
   for (const item of dataSet.token) {
-    if (item.token === token && item.uId === Number(uId)) {
+    if (item.token === token && item.uId === Number('-' + uId)) {
+      // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {
         if (user.uId === Number(uId)) {
           user.password = newPassword;

@@ -6,8 +6,7 @@ import HTTPError from 'http-errors';
 // @ts-ignore
 import codec from 'string-codec';
 import nodemailer from 'nodemailer';
-
-// import nodemailer from 'nodemailer';
+import { findTokenIndex } from './channels';
 
 /* <checks if a uuid is in use and is of the correct structure>
 
@@ -206,22 +205,6 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 }
 
 /*
-Helper function: finds the index of the given token in the tokens array
-in the database
-
-Arguments:
-    token (string)          - represents a user session
-
-Return Value:
-    Returns tokenIndex
-*/
-const findTokenIndex = (token: string) => {
-  const data = getData();
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-  return tokenIndex;
-};
-
-/*
 Given an active token, invalidates the token to log the user out
 
 Arguments:
@@ -229,17 +212,12 @@ Arguments:
 
 Return Value:
     Returns {} if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
-export function authLogoutV1(token: string) {
+export function authLogoutV2(token: string) {
   const data = getData();
 
   const tokenIndex = findTokenIndex(token);
-
-  // Token was invalid
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   // Invalidate the token
   data.token.splice(tokenIndex, 1);
@@ -344,7 +322,7 @@ export function passwordReset(resetCode: string, newPassword: string) {
   const token = decryptedCode.replace('-' + uId, '');
 
   const dataSet = getData();
-  for (const i of dataSet.token) {
+  for (const i in dataSet.token) {
     if (dataSet.token[i].token === token && dataSet.token[i].uId === Number('-' + uId)) {
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {

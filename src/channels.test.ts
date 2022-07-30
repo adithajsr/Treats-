@@ -335,3 +335,5 @@ describe('channels functions testing', () => {
     });
   });
 });
+
+export { requestChannelsCreate };

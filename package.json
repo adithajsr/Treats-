@@ -1,10 +1,9 @@
 {
     "scripts": {
-        "test": "jest --coverage",
+        "test": "jest",
         "tsc": "tsc --noImplicitAny",
         "lint": "eslint src/**.ts",
         "lint-fix": "eslint --fix src/**.ts",
-        "start": "ts-node src/server.ts",
         "ts-node-coverage": "nyc --reporter=text --reporter=lcov ts-node src/server.ts",
         "posttest": "pkill -f 'node_modules/sync-rpc/lib/worker.js' > /dev/null 2>&1"
     },
@@ -42,11 +41,6 @@
     "nyc": {
         "exclude": [
             "echo.*"
-        ],
-        "sourceMap": false,
-        "reporter": [
-            "lcov",
-            "text"
         ]
     }
 }

@@ -327,6 +327,14 @@ export function passwordRequest(email: string) {
   return {};
 }
 
+/* <Checks for a valid resetCode, to which the user associated gets their password replaced and the resetCode expires>
+
+Arguments:
+resetCode (string) - <encrypted uId and uuid>
+newPassword (string) - <greater then or equal to 6 in length>
+Return Value:
+throws HTTP Error on <invalid newPassword or wrong resetCode>
+returns <{}> on <changed password> */
 export function passwordReset(resetCode: string, newPassword: string) {
   if (newPassword.length < 6) {
     throw HTTPError(400, 'password entered is less than 6 characters long');

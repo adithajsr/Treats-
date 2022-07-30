@@ -98,4 +98,3 @@ function setData(newData: database) {
 }
 
 export { getData, setData };
-export { user, channelMember, dmMember, message, channel, token, dm, database };

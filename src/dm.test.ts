@@ -46,7 +46,7 @@ function requestDMMessages(token: string, dmId: number, start: number) {
 function requestMessageSendDM(token: string, dmId: number, message: string) {
   const res = request(
     'POST',
-    `${url}:${port}/message/senddm/v2`,
+    `${url}:${port}/message/senddm/v1`,
     {
       json: { token, dmId, message },
     }

@@ -1,5 +1,4 @@
 import { getData, setData } from './dataStore';
-import { checkToken } from './message';
 
 interface channelMember {
   uId: number,
@@ -161,9 +160,27 @@ Return Value:
     Returns <[]> on <no channels in data>
 Returns <[{ error: error }]> on <inappropriate or invalid authUserId> */
 
-export function channelsListallV3(token: string) {
+interface Database {
+  user: any[];
+  channel: any[];
+  token: any[];
+  dm: any[];
+}
+
+function checkToken(token: string, data: Database) {
+  if (data.token.find(a => a.token === token) === undefined) {
+    return false;
+  }
+  return true;
+}
+
+function channelsListallV2(token: string) {
   const data = getData();
-  checkToken(token, data);
+
+  // invalid token - invalid, or token is not in database
+  if (checkToken(token, data) === false) {
+    return { error: 'error' };
+  }
 
   const foundChannels = [];
   for (const i in data.channel) {
@@ -175,4 +192,4 @@ export function channelsListallV3(token: string) {
   };
 }
 
-export { channelsCreateV2, channelsListV2 };
+export { channelsCreateV2, channelsListV2, channelsListallV2 };

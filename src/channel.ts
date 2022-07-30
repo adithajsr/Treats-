@@ -1,5 +1,4 @@
 import { getData, setData } from './dataStore';
-import { checkToken } from './message';
 import HTTPError from 'http-errors';
 
 /*
@@ -70,6 +69,25 @@ interface Details {
 }
 
 /*
+Checks validity of a token
+
+Arguments:
+  token (string)         - represents the session of the user who is creating the channel
+  data (database)     - database that is being interacted with
+  message (string)      - message they want to send
+
+Return Value:
+  Returns { true } if token is valid
+  Returns { false } if token is invalid
+*/
+function checkToken(token: string, data: Database) {
+  if (data.token.find((a: any) => a.token === token) === undefined) {
+    return false;
+  }
+  return true;
+}
+
+/*
 Converts a token to its relevant uid
 
 Arguments:
@@ -95,9 +113,13 @@ Return Value:
     Returns <error otherwise>
 */
 
-export function channelDetailsV3(token: string, channelId: number) {
+function channelDetailsV2(token: string, channelId: number) {
   const data = getData();
-  checkToken(token, data);
+
+  // check for token validity
+  if (checkToken(token, data) === false) {
+    return { error: 'error' };
+  }
 
   const uId = tokenToUid(token, data);
 
@@ -106,11 +128,11 @@ export function channelDetailsV3(token: string, channelId: number) {
 
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
-    throw HTTPError(400, 'invalid channelId');
+    return { error: 'error' };
     // check for user in channel
   } else {
     if (channel[i].members.find(a => a.uId === uId) === undefined) {
-      throw HTTPError(403, 'auth user is not a member!');
+      return { error: 'error' };
     }
   }
 
@@ -138,18 +160,20 @@ export function channelDetailsV3(token: string, channelId: number) {
           handle: user[index].handle,
         }
       );
+    // members
+    } else if (members[i].channelPerms === 2) {
+      details.allMembers.push(
+        {
+          uId: user[index].uId,
+          email: user[index].email,
+          nameFirst: user[index].nameFirst,
+          nameLast: user[index].nameLast,
+          handle: user[index].handle,
+        }
+      );
     }
-    details.allMembers.push(
-      {
-        uId: user[index].uId,
-        email: user[index].email,
-        nameFirst: user[index].nameFirst,
-        nameLast: user[index].nameLast,
-        handle: user[index].handle,
-      }
-    );
   }
-  return { channelDetails: details };
+  return details;
 }
 
 // ======================================== Main Functions. ========================================
@@ -439,3 +463,5 @@ function addUser(channelId: number, uId: number) {
   data.channel[i].members.push(newUser);
   setData(data);
 }
+
+export { channelDetailsV2 };

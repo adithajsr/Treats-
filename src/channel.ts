@@ -123,7 +123,6 @@ export function channelDetailsV3(token: string, channelId: number) {
     allMembers: [],
   };
   // find the member in the user array, then push details on
-  console.log(user);
   for (const i in members) {
     const index = data.user.findIndex(a => a.uId === members[i].uId);
     if (members[i].channelPerms === 1) {

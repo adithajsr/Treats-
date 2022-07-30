@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "test": "jest",
+        "test": "jest --coverage",
         "tsc": "tsc --noImplicitAny",
         "lint": "eslint src/**.ts",
         "lint-fix": "eslint --fix src/**.ts",
@@ -42,6 +42,11 @@
     "nyc": {
         "exclude": [
             "echo.*"
+        ],
+        "sourceMap": false,
+        "reporter": [
+            "lcov",
+            "text"
         ]
     }
 }

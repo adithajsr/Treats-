@@ -130,6 +130,8 @@ export function messageSendV2 (token: string, channelId: number, message: string
       uId: uId,
       message: message,
       timeSent: time,
+      pinned: 0,
+      react: 0,
     }
   );
 
@@ -316,7 +318,9 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
       messageId: messageId,
       uId: uId,
       message: message,
-      timeSent: time
+      timeSent: time,
+      pinned: 0,
+      react: 0,
     }
   );
   setData(data);

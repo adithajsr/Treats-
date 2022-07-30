@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import { checkToken } from './message';
+import HTTPError from 'http-errors';
 
 interface channelMember {
   uId: number,
@@ -15,10 +16,17 @@ Arguments:
 
 Return Value:
     Returns tokenIndex
+    Throws a 403 error if token is invalid
 */
-const findTokenIndex = (token: string) => {
+export const findTokenIndex = (token: string) => {
   const data = getData();
   const tokenIndex = data.token.findIndex(a => a.token === token);
+
+  // Invalid token
+  if (tokenIndex === -1) {
+    throw HTTPError(403, 'Invalid token');
+  }
+
   return tokenIndex;
 };
 
@@ -34,10 +42,6 @@ Return Value:
     Returns false if arguments are invalid
 */
 const areArgumentsValidChannelsCreate = (tokenIndex: number, name: string) => {
-  // Invalid token
-  if (tokenIndex === -1) {
-    return false;
-  }
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
     return false;
@@ -86,15 +90,15 @@ Arguments:
 
 Return Value:
     Returns { channelId } if no error
-    Returns { error: 'error' } on invalid token or invalid channel name
+    Throws an error on invalid token (403) or invalid channel name (400)
 */
 
-function channelsCreateV2(token: string, name: string, isPublic: boolean) {
+export function channelsCreateV3(token: string, name: string, isPublic: boolean) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
 
   if (areArgumentsValidChannelsCreate(tokenIndex, name) === false) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Invalid channel name');
   }
 
   // Generate channeId
@@ -131,16 +135,11 @@ Arguments:
 
 Return Value:
     Returns { channels } if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
-function channelsListV2(token: string) {
+export function channelsListV3(token: string) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   const userId = data.token[tokenIndex].uId;
   const channelsList = createListChannelsList(userId);
@@ -174,5 +173,3 @@ export function channelsListallV3(token: string) {
     channels: foundChannels
   };
 }
-
-export { channelsCreateV2, channelsListV2 };

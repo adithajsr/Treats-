@@ -213,7 +213,7 @@ Arguments:
 
 Return Value:
     Returns {} if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
 export function authLogoutV2(token: string) {
   const data = getData();

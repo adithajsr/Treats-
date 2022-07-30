@@ -31,17 +31,16 @@ export const findTokenIndex = (token: string) => {
 };
 
 /*
-Helper function: Checks if the arguments for channelsCreateV2() are valid
+Helper function: Checks if the channel name for /channels/create is valid
 
 Arguments:
-    tokenIndex (number)          - index of token in tokens array in database
     name (string)                - name of new channel
 
 Return Value:
     Returns true if arguments are valid
     Returns false if arguments are invalid
 */
-const areArgumentsValidChannelsCreate = (tokenIndex: number, name: string) => {
+const isChannelNameValidChannelsCreate = (name: string) => {
   // Invalid channel name
   if (name.length < 1 || name.length > 20) {
     return false;
@@ -90,14 +89,15 @@ Arguments:
 
 Return Value:
     Returns { channelId } if no error
-    Throws an error on invalid token (403) or invalid channel name (400)
+    Throws a 403 error on invalid token
+    Throws a 400 error on invalid channel name
 */
 
 export function channelsCreateV3(token: string, name: string, isPublic: boolean) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
 
-  if (areArgumentsValidChannelsCreate(tokenIndex, name) === false) {
+  if (isChannelNameValidChannelsCreate(name) === false) {
     throw HTTPError(400, 'Invalid channel name');
   }
 

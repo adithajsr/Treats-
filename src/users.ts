@@ -4,6 +4,8 @@ import validator from 'validator';
 import HTTPError from 'http-errors';
 import request from 'sync-request';
 import fs from 'fs';
+import sharp from 'sharp';
+import { v4 as generateV4uuid } from 'uuid';
 
 /* This function returns the important information about a user's profile.
 
@@ -193,16 +195,43 @@ export function usersAll() {
   return { users: returnObject };
 }
 
-function requestUsersAll(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+  // CHECK COORDINATES MAKE SENSE
+  if (xEnd <= xStart || yEnd <= yStart) {
+    throw HTTPError(400, 'cropping coordinates are invalid');
+  }
+  if (xEnd < 0 || xStart < 0 || yEnd < 0 || yStart < 0) {
+    throw HTTPError(400, 'cropping coordinates are invalid');
+  }
+    // DETERMINE NAME of PHOTO
+  // -> new key in user data
   const res = request(
     'GET',
     imgUrl,
   );
-  let photoFile = res.getBody();
+  let body = res.getBody();
+  // CHECK IMAGE MEETS REQUIREMENTS
+  if (photoFile.match(/^ÿØÿà/) !== null) {
+    throw HTTPError(400, 'image uploaded is not a JPG');
+  }
+  const uuid = generateV4uuid();
+  const preEditedImage = `profilePics/pre-edit-${uuid}.jpg`;
+  fs.writeFileSync(preEditedImage, body, { flag: 'w' });
+  if (sharp(preEditedImage).metadata().width < xEnd ||
+      sharp(preEditedImage).metadata().height < yEnd) {
+        fs.unlinkSync(preEditedImage);
+        throw HTTPError(400, 'cropping coordinates are invalid');
+  }
   // CROP PHOTO
-  // DETERMINE NAME of PHOTO
-  // -> uuid generated for photo
-  // -> new key in user data
-  // -> universal image
-  fs.writeFileSync(`profilePics/${photoName}.jpg`, body, { flag: 'w' });
+  const width = xEnd - xStart;
+  const height = yEnd - yStart;
+  sharp(preEditedImage).extract({ width: width, height: heighy, left: xStart, top: yStart }).toFile(`profilePics/${uuid}.jpg`)
+    .then(function(new_file_info) {
+      fs.unlinkSync(preEditedImage);
+      console.log("Image cropped and saved");
+    })
+    .catch(function(err) {
+      fs.unlinkSync(preEditedImage);
+      throw HTTPError(400, 'sharp failed to crop');
+    });
 }

@@ -121,6 +121,7 @@ app.post('/auth/logout/v1', (req, res, next) => {
 });
 
 app.post('/auth/passwordreset/request/v1', (req, res) => {
+  console.log('/ ===== /');
   const email = req.body.email;
   res.json(passwordRequest(email));
 });

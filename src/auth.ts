@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { v4 as generateV4uuid, validate as validateV4uuid } from 'uuid';
+import { v4 as generateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
 // eslint-disable-next-line
@@ -17,15 +17,10 @@ Return Value:
 returns <true> on <valid uuid>
 returns <false> on <in-use or inccorectly structured uuid> */
 export function isUuidValid(uuid: string) : boolean {
-  // this function is only called after a random uuidv4 is generated so it is unlikely to access line # and is impossible to access line $
-  if (!validateV4uuid(uuid)) {
-    // line $ is below
-    return false;
-  }
   const dataSet = getData();
   for (const item of dataSet.token) {
     if (item.token === uuid) {
-      // line # is below
+      // this function is only called after a random uuidv4 is generated so it is unlikely and random there is a match, hence it is virtually impossible to test
       return false;
     }
   }
@@ -40,7 +35,7 @@ returns <uid> on <finding a valid uuid> */
 function newUuid() {
   let uuid: string = generateV4uuid();
   while (!isUuidValid(uuid)) {
-    // above function is only caleld here 'isUuidValid' and always* returns true because it is given a brand new random uuidv4 so below line cannot be accessed via coverage
+    // above condition is unliely to be met as described in line 21
     uuid = generateV4uuid();
   }
   return uuid;
@@ -299,6 +294,7 @@ function sendEmail(email: string, encryptedCode: string) {
 
   transporter.sendMail(mailOptions, function(err, success) {
     if (err) {
+      // only be able to cover line below if server was down or invalid email, however other fns stop the latter from happening
       console.log(err);
     } else {
       console.log('Email sent successfully!');

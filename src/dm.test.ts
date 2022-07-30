@@ -2,6 +2,8 @@ import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
+const INPUT_ERROR = 400;
+const INVALID_AUTH = 403;
 const port = config.port;
 const url = config.url;
 
@@ -17,14 +19,14 @@ type wrapperOutput = {
 export function requestDMCreate(token: string, uIds: number[]) {
   const res = request(
     'POST',
-    `${url}:${port}/dm/create/v1`,
+    `${url}:${port}/dm/create/v2`,
     {
       json: { token, uIds },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -52,35 +54,35 @@ function requestMessageSendDM(token: string, dmId: number, message: string) {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
 function requestDMList(token: string) {
   const res = request(
     'GET',
-    `${url}:${port}/dm/list/v1`,
+    `${url}:${port}/dm/list/v2`,
     {
       qs: { token },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
 function requestDMRemove(token: string, dmId: number) {
   const res = request(
     'DELETE',
-    `${url}:${port}/dm/remove/v1`,
+    `${url}:${port}/dm/remove/v2`,
     {
       qs: { token, dmId },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(String(res.getBody())),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -134,7 +136,7 @@ function requestClear() {
       qs: {},
     }
   );
-  return JSON.parse(String(res.getBody()));
+  return JSON.parse(res.body as string);
 }
 test('Invalid dmId', () => {
   requestClear();
@@ -143,6 +145,8 @@ test('Invalid dmId', () => {
   const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
 
   expect(requestDMMessages(danielToken, dmId + 20, 0).res.statusCode).toBe(400);
+
+  requestClear();
 });
 
 test('Start is greater than total number of messages', () => {
@@ -154,6 +158,8 @@ test('Start is greater than total number of messages', () => {
   requestMessageSendDM(danielToken, dmId, 'First message');
   requestMessageSendDM(danielToken, dmId, 'Second message');
   expect(requestDMMessages(danielToken, dmId, 4).res.statusCode).toBe(400);
+
+  requestClear();
 });
 
 test('Requesting user is not member of DM', () => {
@@ -163,6 +169,8 @@ test('Requesting user is not member of DM', () => {
   const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
   const dmId = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
   expect(requestDMMessages(samToken, dmId, 0).res.statusCode).toBe(403);
+
+  requestClear();
 });
 
 test('Default case', () => {
@@ -189,6 +197,8 @@ test('Default case', () => {
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[4].message).toStrictEqual(returnObject[4]);
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[5].message).toStrictEqual(returnObject[5]);
   expect(requestDMMessages(danielToken, dmId, 0).res.statusCode).toBe(OK);
+
+  requestClear();
 });
 
 test('Start at integer > 0', () => {
@@ -206,6 +216,8 @@ test('Start at integer > 0', () => {
 
   expect(requestDMMessages(danielToken, dmId, 3).bodyObj.messages[0].message).toStrictEqual('Fourth message');
   expect(requestDMMessages(danielToken, dmId, 3).res.statusCode).toBe(OK);
+
+  requestClear();
 });
 
 describe('dm capabilities', () => {
@@ -232,7 +244,11 @@ describe('dm capabilities', () => {
     testUser4 = requestAuthRegister('jdoe@proton.com', '111111', 'John', 'Doe');
   });
 
-  describe('test /dm/create/v1', () => {
+  afterEach(() => {
+    requestClear();
+  });
+
+  describe('test /dm/create/v2', () => {
     test('Success create new DM, two users in DM', () => {
       const testDM = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
 
@@ -255,56 +271,55 @@ describe('dm capabilities', () => {
 
     test('Fail create new DM, invalid token', () => {
       const testDM = requestDMCreate(testUser4.bodyObj.token + 'a', [testUser1.bodyObj.authUserId, testUser2.bodyObj.authUserId]);
-      expect(testDM.res.statusCode).toBe(OK);
-      expect(testDM.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM.res.statusCode).toBe(INVALID_AUTH);
+      expect(testDM.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('Fail create new DM, invalid uId(s)', () => {
       // One invalid uId, invalid uId is not creator's uID
       const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId + 20]);
-      expect(testDM1.res.statusCode).toBe(OK);
-      expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM1.res.statusCode).toBe(INPUT_ERROR);
+      expect(testDM1.bodyObj.error).toStrictEqual({ message: 'Invalid uIds' });
 
       // One invalid uId, invalid uId is creator's uID
       const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser1.bodyObj.authUserId, testUser2.bodyObj.authUserId]);
-      expect(testDM2.res.statusCode).toBe(OK);
-      expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM2.res.statusCode).toBe(INPUT_ERROR);
+      expect(testDM2.bodyObj.error).toStrictEqual({ message: 'Invalid uIds' });
 
       // Multiple invalid uIds
       const testDM3 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId + 20, testUser4.bodyObj.authUserId + 20]);
-      expect(testDM3.res.statusCode).toBe(OK);
-      expect(testDM3.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM3.res.statusCode).toBe(INPUT_ERROR);
+      expect(testDM3.bodyObj.error).toStrictEqual({ message: 'Invalid uIds' });
     });
 
     test('Fail create new DM, duplicate uIds', () => {
       // One pair of duplicate uIds
       const testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
-      expect(testDM1.res.statusCode).toBe(OK);
-      expect(testDM1.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM1.res.statusCode).toBe(INPUT_ERROR);
+      expect(testDM1.bodyObj.error).toStrictEqual({ message: 'Invalid uIds' });
 
       // Multiple pairs of duplicate uIds
       const testDM2 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId, testUser2.bodyObj.authUserId, testUser4.bodyObj.authUserId]);
-      expect(testDM2.res.statusCode).toBe(OK);
-      expect(testDM2.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testDM2.res.statusCode).toBe(INPUT_ERROR);
+      expect(testDM2.bodyObj.error).toStrictEqual({ message: 'Invalid uIds' });
     });
   });
 
-  describe('test /dm/list/v1', () => {
+  describe('test /dm/list/v2', () => {
     let testDM1: wrapperOutput;
     let testDetails1: wrapperOutput;
 
     beforeEach(() => {
       // testUser1 is the creator of testDM1
       testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
-      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
       testDetails1 = requestDMDetails(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
     });
 
     test('Fail DM list, invalid token', () => {
       const testList = requestDMList(testUser4.bodyObj.token + 'a');
 
-      expect(testList.res.statusCode).toBe(OK);
-      expect(testList.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testList.res.statusCode).toBe(INVALID_AUTH);
+      expect(testList.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('One DM, authorised user is in DM', () => {
@@ -410,13 +425,12 @@ describe('dm capabilities', () => {
     });
   });
 
-  describe('test /dm/remove/v1', () => {
+  describe('test /dm/remove/v2', () => {
     let testDM1: wrapperOutput;
 
     beforeEach(() => {
       // testUser1 is the original creator of testDM1
       testDM1 = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId, testUser3.bodyObj.authUserId]);
-      expect(testDM1.bodyObj).not.toStrictEqual({ error: 'error' });
     });
 
     test('Success remove DM, two users in DM', () => {
@@ -427,7 +441,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(403);
+      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
     });
 
     test('Success remove DM, more than two users in DM', () => {
@@ -442,39 +456,39 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(403);
+      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
     });
 
     test('Fail remove DM, invalid token', () => {
       const testRemove = requestDMRemove(testUser4.bodyObj.token + 'a', testDM1.bodyObj.dmId);
-      expect(testRemove.res.statusCode).toBe(OK);
-      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testRemove.res.statusCode).toBe(INVALID_AUTH);
+      expect(testRemove.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('Fail remove DM, invalid dmId', () => {
       const testRemove = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId + 20);
-      expect(testRemove.res.statusCode).toBe(OK);
-      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testRemove.res.statusCode).toBe(INPUT_ERROR);
+      expect(testRemove.bodyObj.error).toStrictEqual({ message: 'Invalid dmId' });
     });
 
     test('Fail remove DM, authorised user is not in the DM', () => {
       // testUser4 was never in testDM1
       const testRemove1 = requestDMRemove(testUser4.bodyObj.token, testDM1.bodyObj.dmId);
-      expect(testRemove1.res.statusCode).toBe(OK);
-      expect(testRemove1.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testRemove1.res.statusCode).toBe(INVALID_AUTH);
+      expect(testRemove1.bodyObj.error).toStrictEqual({ message: 'The authorised user is not in the DM' });
 
       // testUser1 was the original creator of testDM1 but left
       requestDMLeave(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
       const testRemove2 = requestDMRemove(testUser1.bodyObj.token, testDM1.bodyObj.dmId);
-      expect(testRemove2.res.statusCode).toBe(OK);
-      expect(testRemove2.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testRemove2.res.statusCode).toBe(INVALID_AUTH);
+      expect(testRemove2.bodyObj.error).toStrictEqual({ message: 'The authorised user is not in the DM' });
     });
 
     test('Fail remove DM, authorised user is in the DM but is not the creator', () => {
       // testUser2 is in testDM1 but testUser1 is the creator
       const testRemove = requestDMRemove(testUser3.bodyObj.token, testDM1.bodyObj.dmId);
-      expect(testRemove.res.statusCode).toBe(OK);
-      expect(testRemove.bodyObj).toStrictEqual({ error: 'error' });
+      expect(testRemove.res.statusCode).toBe(INVALID_AUTH);
+      expect(testRemove.bodyObj.error).toStrictEqual({ message: 'The authorised user is not the original DM creator' });
     });
   });
 });

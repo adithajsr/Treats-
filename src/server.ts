@@ -9,7 +9,7 @@ import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, chann
 import { authRegisterV1, authLoginV1, authLogoutV1, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV2, channelsListV2 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
-import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, uploadPhoto } from './users';
 import { dmMessagesV2, dmCreateV1, dmListV1, dmRemoveV1, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
@@ -228,6 +228,15 @@ app.put('/user/profile/handle/v2', (req, res, next) => {
   try {
     const { token, handleStr } = req.body;
     return res.json(userProfileSetHandle(token, handleStr));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
+  try {
+    const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
+    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd));
   } catch (err) {
     next(err);
   }

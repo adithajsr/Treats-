@@ -79,6 +79,26 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
+export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/user/profile/uploadphoto/v1`,
+    {
+      json: {
+        imgUrl: imgUrl,
+        xStart: xStart,
+        yStart: yStart,
+        xEnd: xEnd,
+        yEnd: yEnd,
+      }
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
 function requestUsersAll() {
   const res = request(
     'GET',

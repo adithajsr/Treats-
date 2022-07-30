@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { requestClear, requestUserProfile } from './users.test';
+import { requestUserProfile } from './users.test';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
@@ -8,6 +8,20 @@ const OK = 200;
 const INVALID_TOKEN = 403;
 const port = config.port;
 const url = config.url;
+
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
 export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -56,6 +70,22 @@ function requestAuthLogout(token: string) {
   return {
     res: res,
     bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestPasswordRequest(email: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/passwordreset/request/v1`,
+    {
+      json: {
+        email: email,
+      },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
   };
 }
 
@@ -163,7 +193,7 @@ describe('Testing for requestAuthRegister', () => {
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
-      uId: 0,
+      uId: 1,
       email: testUserEmail,
       nameFirst: testUserFN,
       nameLast: testUserLN,
@@ -315,5 +345,23 @@ describe('test /auth/logout/v2', () => {
     const testLogout = requestAuthLogout(testUser.bodyObj.token + 'a');
     expect(testLogout.res.statusCode).toBe(INVALID_TOKEN);
     expect(testLogout.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+  });
+});
+
+describe('test /auth/passwordreset/request/v1', () => {
+  requestClear();
+  test('Success user log out', () => {
+    const testUser = requestAuthRegister('z5420895@ad.unsw.edu.au', '123abc!@#', 'John', 'Doe');
+    // has not logged out
+    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout1.res.statusCode).toBe(OK);
+    expect(testLogout1.bodyObj).toStrictEqual({});
+
+    // has logged out
+    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    requestClear();
   });
 });

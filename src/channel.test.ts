@@ -201,7 +201,7 @@ describe('channel/details/v3 testing', () => {
           handle: 'johndoe',
           nameFirst: 'John',
           nameLast: 'Doe',
-          uId: 0,
+          uId: 1,
         },
       ],
       allMembers: [
@@ -210,7 +210,7 @@ describe('channel/details/v3 testing', () => {
           handle: 'johndoe',
           nameFirst: 'John',
           nameLast: 'Doe',
-          uId: 0,
+          uId: 1,
         },
       ],
     });

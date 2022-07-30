@@ -14,7 +14,7 @@ type wrapperOutput = {
   bodyObj: any,
 };
 
-function requestDMCreate(token: string, uIds: number[]) {
+export function requestDMCreate(token: string, uIds: number[]) {
   const res = request(
     'POST',
     `${url}:${port}/dm/create/v1`,

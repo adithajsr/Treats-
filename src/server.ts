@@ -6,7 +6,7 @@ import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
 
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
-import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest } from './auth';
+import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
@@ -123,6 +123,15 @@ app.post('/auth/logout/v2', (req, res, next) => {
 app.post('/auth/passwordreset/request/v1', (req, res) => {
   const email = req.body.email;
   res.json(passwordRequest(email));
+});
+
+app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
+  try {
+    const { resetCode, newPassword } = req.body;
+    return res.json(passwordReset(resetCode, newPassword));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/channels/create/v3', (req, res, next) => {

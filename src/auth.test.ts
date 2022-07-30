@@ -3,6 +3,10 @@ import { requestUserProfile } from './users.test';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
+// eslint-disable-next-line
+// @ts-ignore
+import codec from 'string-codec';
+import { v4 as generateV4uuid } from 'uuid';
 
 const OK = 200;
 const INVALID_TOKEN = 403;
@@ -80,6 +84,23 @@ function requestPasswordRequest(email: string) {
     {
       json: {
         email: email,
+      },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+function requestPasswordReset(resetCode: string, newPassword: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/auth/passwordreset/reset/v1`,
+    {
+      json: {
+        resetCode: resetCode,
+        newPassword: newPassword,
       },
     }
   );
@@ -348,19 +369,28 @@ describe('test /auth/logout/v2', () => {
   });
 });
 
-describe('test /auth/passwordreset/request/v1', () => {
+describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', () => {
   requestClear();
   test('Success user log out', () => {
     const testUser = requestAuthRegister('z5420895@ad.unsw.edu.au', '123abc!@#', 'John', 'Doe');
+
     // has not logged out
     requestPasswordRequest('z5420895@ad.unsw.edu.au');
 
-    const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
-    expect(testLogout1.res.statusCode).toBe(OK);
-    expect(testLogout1.bodyObj).toStrictEqual({});
+    const testLogout = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout.res.statusCode).toBe(OK);
+    expect(testLogout.bodyObj).toStrictEqual({});
 
     // has logged out
     requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5');
+    expect(returnValue1.res.statusCode).toBe(400);
+    expect(returnValue1.bodyObj.error).toStrictEqual({ message: 'password entered is less than 6 characters long' });
+
+    const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve');
+    expect(returnValue2.res.statusCode).toBe(400);
+    expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
 
     requestClear();
   });

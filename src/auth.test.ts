@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { requestClear, requestUserProfile } from './users.test';
+import { requestUserProfile } from './users.test';
 import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
@@ -7,6 +7,20 @@ import config from './config.json';
 const OK = 200;
 const port = config.port;
 const url = config.url;
+
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
 
 export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
   const res = request(
@@ -315,3 +329,20 @@ describe('test /auth/logout/v1', () => {
   });
 });
 
+describe('test /auth/passwordreset/request/v1', () => {
+  requestClear();
+  test('Success user log out', () => {
+    const testUser = requestAuthRegister('z5420895@ad.unsw.edu.au', '123abc!@#', 'John', 'Doe');
+    // has not logged out
+    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    const testLogout1 = requestAuthLogout(testUser.bodyObj.token);
+    expect(testLogout1.res.statusCode).toBe(OK);
+    expect(testLogout1.bodyObj).toStrictEqual({});
+
+    // has logged out
+    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+
+    requestClear();
+  });
+});

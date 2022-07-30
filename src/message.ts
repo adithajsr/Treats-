@@ -45,8 +45,6 @@ export function tokenToUid(token: string, data: Database) {
 }
 
 /*
-Finds the index of the channel, if existing, according to channel id
-
 Arguments:
   messageId (number)         - messageId to find in channel
   channel (channel [])     - channel to search through
@@ -57,15 +55,17 @@ Return Value:
 
 export function getChannelIndex(messageId: number, channel: channel[]) {
   let index;
-  for (const i in channel) {
-    index = channel[i].messages.findIndex(a => a.messageId === messageId);
+  for (let i = 0; i < channel.length; i++) {
+    for (let j = 0; j < channel[i].messages.length; j++) {
+      if (channel[i].messages[j].messageId === messageId) {
+        index = i;
+      }
+    }
   }
   return index;
 }
 
 /*
-Finds the index of the dm, if existing, according to dm id
-
 Arguments:
   messageId (number)         - messageId to find in channel
   dm (dm [])     - channel to search through
@@ -76,8 +76,12 @@ Return Value:
 
 export function getDmIndex(messageId: number, dm: dm[]) {
   let index;
-  for (const i in dm) {
-    index = dm[i].messages.findIndex(a => a.messageId === messageId);
+  for (let i = 0; i < dm.length; i++) {
+    for (let j = 0; j < dm[i].messages.length; j++) {
+      if (dm[i].messages[j].messageId === messageId) {
+        index = i;
+      }
+    }
   }
   return index;
 }
@@ -151,35 +155,36 @@ Return Value:
 export function messageEditV2 (token: string, messageId: number, message: string) {
   const data = getData();
   checkToken(token, data);
-
   if (message.length > 1000) {
     throw HTTPError(400, 'invalid message length!');
   }
 
   const uId = tokenToUid(token, data);
-  let messageIndex;
+
   const { channel } = data;
   const { dm } = data;
-
+  let messageIndex;
   const channelIndex = getChannelIndex(messageId, channel);
   const dmIndex = getDmIndex(messageId, dm);
-
-  if (channelIndex && dmIndex === undefined) {
+  if (channelIndex === undefined && dmIndex === undefined) {
     throw HTTPError(400, 'invalid messageId!');
   }
 
   // check info surrounding message
   if (channelIndex === undefined) {
     messageIndex = dm[dmIndex].messages.findIndex(a => a.messageId === messageId);
+
     if (dm[dmIndex].messages[messageIndex].uId !== uId) {
       throw HTTPError(403, 'dm not sent by this user, cannot edit!');
     }
     const memberIndex = dm[dmIndex].members.findIndex(a => a.uId === uId);
     const globalPermIndex = data.user.findIndex(a => a.uId === uId);
-    if (dm[dmIndex].members[memberIndex].dmPerms !== 1 &&
+
+    if (dm[dmIndex].members[memberIndex].dmPerms === 2 &&
       data.user[globalPermIndex].globalPerms !== 1) {
       throw HTTPError(403, 'no permissions!');
     }
+
     if (message === '') {
       dm[dmIndex].messages.splice(messageIndex, 1);
     } else {
@@ -187,15 +192,17 @@ export function messageEditV2 (token: string, messageId: number, message: string
     }
   } else if (dmIndex === undefined) {
     messageIndex = channel[channelIndex].messages.findIndex(a => a.messageId === messageId);
+
     if (channel[channelIndex].messages[messageIndex].uId !== uId) {
       throw HTTPError(403, 'no permissions!');
     }
     const memberIndex = channel[channelIndex].members.findIndex(a => a.uId === uId);
     const globalPermIndex = data.user.findIndex(a => a.uId === uId);
-    if (channel[channelIndex].members[memberIndex].channelPerms !== 1 &&
+    if (channel[channelIndex].members[memberIndex].channelPerms === 2 &&
       data.user[globalPermIndex].globalPerms !== 1) {
       throw HTTPError(403, 'no permissions!');
     }
+
     if (message === '') {
       channel[channelIndex].messages.splice(messageIndex, 1);
     } else {
@@ -233,7 +240,7 @@ export function messageRemoveV2(token: string, messageId: number) {
   const channelIndex = getChannelIndex(messageId, channel);
   const dmIndex = getDmIndex(messageId, dm);
 
-  if (channelIndex && dmIndex === undefined) {
+  if (channelIndex === undefined && dmIndex === undefined) {
     throw HTTPError(400, 'invalid messageId!');
   }
 
@@ -245,7 +252,7 @@ export function messageRemoveV2(token: string, messageId: number) {
     }
     const memberIndex = dm[dmIndex].members.findIndex(a => a.uId === uId);
     const globalPermIndex = data.user.findIndex(a => a.uId === uId);
-    if (dm[dmIndex].members[memberIndex].dmPerms !== 1 &&
+    if (dm[dmIndex].members[memberIndex].dmPerms === 2 &&
       data.user[globalPermIndex].globalPerms !== 1) {
       throw HTTPError(403, 'no permissions!');
     }
@@ -257,7 +264,7 @@ export function messageRemoveV2(token: string, messageId: number) {
     }
     const memberIndex = channel[channelIndex].members.findIndex(a => a.uId === uId);
     const globalPermIndex = data.user.findIndex(a => a.uId === uId);
-    if (channel[channelIndex].members[memberIndex].channelPerms !== 1 &&
+    if (channel[channelIndex].members[memberIndex].channelPerms === 2 &&
       data.user[globalPermIndex].globalPerms !== 1) {
       throw HTTPError(403, 'no permissions!');
     }

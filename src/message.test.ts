@@ -73,7 +73,7 @@ Arguments:
 Return Value:
   Returns { string }      - consists of letters
 */
-function generateString() {
+export function generateString() {
   const length = 1005;
   const set = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
   let string = '';

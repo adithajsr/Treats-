@@ -13,6 +13,7 @@ import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetH
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
+import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 
 // Set up web app, use JSON
 const app = express();
@@ -280,6 +281,22 @@ app.delete('/dm/remove/v2', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/standup/start/v1', (req, res) => {
+  const { token, channelId, length } = req.body;
+  res.json(standupStartV1(token, channelId, length));
+});
+
+app.get('/standup/active/v1', (req, res) => {
+  const token = req.query.token as string;
+  const channelId = parseInt(req.query.channelId as string);
+  res.json(standupActiveV1(token, channelId));
+});
+
+app.post('/standup/send/v1', (req, res) => {
+  const { token, channelId, message } = req.body;
+  res.json(standupStartV1(token, channelId, message));
 });
 
 // handles errors nicely

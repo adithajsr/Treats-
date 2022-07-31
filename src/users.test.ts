@@ -434,34 +434,92 @@ describe('stats capabilities', () => {
     });
 
     test('Test first data points', () => {
-      // For users, the first data point should be 0 for all metrics
-      // at the time that their account was created
+      // The first data point should be 0 for all metrics at the time
+      // that their account was created
     });
 
-    test('Test metrics basic', () => {
+    test('Test metrics other than involvement', () => {
       // The number of channels the user is a part of
       // The number of DMs the user is a part of
       // The number of messages the user has sent
-      // The user's involvement
+    });
+
+    test('involvement is 0', () => {
+      // The user's involvement:
+        // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by 
+        // sum(numChannels, numDms, numMsgs)
 
       // If the denominator is 0, involvement should be 0
-      
+    });
+
+    test('numChannelsJoined increase and decrease', () => {
+      // The number of channels that the user is a part of can increase over time
       // If the involvement is greater than 1, it should be capped at 1
+      // channels/create
+      // channel/join
+      // channel/invite
+
+      // The number of channels that the user is a part of can decrease over time
+      // channel/leave
     });
 
-    test('Test remove user from channel(s)', () => {
-      // The number of channels that the user is a part of can increase and
-      // decrease over time
+    test('numDmsJoined increase and decrease', () => {
+      // The number of DMs that the user is a part of can increase over time
+      // If the involvement is greater than 1, it should be capped at 1
+      // dm/create
+
+      // The number of DMs that the user is a part of can decrease over time
+      // dm/remove
+      // dm/leave
     });
 
-    test('Test remove user from DM(s)', () => {
-      // The number of DMs that the user is a part of can increase and decrease
-      // over time
+    test('numMsgsSent increase', () => {
+      // The number of messages sent will only increase over time
+      // If the involvement is greater than 1, it should be capped at 1
+      // message/send
+      // message/senddm
+
+      // standup/send messages only count when the final packaged
+      // standup message from standup/start has been sent
+      // When a standup is sent, the number of messages sent by the user
+      // who started the standup should increase by 1
+
+      // The removal of messages does NOT affect the number of messages sent
+      // message/remove
+      // dm/remove
     });
 
-    test('Test remove user\'s message(s)', () => {
-      // The number of messages sent will only increase (the removal of
-      // messages does not affect it).
+    test('numChannels increase', () => {
+      // The number of channels sent will only increase over time
+      // numChannels will never decrease as there is no way to remove channels
+      // channels/create
+    });
+
+    test('numDms increase and decrease', () => {
+      // The number of DMs in the workspace can increase over time
+      // dm/create
+
+      // numDms will only decrease when dm/remove is called
+      // dm/remove
+    });
+
+    test('numMsgs increase and decrease', () => {
+      // numMsgs is the number of messages that exist at the current time
+
+      // numMsgs can increase over time
+      // message/send
+      // message/senddm
+
+      // standup/send messages only count when the final packaged
+      // standup message from standup/start has been sent
+      // A standup should only count as single message
+
+      // numMsgs should decrease when messages or DMs are removed
+      // message/remove
+      // dm/remove
+
+      // Messages which have not been sent yet with message/sendlater or
+      // message/sendlaterdm are not included
     });
   });
 
@@ -484,35 +542,57 @@ describe('stats capabilities', () => {
     test('Fail fetch workspace\'s stats, invalid token', () => {
     });
 
-    test('Success fetch workspace\'s stats, test first data points', () => {
-      // For the workspace, the first data point should be 0 for all metrics
-      // at the time that the first user registers
+    test('Test first data points', () => {
+      // The first data point should be 0 for all metrics at the time
+      // that the first user registers
     });
 
-    test('Success fetch workspace\'s stats, test metrics basic', () => {
+    test('Test metrics other than utilization', () => {
       // The number of channels that exist currently
       // The number of DMs that exist currently
       // The number of messages that exist currently
       // The workspace's utilization
+        // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
+
+      // admin/user/remove/v1
     });
 
-    test('Test remove DM(s) from workspace', () => {
-      // numDms will only decrease when dm/remove is called
+    test('utilization is 0', () => {
+      // The workspace's utilization
+        // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
+        
+      // If the denominator is 0, involvement should be 0
     });
 
-    test('Test remove message(s) from workspace', () => {
-      // numMsgs is the number of messages that exist at the current time,
-      // and should decrease when messages or DMs are removed
+    test('numUsersWhoHaveJoinedAtLeastOneChannelOrDm increase and decrease', () => {
+      // The number of users who are currently in at least one channel or DM
+      // can increase over time
+      
+      // CHANNELS:
+      // channels/create
+      // channel/join
+      // channel/invite
+
+      // DMS:
+      // dm/create
+
+      // The number of users who are currently in at least one channel or DM
+      // can decrease over time
+
+      // CHANNELS:
+      // channel/leave
+
+      // DMS:
+      // dm/remove
+      // dm/leave
     });
 
-    test('Test messages which have not been sent yet', () => {
-      // Messages which have not been sent yet with message/sendlater or
-      // message/sendlaterdm are not included
-    });
+    test('numUsers increase and decrease', () => {
+      // The number of users in the workspace can increase over time
+      // auth/register
 
-    test('Test messages in standups', () => {
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
+      // The number of users in the workspace can decrease over time
+      // admin/user/remove
     });
   });
 });

@@ -13,6 +13,7 @@ import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetH
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
+import {notificationsGetV1} from './notifications';
 
 // Set up web app, use JSON
 const app = express();
@@ -35,6 +36,11 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.get('/notifications/get/v1', (req, res, next) => {
+  const token = req.query.token as string;
+  return res.json(notificationsGetV1(token));
+});
 
 app.get('/channel/messages/v3', (req, res, next) => {
   try {

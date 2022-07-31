@@ -420,12 +420,54 @@ function requestUsersStats(token: string) {
   };
 }
 
-export function requestMessageSend(token: string, channelId: number, message: string) {
+function requestMessageSend(token: string, channelId: number, message: string) {
   const res = request(
     'POST',
     `${url}:${port}/message/send/v2`,
     {
       json: { token, channelId, message },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestChannelJoin(token: string, channelId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/join/v3`,
+    {
+      json: { token, channelId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestChannelLeave(token: string, channelId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/leave/v2`,
+    {
+      json: { token, channelId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestChannelInvite(token: string, channelId: number, uId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/invite/v3`,
+    {
+      json: { token, channelId, uId },
     }
   );
   return {
@@ -444,23 +486,27 @@ describe('stats capabilities', () => {
   });
 
   describe('test /user/stats/v1', () => {
-    let testUser: wrapperOutput;
-    let expectedAccountCreationTime: number;
+    let testUser1: wrapperOutput;
+    let expectedAcc1CreatTime: number;
+    let testUser2: wrapperOutput;
 
     beforeEach(() => {
-      // Create a test user
-      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      expectedAccountCreationTime = Math.floor((new Date()).getTime() / 1000);
+      // Create test user 1 and generate the time their account as created
+      testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expectedAcc1CreatTime = Math.floor((new Date()).getTime() / 1000);
+
+      // Create test user 2
+      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
     });
 
     test('Fail fetch user\'s stats, invalid token', () => {
-      const testUserStats = requestUserStats(testUser.bodyObj.token + 'a');
+      const testUserStats = requestUserStats(testUser1.bodyObj.token + 'a');
       expect(testUserStats.res.statusCode).toBe(INVALID_TOKEN);
       expect(testUserStats.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('Test first data points', () => {
-      const testUserStats = requestUserStats(testUser.bodyObj.token);
+      const testUserStats = requestUserStats(testUser1.bodyObj.token);
       expect(testUserStats.res.statusCode).toBe(OK);
 
       // The first data point should be 0 for all metrics at the time that
@@ -493,8 +539,8 @@ describe('stats capabilities', () => {
       const userStatsObject = testUserStats.bodyObj.userStats;
 
       const accountCreationTime = userStatsObject.channelsJoined[0].timeStamp;
-      expect(accountCreationTime).toBeGreaterThanOrEqual(expectedAccountCreationTime);
-      expect(accountCreationTime).toBeLessThan(expectedAccountCreationTime + 1);
+      expect(accountCreationTime).toBeGreaterThanOrEqual(expectedAcc1CreatTime);
+      expect(accountCreationTime).toBeLessThan(expectedAcc1CreatTime + 1);
 
       expect(userStatsObject.dmsJoined[0].timeStamp).toStrictEqual(accountCreationTime);
       expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
@@ -503,11 +549,11 @@ describe('stats capabilities', () => {
     test('Test metrics, basic', () => {
       // Create a test channel and DM, and send a test message to the channel
       const expectedTimeStamp = Math.floor((new Date()).getTime() / 1000);
-      const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
-      const testDM = requestDMCreate(testUser.bodyObj.token, []);
-      const testMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'message');
+      const testChannel = requestChannelsCreate(testUser1.bodyObj.token, 'channelName', true);
+      const testDM = requestDMCreate(testUser1.bodyObj.token, []);
+      const testMessage = requestMessageSend(testUser1.bodyObj.token, testChannel.bodyObj.channelId, 'message');
 
-      const testUserStats = requestUserStats(testUser.bodyObj.token);
+      const testUserStats = requestUserStats(testUser1.bodyObj.token);
       expect(testUserStats.res.statusCode).toBe(OK);
 
       expect(testUserStats.bodyObj).toStrictEqual({
@@ -515,7 +561,7 @@ describe('stats capabilities', () => {
           channelsJoined: [
             {
               numChannelsJoined: 0,
-              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAcc1CreatTime),
             },
             {
               numChannelsJoined: 1,
@@ -525,7 +571,7 @@ describe('stats capabilities', () => {
           dmsJoined: [
             {
               numDmsJoined: 0,
-              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAcc1CreatTime),
             },
             {
               numDmsJoined: 1,
@@ -535,7 +581,7 @@ describe('stats capabilities', () => {
           messagesSent: [
             {
               numMessagesSent: 0,
-              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAcc1CreatTime),
             },
             {
               numMessagesSent: 1,
@@ -551,15 +597,42 @@ describe('stats capabilities', () => {
       // sum(numChannels, numDms, numMsgs)
     });
 
-    test('numChannelsJoined increase and decrease', () => {
-      // The number of channels that the user is a part of can increase over time
-      // If the involvement is greater than 1, it should be capped at 1
-      // channels/create
-      // channel/join
-      // channel/invite
+    test('numChannels increase, numChannelsJoined increase and decrease', () => {
+      // numChannels will only increase over time, it will never decrease
+      // as there is no way to remove channels
+      
+      // testUser1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to previous test at this point
+      const testChannel1 = requestChannelsCreate(testUser1.bodyObj.token, 'channel1Name', true);
+      const testDM1 = requestDMCreate(testUser1.bodyObj.token, []);
+      const testMessage1 = requestMessageSend(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, 'message');
+      
+      // testUser2 creates a channel, increasing numChannels
+      const testChannel2 = requestChannelsCreate(testUser2.bodyObj.token, 'channel2Name', false);
+      const testUser1StatsA = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsA.res.statusCode).toBe(OK);
+      expect(testUser1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1)/(2 + 1 + 1));
 
-      // The number of channels that the user is a part of can decrease over time
-      // channel/leave
+      // testUser1 joins testUser2's channel, increasing numChannelsJoined
+      requestChannelJoin(testUser1.bodyObj.token, testChannel2.bodyObj.channelId);
+      const testUser1StatsB = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsB.res.statusCode).toBe(OK);
+      expect(testUser1StatsB.bodyObj.userStats.channelsJoined[length - 1].numChannelsJoined).toStrictEqual(2);
+      expect(testUser1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1)/(2 + 1 + 1));
+      
+      // testUser1 leaves testUser2's channel, decreasing numChannelsJoined
+      requestChannelLeave(testUser1.bodyObj.token, testChannel2.bodyObj.channelId);
+      const testUser1StatsC = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsC.res.statusCode).toBe(OK);
+      expect(testUser1StatsC.bodyObj.userStats.channelsJoined[length - 1].numChannelsJoined).toStrictEqual(1);
+      expect(testUser1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1)/(2 + 1 + 1));
+
+      // testUser2 invites testUser1 to their channel, increasing numChannelsJoined
+      requestChannelInvite(testUser2.bodyObj.token, testChannel2.bodyObj.channelId, testUser1.bodyObj.authUserId);
+      const testUser1StatsD = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsD.res.statusCode).toBe(OK);
+      expect(testUser1StatsD.bodyObj.userStats.channelsJoined[length - 1].numChannelsJoined).toStrictEqual(2);
+      expect(testUser1StatsD.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1)/(2 + 1 + 1));
     });
 
     test('numDmsJoined increase and decrease', () => {
@@ -589,7 +662,7 @@ describe('stats capabilities', () => {
     });
 
     test('numChannels increase', () => {
-      // The number of channels sent will only increase over time
+      // The number of channels will only increase over time
       // numChannels will never decrease as there is no way to remove channels
       // channels/create
     });

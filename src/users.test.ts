@@ -3,6 +3,7 @@ import request from 'sync-request';
 import config from './config.json';
 
 const OK = 200;
+const INVALID_TOKEN = 403;
 const url = config.url;
 const port = config.port;
 
@@ -40,7 +41,7 @@ export function requestClear() {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -119,6 +120,8 @@ test('Invalid uId', () => {
   const maiyaId = maiyaUser.bodyObj.authUserId;
   expect(requestUserProfile(maiyaToken, maiyaId + 20).res.statusCode).toEqual(400);
   // expect(returnObject.res.statusCode).toBe(400);
+
+  requestClear();
 });
 
 test('Testing default case', () => {
@@ -151,6 +154,8 @@ test('Testing default case', () => {
   const obj1 = requestUserProfile(maiyaToken, maiyaId);
   expect(obj1.bodyObj).toMatchObject(maiyaInfo);
   expect(obj1.res.statusCode).toBe(OK);
+
+  requestClear();
 });
 
 // ======================================== requestUserProfileSetName Testing ========================================
@@ -375,5 +380,139 @@ describe('Testing for requestUsersAll', () => {
         handleStr: 'johnsmith',
       }
     ]);
+  });
+});
+
+// ========================================================================= //
+
+function requestUserStats(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/user/stats/v1`,
+    {
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestUsersStats(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/users/stats/v1`,
+    {
+      qs: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+describe('stats capabilities', () => {
+  beforeEach(() => {
+    requestClear();
+  });
+
+  afterEach(() => {
+    requestClear();
+  });
+
+  describe('test /user/stats/v1', () => {
+    let testUser: user;
+
+    beforeEach(() => {
+      // Create a test user
+      testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+    });
+
+    test('Fail fetch user\'s stats, invalid token', () => {
+    });
+
+    test('Test first data points', () => {
+      // For users, the first data point should be 0 for all metrics
+      // at the time that their account was created
+    });
+
+    test('Test metrics basic', () => {
+      // The number of channels the user is a part of
+      // The number of DMs the user is a part of
+      // The number of messages the user has sent
+      // The user's involvement
+
+      // If the denominator is 0, involvement should be 0
+      
+      // If the involvement is greater than 1, it should be capped at 1
+    });
+
+    test('Test remove user from channel(s)', () => {
+      // The number of channels that the user is a part of can increase and
+      // decrease over time
+    });
+
+    test('Test remove user from DM(s)', () => {
+      // The number of DMs that the user is a part of can increase and decrease
+      // over time
+    });
+
+    test('Test remove user\'s message(s)', () => {
+      // The number of messages sent will only increase (the removal of
+      // messages does not affect it).
+    });
+  });
+
+  describe('test /users/stats/v1 i.e. workspace stats', () => {
+    let testUser1: user;
+    let testUser2: user;
+    let testChannel1: channel;
+
+    beforeEach(() => {
+      // Create test user 1
+      testUser1 = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+
+      // Create test user 2
+      testUser2 = createTestUser('student@unsw.com', 'password', 'Jane', 'Schmoe');
+
+      // testUser1 created testChannel1 so they automatically join it
+      testChannel1 = createTestChannel(testUser1.bodyObj.token, 'channelName', true);
+    });
+
+    test('Fail fetch workspace\'s stats, invalid token', () => {
+    });
+
+    test('Success fetch workspace\'s stats, test first data points', () => {
+      // For the workspace, the first data point should be 0 for all metrics
+      // at the time that the first user registers
+    });
+
+    test('Success fetch workspace\'s stats, test metrics basic', () => {
+      // The number of channels that exist currently
+      // The number of DMs that exist currently
+      // The number of messages that exist currently
+      // The workspace's utilization
+    });
+
+    test('Test remove DM(s) from workspace', () => {
+      // numDms will only decrease when dm/remove is called
+    });
+
+    test('Test remove message(s) from workspace', () => {
+      // numMsgs is the number of messages that exist at the current time,
+      // and should decrease when messages or DMs are removed
+    });
+
+    test('Test messages which have not been sent yet', () => {
+      // Messages which have not been sent yet with message/sendlater or
+      // message/sendlaterdm are not included
+    });
+
+    test('Test messages in standups', () => {
+      // standup/send messages only count when the final packaged
+      // standup message from standup/start has been sent
+    });
   });
 });

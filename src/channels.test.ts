@@ -54,15 +54,15 @@ const createTestChannel = (token: string, name: string, isPublic: boolean) => {
 };
 
 describe('channels capabilities', () => {
+  beforeEach(() => {
+    requestClear();
+  });
+
+  afterEach(() => {
+    requestClear();
+  });
+
   describe('test /channels/create/v3', () => {
-    beforeEach(() => {
-      requestClear();
-    });
-
-    afterEach(() => {
-      requestClear();
-    });
-
     let testUser: user;
 
     beforeEach(() => {
@@ -97,10 +97,6 @@ describe('channels capabilities', () => {
   });
 
   describe('test /channels/list/v3', () => {
-    beforeEach(() => {
-      requestClear();
-    });
-
     let testUser1: user;
     let testUser2: user;
     let testChannel1: channel;

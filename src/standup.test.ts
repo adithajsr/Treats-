@@ -2,8 +2,9 @@ import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
+import { requestChannelMessages } from './channel.test'
 import { requestClear } from './users.test';
-import { generateString } from './message.test';
+import { requestChannelJoinV2, generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
@@ -48,6 +49,10 @@ let testUser: any;
 let badUser: any;
 let testChannel: any;
 let testStandup: any;
+let timeNow: any;
+let timeFinish: any;
+
+// handle for testUser is johndoe0
 
 describe('standup capabilities', () => {
   describe('standup/start/v1 test', () => {
@@ -55,7 +60,7 @@ describe('standup capabilities', () => {
       requestClear();
       // Create a test user
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      badUser = requestAuthRegister('validemail@gmail.coma', '123aabc!@#', 'aJohn', 'aDoe');
+      badUser = requestAuthRegister('validemail@gmail.coma', '123aabc!@#', 'Jane', 'Doe');
       // Create a test channel
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
     });
@@ -79,15 +84,27 @@ describe('standup capabilities', () => {
       expect(testRequest).toBe(400);
     });
 
-    test('active standup currently running in channel, fail standup start', () => {
-    });
-
     test('channelId valid but auth user is not a member of the channel, fail standup start', () => {
       const testRequest = requestStandupStart(badUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       expect(testRequest).toBe(403);
     });
 
     test('successful standup start', () => {
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      timeFinish = timeNow + 3;
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(testRequest).toStrictEqual({ timeFinish: timeFinish});
+    });
+
+    test('active standup currently running in channel, fail standup start', () => {
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      timeFinish = timeNow + 3;
+      expect(testRequest).toStrictEqual({ timeFinish: timeFinish});
+      const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      expect(badRequest).toBe(400);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
     });
   
   });
@@ -122,6 +139,16 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup active', () => {
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      expect(setTimeout).toHaveBeenCalledTimes(1);
+      expect(testStandup).toStrictEqual({ timeFinish: timeFinish});
+      const testRequest = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+      timeFinish = timeNow + 3;
+      expect(testRequest).toStrictEqual({ 
+        isActive: true,
+        timeFinish: timeFinish
+      });
     });
   
   });
@@ -157,9 +184,54 @@ describe('standup capabilities', () => {
     });
 
     test('active standup currently not running in channel, fail standup send', () => {
+      const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'single successful standup send');
+      expect(testRequest).toBe(400);
     });
 
     test('successful standup send', () => {
+      // check standup
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      // check standup active
+      const testActive = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+      timeFinish = timeNow + 3;
+      expect(testActive).toStrictEqual({ 
+        isActive: true,
+        timeFinish: timeFinish
+      });
+      // standup send check
+      const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'single successful standup send');
+      expect(testRequest).toStrictEqual({});
+      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      expect(checkSent.bodyObj).toStrictEqual(['johndoe0: single successful standup send']);
+    });
+
+    test('successful standup send multiple', () => {
+      // check standup
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      // check standup active
+      const testActive = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+      timeFinish = timeNow + 3;
+      expect(testActive).toStrictEqual({ 
+        isActive: true,
+        timeFinish: timeFinish
+      });
+      // standup send check
+      requestChannelJoinV2(badUser.bodyObj.token, testChannel.bodyObj.channelId)
+      requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser string');
+      requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser string');
+      // expect for standup messages to be there
+      const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
+      expect(testRequest).toStrictEqual({});
+      const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
+      expect(testRequest2).toStrictEqual({});
+      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      expect(checkSent.bodyObj).toStrictEqual([
+        'johndoe0: testUser successful standup send' + '\n' +
+        'janedoe0: badUser successful standup send'
+      ]);
+      expect(setTimeout).toHaveBeenCalledTimes(2);
     });
   });
 });

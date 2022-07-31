@@ -215,7 +215,7 @@ describe('channels capabilities', () => {
   });
 });
 
-function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
     `${url}:${port}/channels/create/v3`,

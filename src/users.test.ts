@@ -1,6 +1,8 @@
-import { requestAuthRegister } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
+import { requestAuthRegister } from './auth.test';
+import { requestChannelsCreate } from './channels.test';
+import { requestDMCreate } from './dm.test';
 
 const OK = 200;
 const INVALID_TOKEN = 403;
@@ -385,6 +387,11 @@ describe('Testing for requestUsersAll', () => {
 
 // ========================================================================= //
 
+type wrapperOutput = {
+  res: any,
+  bodyObj: any,
+};
+
 function requestUserStats(token: string) {
   const res = request(
     'GET',
@@ -413,6 +420,20 @@ function requestUsersStats(token: string) {
   };
 }
 
+export function requestMessageSend(token: string, channelId: number, message: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/send/v2`,
+    {
+      json: { token, channelId, message },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
 describe('stats capabilities', () => {
   beforeEach(() => {
     requestClear();
@@ -423,31 +444,76 @@ describe('stats capabilities', () => {
   });
 
   describe('test /user/stats/v1', () => {
-    let testUser: user;
+    let testUser: wrapperOutput;
+    let expectedAccountCreationTime: number;
 
     beforeEach(() => {
       // Create a test user
-      testUser = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expectedAccountCreationTime = Math.floor((new Date()).getTime() / 1000);
     });
 
     test('Fail fetch user\'s stats, invalid token', () => {
+      const testUserStats = requestUserStats(testUser.bodyObj.token + 'a');
+      expect(testUserStats.res.statusCode).toBe(INVALID_TOKEN);
+      expect(testUserStats.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('Test first data points', () => {
-      // The first data point should be 0 for all metrics at the time
-      // that their account was created
+      const testUserStats = requestUserStats(testUser.bodyObj.token);
+      expect(testUserStats.res.statusCode).toBe(OK);
+
+      // The first data point should be 0 for all metrics at the time that
+      // the user's account was created
+      expect(testUserStats.bodyObj).toStrictEqual({
+        userStats: {
+          channelsJoined: [
+            {
+              numChannelsJoined: 0,
+              timeStamp: expect.any(Number),
+            }
+          ],
+          dmsJoined: [
+            {
+              numDmsJoined: 0,
+              timeStamp: expect.any(Number),
+            }
+          ],
+          messagesSent: [
+            {
+              numMessagesSent: 0,
+              timeStamp: expect.any(Number),
+            }
+          ],
+          involvementRate: 0,
+        }
+      });
+
+      // Account for 1 second delay between requests
+      const userStatsObject = testUserStats.bodyObj.userStats;
+
+      const accountCreationTime = userStatsObject.channelsJoined[0].timeStamp;
+      expect(accountCreationTime).toBeGreaterThanOrEqual(expectedAccountCreationTime);
+      expect(accountCreationTime).toBeLessThan(expectedAccountCreationTime + 1);
+
+      expect(userStatsObject.dmsJoined[0].timeStamp).toStrictEqual(accountCreationTime);
+      expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
     });
 
     test('Test metrics other than involvement', () => {
       // The number of channels the user is a part of
       // The number of DMs the user is a part of
       // The number of messages the user has sent
+
+      const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
+      const testDM = requestDMCreate(testUser.bodyObj.token, []);
+      const testMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'message');
     });
 
     test('involvement is 0', () => {
       // The user's involvement:
-        // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by 
-        // sum(numChannels, numDms, numMsgs)
+      // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
+      // sum(numChannels, numDms, numMsgs)
 
       // If the denominator is 0, involvement should be 0
     });
@@ -524,22 +590,17 @@ describe('stats capabilities', () => {
   });
 
   describe('test /users/stats/v1 i.e. workspace stats', () => {
-    let testUser1: user;
-    let testUser2: user;
-    let testChannel1: channel;
+    let testUser1: wrapperOutput;
 
     beforeEach(() => {
       // Create test user 1
-      testUser1 = createTestUser('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-
-      // Create test user 2
-      testUser2 = createTestUser('student@unsw.com', 'password', 'Jane', 'Schmoe');
-
-      // testUser1 created testChannel1 so they automatically join it
-      testChannel1 = createTestChannel(testUser1.bodyObj.token, 'channelName', true);
+      testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
     });
 
     test('Fail fetch workspace\'s stats, invalid token', () => {
+      const testWorkspaceStats = requestUsersStats(testUser1.bodyObj.token + 'a');
+      expect(testWorkspaceStats.res.statusCode).toBe(INVALID_TOKEN);
+      expect(testWorkspaceStats.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
     });
 
     test('Test first data points', () => {
@@ -551,23 +612,19 @@ describe('stats capabilities', () => {
       // The number of channels that exist currently
       // The number of DMs that exist currently
       // The number of messages that exist currently
-      // The workspace's utilization
-        // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
-
-      // admin/user/remove/v1
     });
 
     test('utilization is 0', () => {
-      // The workspace's utilization
-        // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
-        
-      // If the denominator is 0, involvement should be 0
+      // The workspace's utilization:
+      // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
+
+      // If the denominator is 0, utilization should be 0
     });
 
     test('numUsersWhoHaveJoinedAtLeastOneChannelOrDm increase and decrease', () => {
       // The number of users who are currently in at least one channel or DM
       // can increase over time
-      
+
       // CHANNELS:
       // channels/create
       // channel/join

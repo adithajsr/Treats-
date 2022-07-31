@@ -9,7 +9,15 @@ let data = {
       nameFirst: 'John',
       nameLast: 'Doe',
       handle: 'johndoe0',
+      profileImgUrl: 'http://localhost:5001/imgurl/randomstring.jpg',
       globalPerms: 1,
+      notifications: [
+        {
+          channelId: 999,
+          dmId: -1,
+          notificationMessage: 'johndoe0 tagged you in channel: Hello to myself',
+        }
+      ],
     },
   ],
 

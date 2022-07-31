@@ -117,8 +117,6 @@ function requestUsersAll() {
   };
 }
 
-// AWAITING ADITHA TO IMPLEMENT
-
 export function requestUserProfile(token: string, uId: number) {
   const res = request(
     'GET',

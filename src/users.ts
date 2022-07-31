@@ -6,6 +6,10 @@ import request from 'sync-request';
 import fs from 'fs';
 import sharp from 'sharp';
 import { v4 as generateV4uuid } from 'uuid';
+import config from './config.json';
+
+const url = config.url;
+const port = config.port;
 
 /* This function returns the important information about a user's profile.
 
@@ -228,7 +232,11 @@ export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
   sharp(preEditedImage).extract({ width: width, height: heighy, left: xStart, top: yStart }).toFile(`profilePics/${uuid}.jpg`)
     .then(function(new_file_info) {
       fs.unlinkSync(preEditedImage);
+      const dataSet = getData();
+      // without user identification can't associate new image URL to user???
+      `${url}:${port}/imgurl/${uuid}.jpg`;
       console.log("Image cropped and saved");
+      return {};
     })
     .catch(function(err) {
       fs.unlinkSync(preEditedImage);

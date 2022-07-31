@@ -6,8 +6,11 @@ import HTTPError from 'http-errors';
 // @ts-ignore
 import codec from 'string-codec';
 import nodemailer from 'nodemailer';
+import { findTokenIndex } from './channels';
+import config from './config.json';
 
-// import nodemailer from 'nodemailer';
+const url = config.url;
+const port = config.port;
 
 /* <checks if a uuid is in use and is of the correct structure>
 
@@ -191,6 +194,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     nameFirst: nameFirst,
     nameLast: nameLast,
     handle: newHandle,
+    profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     globalPerms: globalPermissions,
   });
   const uuid: string = newUuid();
@@ -206,22 +210,6 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 }
 
 /*
-Helper function: finds the index of the given token in the tokens array
-in the database
-
-Arguments:
-    token (string)          - represents a user session
-
-Return Value:
-    Returns tokenIndex
-*/
-const findTokenIndex = (token: string) => {
-  const data = getData();
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-  return tokenIndex;
-};
-
-/*
 Given an active token, invalidates the token to log the user out
 
 Arguments:
@@ -229,17 +217,12 @@ Arguments:
 
 Return Value:
     Returns {} if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
-export function authLogoutV1(token: string) {
+export function authLogoutV2(token: string) {
   const data = getData();
 
   const tokenIndex = findTokenIndex(token);
-
-  // Token was invalid
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   // Invalidate the token
   data.token.splice(tokenIndex, 1);
@@ -287,7 +270,7 @@ function sendEmail(email: string, encryptedCode: string) {
 
   const mailOptions = {
     from: 'M13A_AERO <m13a.areo@gmail.com>',
-    to: `Jack <${email}>`,
+    to: `User <${email}>`,
     subject: 'Password Reset Request',
     text: `Reset code is ${encryptedCode}`,
   };
@@ -344,7 +327,7 @@ export function passwordReset(resetCode: string, newPassword: string) {
   const token = decryptedCode.replace('-' + uId, '');
 
   const dataSet = getData();
-  for (const i of dataSet.token) {
+  for (const i in dataSet.token) {
     if (dataSet.token[i].token === token && dataSet.token[i].uId === Number('-' + uId)) {
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {

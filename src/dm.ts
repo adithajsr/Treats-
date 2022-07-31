@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import HTTPError from 'http-errors';
+import { findTokenIndex } from './channels';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
@@ -57,22 +58,6 @@ interface dmMember {
 }
 
 /*
-Helper function: finds the index of the given token in the tokens array
-in the database
-
-Arguments:
-    token (string)          - represents a user session
-
-Return Value:
-    Returns tokenIndex
-*/
-const findTokenIndex = (token: string) => {
-  const data = getData();
-  const tokenIndex = data.token.findIndex(a => a.token === token);
-  return tokenIndex;
-};
-
-/*
 Helper function: checks if an array has duplicate values
 
 Arguments:
@@ -125,6 +110,33 @@ const areUIdsValidDMCreate = (uIds: number[], creatoruId: number) => {
   }
 
   return true;
+};
+
+/*
+Helper function: Creates a valid and unique dmId for the new DM
+
+Arguments:
+    n/a
+
+Return Value:
+    Returns newDMId
+*/
+const createIdDMCreate = () => {
+  const data = getData();
+
+  let newDMId = 0;
+
+  // Find the largest existing dmId in the database
+  for (const dm of data.dm) {
+    if (newDMId < dm.dmId) {
+      newDMId = dm.dmId;
+    }
+  }
+
+  // Increment largest existing dmId to generate the new dmId
+  newDMId++;
+
+  return newDMId;
 };
 
 /*
@@ -225,30 +237,27 @@ Arguments:
 
 Return Value:
     Returns true if arguments are valid
-    Returns false if arguments are invalid
+    Throws a 400 error on invalid dmId
+    Throws a 403 error if the authorised user is not in the DM
+    or is not the original DM creator
 */
 const areArgumentsValidDMRemove = (tokenIndex: number, dmId: number) => {
   const data = getData();
 
-  // Invalid token
-  if (tokenIndex === -1) {
-    return false;
-  }
-
   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
   // Invalid dmId
   if (dmIndex === -1) {
-    return false;
+    throw HTTPError(400, 'Invalid dmId');
   }
 
   const useruId = data.token[tokenIndex].uId;
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === useruId);
   if (memberIndex === -1) {
     // Authorised user is not in the DM
-    return false;
+    throw HTTPError(403, 'The authorised user is not in the DM');
   } else if (data.dm[dmIndex].members[memberIndex].dmPerms !== 1) {
     // Authorised user is in the DM but is not the creator
-    return false;
+    throw HTTPError(403, 'The authorised user is not the original DM creator');
   }
 
   return true;
@@ -259,28 +268,24 @@ Creates a new DM with the creator as the owner of the DM
 
 Arguments:
     token (string)    - represents the session of the user who is creating the DM
-    uIds (number[])   - name of new channel
+    uIds (number[])   - the user(s) that the DM is directed to
 
 Return Value:
     Returns { dmId } if no error
-    Returns { error: 'error' } on invalid token or invalid uIds
+    Throws a 403 error on invalid token
+    Throws a 400 error on invalid uIds
 */
-function dmCreateV1(token: string, uIds: number[]) {
+export function dmCreateV2(token: string, uIds: number[]) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   const creatoruId = data.token[tokenIndex].uId;
 
   if (areUIdsValidDMCreate(uIds, creatoruId) === false) {
-    return { error: 'error' };
+    throw HTTPError(400, 'Invalid uIds');
   }
 
-  const newDMId = data.dm.length + 1;
+  const newDMId = createIdDMCreate();
   const dmMembers = createMembersListDMCreate(uIds, creatoruId);
   const dmName = createNameDMCreate(dmMembers);
 
@@ -307,16 +312,11 @@ Arguments:
 
 Return Value:
     Returns { dms } if no error
-    Returns { error: 'error' } on invalid token
+    Throws a 403 error on invalid token
 */
-function dmListV1(token: string) {
+export function dmListV2(token: string) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
-
-  // Invalid token
-  if (tokenIndex === -1) {
-    return { error: 'error' };
-  }
 
   const userId = data.token[tokenIndex].uId;
   const dmsList = createListDMList(userId);
@@ -327,7 +327,7 @@ function dmListV1(token: string) {
 }
 
 /*
-Removes all members from an existing DM
+Removes an existing DM from the database
 
 Arguments:
     token (string)  - represents the session of the user who is removing the DM
@@ -335,26 +335,24 @@ Arguments:
 
 Return Value:
     Returns {} if no error
-    Returns { error: 'error' } on invalid token, invalid dmId, or invalid user
+    Throws a 400 error on invalid dmId
+    Throws a 403 error if token is invalid, the authorised user is not in the DM,
+    or the authorised user is not the original DM creator
 */
-function dmRemoveV1(token: string, dmId: number) {
+export function dmRemoveV2(token: string, dmId: number) {
   const data = getData();
   const tokenIndex = findTokenIndex(token);
 
-  if (areArgumentsValidDMRemove(tokenIndex, dmId) === false) {
-    return { error: 'error' };
-  }
+  areArgumentsValidDMRemove(tokenIndex, dmId);
 
-  // Remove all members from the DM
+  // Remove the DM from the database
   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
-  data.dm[dmIndex].members = [];
+  data.dm.splice(dmIndex, 1);
 
   setData(data);
 
   return {};
 }
-
-export { dmCreateV1, dmListV1, dmRemoveV1 };
 
 /*
 This function returns the name and members of a specified DM

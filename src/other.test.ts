@@ -13,21 +13,21 @@ const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
-    `${url}:${port}/channels/create/v2`,
+    `${url}:${port}/channels/create/v3`,
     {
       json: { token, name, isPublic },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
 function requestChannelsListAll(token: string) {
   const res = request(
     'GET',
-    `${url}:${port}/channels/listall/v2`,
+    `${url}:${port}/channels/listall/v3`,
     {
       qs: {
         token,
@@ -53,6 +53,10 @@ export function requestChannelInvite(InviterAUI: number, channelId: number, Invi
     bodyObj: JSON.parse(res.getBody() as string),
   };
 }
+
+afterEach(() => {
+  requestClear();
+});
 
 test('Clearing users', () => {
   // Creating a user

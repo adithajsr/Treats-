@@ -54,6 +54,10 @@ function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI:
   };
 }
 
+afterEach(() => {
+  requestClear();
+});
+
 test('Clearing users', () => {
   // Creating a user
   const danielUser = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]);

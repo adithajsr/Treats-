@@ -441,7 +441,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
+      expect(testDetails.res.statusCode).toBe(INPUT_ERROR);
     });
 
     test('Success remove DM, more than two users in DM', () => {
@@ -456,7 +456,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
+      expect(testDetails.res.statusCode).toBe(INPUT_ERROR);
     });
 
     test('Fail remove DM, invalid token', () => {

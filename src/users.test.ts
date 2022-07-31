@@ -476,6 +476,20 @@ function requestChannelInvite(token: string, channelId: number, uId: number) {
   };
 }
 
+function requestAdminUserRemove(token: string, uId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/admin/user/remove/v1`,
+    {
+      qs: { token, uId },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
 describe('stats capabilities', () => {
   beforeEach(() => {
     requestClear();
@@ -606,7 +620,7 @@ describe('stats capabilities', () => {
       // testUser2 creates a channel, increasing numChannels
       // numChannels will only increase over time, it will never decrease
       // as there is no way to remove channels
-      const testChannel2 = requestChannelsCreate(testUser2.bodyObj.token, 'channel2Name', false);
+      const testChannel2 = requestChannelsCreate(testUser2.bodyObj.token, 'channel2Name', true);
       const testUser1StatsA = requestUserStats(testUser1.bodyObj.token);
       expect(testUser1StatsA.res.statusCode).toBe(OK);
       expect(testUser1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (2 + 1 + 1));
@@ -686,7 +700,7 @@ describe('stats capabilities', () => {
       // A standup should only count as single message
 
       // numMsgs should decrease when messages or DMs are removed
-      // message/remove
+      // message/remove (from either channel or DM)
       // dm/remove
 
       // Messages which have not been sent yet with message/sendlater or
@@ -799,6 +813,9 @@ describe('stats capabilities', () => {
       const testWorkspaceStats = requestUsersStats(testUser1.bodyObj.token);
       expect(testWorkspaceStats.res.statusCode).toBe(OK);
 
+      // The workspace's utilization:
+      // numUsersWhoAreInLeastOneChannelOrDm / numUsers
+
       expect(testWorkspaceStats.bodyObj).toStrictEqual({
         workspaceStats: {
           channelsExist: [
@@ -834,40 +851,77 @@ describe('stats capabilities', () => {
           utilizationRate: 1 / 1,
         }
       });
-
-      // The workspace's utilization:
-      // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
     });
 
-    test('numUsersWhoHaveJoinedAtLeastOneChannelOrDm increase and decrease', () => {
-      // The number of users who are currently in at least one channel or DM
-      // can increase over time
+    test('numUsers increase and decrease, numUsersWhoAreInLeastOneChannelOrDm increase and decrease', () => {
+      // testUser1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to metrics, basic test at this point
+      const testChannel1 = requestChannelsCreate(testUser1.bodyObj.token, 'channel1Name', true);
+      const testDM1A = requestDMCreate(testUser1.bodyObj.token, []);
+      requestMessageSend(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, 'message1');
 
-      // CHANNELS:
+      // testUser2 registers, increasing numUsers
+      testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
+      const testWorkspaceStatsA = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsA.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsA.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
+
+      // testUser1 invites testUser2 to their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
+      requestChannelInvite(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, testUser2.bodyObj.authUserId);
+      const testWorkspaceStatsB = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsB.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsB.bodyObj.workspaceStats.utilizationRate).toStrictEqual(2 / 2);
+
+      // testUser2 leaves testUser1's channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      requestChannelLeave(testUser2.bodyObj.token, testChannel1.bodyObj.channelId);
+      const testWorkspaceStatsC = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsC.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsC.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
+
+      // testUser1 creates a DM directed to testUser2,
+      // increasing numUsersWhoAreInLeastOneChannelOrDm (and numDmsExist)
+      const testDM1B = requestDMCreate(testUser1.bodyObj.token, [testUser2.bodyObj.authUserId]);
+      const testWorkspaceStatsD = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsD.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsD.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(3);
+      expect(testWorkspaceStatsD.bodyObj.workspaceStats.utilizationRate).toStrictEqual(2 / 2);
+
+      // testUser2 leaves testUser1's DM, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      requestDMLeave(testUser2.bodyObj.token, testDM1B.bodyObj.dmId);
+      const testWorkspaceStatsE = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsE.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsE.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
+
+      // testUser2 is removed from Treats, decreasing numUsers
+      requestAdminUserRemove(testUser1.bodyObj.token, testUser2.bodyObj.authUserId);
+      const testWorkspaceStatsF = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsF.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsF.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
+
+      // testUser1 removes their DM (they are still in a channel), decreasing numDmsExist
+      requestDMRemove(testUser1.bodyObj.token, testDM1A.bodyObj.dmId);
+      const testWorkspaceStatsG = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsG.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(2);
+      expect(testWorkspaceStatsG.bodyObj.workspaceStats.involvementRate).toStrictEqual(1 / 1);
+
+      // testUser1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      requestChannelLeave(testUser1.bodyObj.token, testChannel1.bodyObj.channelId);
+      const testWorkspaceStatsH = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsH.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsH.bodyObj.workspaceStats.utilizationRate).toStrictEqual(0 / 1);
+
+      // testUser1 joins their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
+      requestChannelJoin(testUser1.bodyObj.token, testChannel1.bodyObj.channelId);
+      const testWorkspaceStatsI = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStatsI.res.statusCode).toBe(OK);
+      expect(testWorkspaceStatsI.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
+    });
+
+    test('numChannelsExist increase, messagesExist increase and decrease', () => {
       // channels/create
-      // channel/join
-      // channel/invite
 
-      // DMS:
-      // dm/create
-
-      // The number of users who are currently in at least one channel or DM
-      // can decrease over time
-
-      // CHANNELS:
-      // channel/leave
-
-      // DMS:
-      // dm/remove
-      // dm/leave
-    });
-
-    test('numUsers increase and decrease', () => {
-      // The number of users in the workspace can increase over time
-      // auth/register
-
-      // The number of users in the workspace can decrease over time
-      // admin/user/remove
+      // FIXME: *********************************************************
     });
   });
 });

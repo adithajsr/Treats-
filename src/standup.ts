@@ -15,48 +15,40 @@ export function checkChannelMemberExist(channelId: number, uId: number, data: Da
     // check for user in channel
   } else {
     const i = data.channel.findIndex(data => data.channelId === channelId);
-    if (data.channel[i].members.find(a => a.uId === uId) === undefined) {
+    if (data.channel[i].members.find((a: any) => a.uId === uId) === undefined) {
       throw HTTPError(403, 'auth user is not a member!');
     }
   }
 }
 
-let messageString: string;
-
-
-
-
+let messageString: any;
 
 function doStandupStart(channel: channel, channelIndex: number, timeSent: number, uId: number, data: Database) {
-  let messageString;
-  
-  console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% IN DO STAND UP START')
+  console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% IN DO STAND UP START');
   for (let i = 0; i < channel.queue.length; i++) {
     if (i === channel.queue.length - 1) {
-      messageString += channel.queue[i].handle + ': ' + channel.queue[i].message;;
+      messageString += channel.queue[i].handle + ': ' + channel.queue[i].message;
     } else {
       messageString += channel.queue[i].handle + ': ' + channel.queue[i].message + '\n';
     }
   }
 
-  let packageMessage = {
+  const packageMessage = {
     messageId: Math.floor(Math.random() * 1000),
     uId: uId,
     message: messageString,
     timeSent: timeSent,
     pinned: 0,
     react: 0
-  }
+  };
 
-  channel[channelIndex].messages.push(packageMessage);
-  channel[channelIndex].isActive = false;
-  channel[channelIndex].standupFinish = 0;
-  channel[channelIndex].queue = [];
-  
+  channel.messages.push(packageMessage);
+  channel.isActive = false;
+  channel.standupFinish = 0;
+  channel.queue = [];
+
   setData(data);
-  return;
 }
-
 
 /*
 Starts a standup period lasting length seconds
@@ -74,7 +66,7 @@ Return Value:
   Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
 */
 export function standupStartV1(token: string, channelId: number, length: number) {
-  let timeFinish = (Math.floor((new Date()).getTime() / 1000)) + 3;
+  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + 3;
   if (length < 0) throw HTTPError(400, 'invalid length for stand up!');
   const data = getData();
   checkToken(token, data);
@@ -84,8 +76,6 @@ export function standupStartV1(token: string, channelId: number, length: number)
 
   const i = data.channel.findIndex(channel => channel.channelId === channelId);
 
-  let result = standupActiveV1(token, channelId)
-
   if (standupActiveV1(token, channelId).isActive === true) throw HTTPError(400, 'standup already in progress!');
 
   setTimeout(doStandupStart, length * 1000, channel[i], i, timeFinish, uId, data);
@@ -93,10 +83,8 @@ export function standupStartV1(token: string, channelId: number, length: number)
   channel[i].standupFinish = timeFinish;
 
   setData(data);
-  return { timeFinish: timeFinish};
+  return { timeFinish: timeFinish };
 }
-
-
 
 /*
 Sends a message to get buffered in the stand up queue if a standup is active in channel
@@ -115,17 +103,15 @@ export function standupActiveV1(token: string, channelId: number) {
   const data = getData();
   checkToken(token, data);
   const uId = tokenToUid(token, data);
-  const { channel } = data;
   checkChannelMemberExist(channelId, uId, data);
 
   const i = data.channel.findIndex(channel => channel.channelId === channelId);
 
-  return { 
+  return {
     isActive: data.channel[i].isActive,
     timeFinish: data.channel[i].standupFinish
   };
 }
-
 
 /*
 Sends a message to get buffered in the stand up queue if a standup is active in channel
@@ -163,12 +149,12 @@ export function standupSendV1(token: string, channelId: number, message: string)
   standupMessage = {
     handle: handle,
     message: message
-  }
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ inside stand up message')
+  };
+  console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ inside stand up message');
   console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ handle and message ' + handle + ' ' + message);
-  console.log(channel[i].queue)
+  console.log(channel[i].queue);
   channel[i].queue.push(standupMessage);
-  console.log(channel[i].queue)
+  console.log(channel[i].queue);
   setData(data);
   return {};
 }

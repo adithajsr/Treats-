@@ -1,6 +1,58 @@
 {
-    "user": [],
-    "channel": [],
-    "token": [],
+    "user": [
+        {
+            "uId": 1,
+            "email": "validemail@gmail.com",
+            "password": "123abc!@#",
+            "nameFirst": "John",
+            "nameLast": "Doe",
+            "handle": "johndoe",
+            "globalPerms": 1
+        },
+        {
+            "uId": 2,
+            "email": "validemail@gmail.coma",
+            "password": "123aabc!@#",
+            "nameFirst": "aJohn",
+            "nameLast": "aDoe",
+            "handle": "ajohnadoe",
+            "globalPerms": 2
+        }
+    ],
+    "channel": [
+        {
+            "channelId": 1,
+            "channelName": "name",
+            "isPublic": true,
+            "isActive": false,
+            "standupFinish": 0,
+            "queue": [],
+            "members": [
+                {
+                    "uId": 1,
+                    "channelPerms": 1
+                }
+            ],
+            "messages": [
+                {
+                    "messageId": 41,
+                    "uId": 1,
+                    "timeSent": 1659286247,
+                    "pinned": 0,
+                    "react": 0
+                }
+            ]
+        }
+    ],
+    "token": [
+        {
+            "token": "f0fd3fc7-85c2-4f56-aeee-52300e3d8f41",
+            "uId": 1
+        },
+        {
+            "token": "fe197efe-df82-4389-bbd1-9085cb47787e",
+            "uId": 2
+        }
+    ],
     "dm": []
 }

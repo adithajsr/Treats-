@@ -471,19 +471,19 @@ describe('stats capabilities', () => {
             {
               numChannelsJoined: 0,
               timeStamp: expect.any(Number),
-            }
+            },
           ],
           dmsJoined: [
             {
               numDmsJoined: 0,
               timeStamp: expect.any(Number),
-            }
+            },
           ],
           messagesSent: [
             {
               numMessagesSent: 0,
               timeStamp: expect.any(Number),
-            }
+            },
           ],
           involvementRate: 0,
         }
@@ -500,22 +500,55 @@ describe('stats capabilities', () => {
       expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
     });
 
-    test('Test metrics other than involvement', () => {
-      // The number of channels the user is a part of
-      // The number of DMs the user is a part of
-      // The number of messages the user has sent
-
+    test('Test metrics, basic', () => {
+      // Create a test channel and DM, and send a test message to the channel
+      const expectedTimeStamp = Math.floor((new Date()).getTime() / 1000);
       const testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
       const testDM = requestDMCreate(testUser.bodyObj.token, []);
       const testMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'message');
-    });
 
-    test('involvement is 0', () => {
+      const testUserStats = requestUserStats(testUser.bodyObj.token);
+      expect(testUserStats.res.statusCode).toBe(OK);
+
+      expect(testUserStats.bodyObj).toStrictEqual({
+        userStats: {
+          channelsJoined: [
+            {
+              numChannelsJoined: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+            },
+            {
+              numChannelsJoined: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          dmsJoined: [
+            {
+              numDmsJoined: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+            },
+            {
+              numDmsJoined: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          messagesSent: [
+            {
+              numMessagesSent: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedAccountCreationTime),
+            },
+            {
+              numMessagesSent: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          involvementRate: (1 + 1 + 1)/(1 + 1 + 1),
+        }
+      });
+
       // The user's involvement:
       // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
       // sum(numChannels, numDms, numMsgs)
-
-      // If the denominator is 0, involvement should be 0
     });
 
     test('numChannelsJoined increase and decrease', () => {
@@ -591,10 +624,12 @@ describe('stats capabilities', () => {
 
   describe('test /users/stats/v1 i.e. workspace stats', () => {
     let testUser1: wrapperOutput;
+    let expectedFirstUserTime: number;
 
     beforeEach(() => {
       // Create test user 1
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      expectedFirstUserTime = Math.floor((new Date()).getTime() / 1000);
     });
 
     test('Fail fetch workspace\'s stats, invalid token', () => {
@@ -604,21 +639,94 @@ describe('stats capabilities', () => {
     });
 
     test('Test first data points', () => {
+      const testWorkspaceStats = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStats.res.statusCode).toBe(OK);
+
       // The first data point should be 0 for all metrics at the time
       // that the first user registers
+      expect(testWorkspaceStats.bodyObj).toStrictEqual({
+        workspaceStats: {
+          channelsExist: [
+            {
+              numChannelsExist: 0,
+              timeStamp: expect.any(Number),
+            },
+          ],
+          dmsExist: [
+            {
+              numDmsExist: 0,
+              timeStamp: expect.any(Number),
+            },
+          ],
+          messagesExist: [
+            {
+              numMessagesExist: 0,
+              timeStamp: expect.any(Number),
+            },
+          ],
+          utilizationRate: 0,
+        }
+      });
+
+      // Account for 1 second delay between requests
+      const workspaceStatsObject = testWorkspaceStats.bodyObj.workspaceStats;
+
+      const firstUserTime = workspaceStatsObject.channelsExist[0].timeStamp;
+      expect(firstUserTime).toBeGreaterThanOrEqual(expectedFirstUserTime);
+      expect(firstUserTime).toBeLessThan(expectedFirstUserTime + 1);
+
+      expect(workspaceStatsObject.dmsExist[0].timeStamp).toStrictEqual(firstUserTime);
+      expect(workspaceStatsObject.messagesExist[0].timeStamp).toStrictEqual(firstUserTime);
     });
 
-    test('Test metrics other than utilization', () => {
-      // The number of channels that exist currently
-      // The number of DMs that exist currently
-      // The number of messages that exist currently
-    });
+    test('Test metrics, basic', () => {
+      // Create a test channel and DM, and send a test message to the channel
+      const expectedTimeStamp = Math.floor((new Date()).getTime() / 1000);
+      const testChannel = requestChannelsCreate(testUser1.bodyObj.token, 'channelName', true);
+      const testDM = requestDMCreate(testUser1.bodyObj.token, []);
+      const testMessage = requestMessageSend(testUser1.bodyObj.token, testChannel.bodyObj.channelId, 'message');
 
-    test('utilization is 0', () => {
+      const testWorkspaceStats = requestUsersStats(testUser1.bodyObj.token);
+      expect(testWorkspaceStats.res.statusCode).toBe(OK);
+
+      expect(testWorkspaceStats.bodyObj).toStrictEqual({
+        workspaceStats: {
+          channelsExist: [
+            {
+              numChannelsExist: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedFirstUserTime),
+            },
+            {
+              numChannelsExist: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          dmsExist: [
+            {
+              numDmsExist: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedFirstUserTime),
+            },
+            {
+              numDmsExist: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          messagesExist: [
+            {
+              numMessagesExist: 0,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedFirstUserTime),
+            },
+            {
+              numMessagesExist: 1,
+              timeStamp: expect.toBeGreaterThanOrEqual(expectedTimeStamp),
+            },
+          ],
+          utilizationRate: 1/1,
+        }
+      });
+
       // The workspace's utilization:
       // numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numUsers
-
-      // If the denominator is 0, utilization should be 0
     });
 
     test('numUsersWhoHaveJoinedAtLeastOneChannelOrDm increase and decrease', () => {

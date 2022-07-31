@@ -25,6 +25,13 @@ let data = {
       channelId: 999,
       channelName: 'channel',
       isPublic: true,
+      isActive: false,
+      queue: [
+        {
+          handle: 'a handle'
+          message: 'a message'
+        }
+      ]
       members: [
         {
           uId: -999,

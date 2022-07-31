@@ -27,12 +27,19 @@ interface message {
   timeSent: number,
 }
 
+interface standupmessage {
+  handle: string,
+  message: string
+}
+
 interface channel {
   channelId: number,
   channelName: string,
   isPublic: boolean,
+  isActive: boolean,
   members: channelMember[],
   messages: message[],
+  queue: standupmessage[]
 }
 
 interface token {

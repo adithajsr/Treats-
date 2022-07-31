@@ -113,6 +113,33 @@ const areUIdsValidDMCreate = (uIds: number[], creatoruId: number) => {
 };
 
 /*
+Helper function: Creates a valid and unique dmId for the new DM
+
+Arguments:
+    n/a
+
+Return Value:
+    Returns newDMId
+*/
+const createIdDMCreate = () => {
+  const data = getData();
+
+  let newDMId = 0;
+
+  // Find the largest existing dmId in the database
+  for (const dm of data.dm) {
+    if (newDMId < dm.dmId) {
+      newDMId = dm.dmId;
+    }
+  }
+
+  // Increment largest existing dmId to generate the new dmId
+  newDMId++;
+
+  return newDMId;
+};
+
+/*
 Helper function: Creates an array of all members in the new DM
 
 Arguments:
@@ -258,7 +285,7 @@ export function dmCreateV2(token: string, uIds: number[]) {
     throw HTTPError(400, 'Invalid uIds');
   }
 
-  const newDMId = data.dm.length + 1;
+  const newDMId = createIdDMCreate();
   const dmMembers = createMembersListDMCreate(uIds, creatoruId);
   const dmName = createNameDMCreate(dmMembers);
 
@@ -300,7 +327,7 @@ export function dmListV2(token: string) {
 }
 
 /*
-Removes all members from an existing DM
+Removes an existing DM from the database
 
 Arguments:
     token (string)  - represents the session of the user who is removing the DM
@@ -318,9 +345,9 @@ export function dmRemoveV2(token: string, dmId: number) {
 
   areArgumentsValidDMRemove(tokenIndex, dmId);
 
-  // Remove all members from the DM
+  // Remove the DM from the database
   const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
-  data.dm[dmIndex].members = [];
+  data.dm.splice(dmIndex, 1);
 
   setData(data);
 

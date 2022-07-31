@@ -116,6 +116,7 @@ export function channelsCreateV3(token: string, name: string, isPublic: boolean)
     channelName: name,
     isPublic: isPublic,
     isActive: false,
+    standupFinish: null,
     queue: [],
     members: [channelOwner],
     messages: [],

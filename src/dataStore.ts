@@ -27,7 +27,7 @@ interface message {
   timeSent: number,
 }
 
-interface standupmessage {
+export interface standupmessage {
   handle: string,
   message: string
 }
@@ -37,6 +37,7 @@ interface channel {
   channelName: string,
   isPublic: boolean,
   isActive: boolean,
+  standupFinish: number,
   members: channelMember[],
   messages: message[],
   queue: standupmessage[]

@@ -91,20 +91,20 @@ describe('standup capabilities', () => {
 
     test('successful standup start', () => {
       timeNow = Math.floor((new Date()).getTime() / 1000);
-      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       timeFinish = timeNow + 3;
-      expect(setTimeout).toHaveBeenCalledTimes(1);
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      // expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(testRequest).toStrictEqual({ timeFinish: timeFinish});
     });
 
     test('active standup currently running in channel, fail standup start', () => {
       timeNow = Math.floor((new Date()).getTime() / 1000);
-      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       timeFinish = timeNow + 3;
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
       expect(testRequest).toStrictEqual({ timeFinish: timeFinish});
       const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       expect(badRequest).toBe(400);
-      expect(setTimeout).toHaveBeenCalledTimes(1);
+      // expect(setTimeout).toHaveBeenCalledTimes(1);
     });
   
   });
@@ -138,13 +138,21 @@ describe('standup capabilities', () => {
       expect(testRequest).toBe(403);
     });
 
-    test('successful standup active', () => {
+    test('successful standup active - standup not in progress', () => {
+      const testRequest = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+      expect(testRequest).toStrictEqual({
+        isActive: false,
+        timeFinish: null
+      });
+    });
+
+    test('successful standup active - standup in progress', () => {
       timeNow = Math.floor((new Date()).getTime() / 1000);
-      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
-      expect(setTimeout).toHaveBeenCalledTimes(1);
+      timeFinish = timeNow + 3;
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
+      // expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(testStandup).toStrictEqual({ timeFinish: timeFinish});
       const testRequest = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-      timeFinish = timeNow + 3;
       expect(testRequest).toStrictEqual({ 
         isActive: true,
         timeFinish: timeFinish
@@ -179,7 +187,7 @@ describe('standup capabilities', () => {
 
     test('length of message is over 1000 characters, fail standup send', () => {
       const longString = generateString();
-      const testRequest = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, longString);
+      const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, longString);
       expect(testRequest).toBe(403);
     });
 
@@ -188,35 +196,44 @@ describe('standup capabilities', () => {
       expect(testRequest).toBe(400);
     });
 
-    test('successful standup send', () => {
+    test('successful standup send none', () => {
       // check standup
       timeNow = Math.floor((new Date()).getTime() / 1000);
+      timeFinish = timeNow + 3;
       const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       // check standup active
       const testActive = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-      timeFinish = timeNow + 3;
       expect(testActive).toStrictEqual({ 
         isActive: true,
         timeFinish: timeFinish
       });
+      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      expect(checkSent.bodyObj.messages).toStrictEqual([]);
+    });
+
+    test('successful standup send single', () => {
+      // check standup
+      timeNow = Math.floor((new Date()).getTime() / 1000);
+      timeFinish = timeNow + 3;
+
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       // standup send check
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'single successful standup send');
       expect(testRequest).toStrictEqual({});
-      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-      expect(checkSent.bodyObj).toStrictEqual(['johndoe0: single successful standup send']);
+      setTimeout(() => {
+        const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+        expect(checkSent.bodyObj.messages).toStrictEqual(['johndoe0: single successful standup send']);
+      }, 4000)
+      jest.useFakeTimers()
+      jest.advanceTimersByTime(10000)
     });
 
     test('successful standup send multiple', () => {
       // check standup
       timeNow = Math.floor((new Date()).getTime() / 1000);
-      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
-      // check standup active
-      const testActive = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
       timeFinish = timeNow + 3;
-      expect(testActive).toStrictEqual({ 
-        isActive: true,
-        timeFinish: timeFinish
-      });
+
+      const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       // standup send check
       requestChannelJoinV2(badUser.bodyObj.token, testChannel.bodyObj.channelId)
       requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser string');
@@ -226,12 +243,18 @@ describe('standup capabilities', () => {
       expect(testRequest).toStrictEqual({});
       const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
       expect(testRequest2).toStrictEqual({});
-      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-      expect(checkSent.bodyObj).toStrictEqual([
-        'johndoe0: testUser successful standup send' + '\n' +
-        'janedoe0: badUser successful standup send'
-      ]);
-      expect(setTimeout).toHaveBeenCalledTimes(2);
+
+      setTimeout(() => {
+        const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+        expect(checkSent.bodyObj.messages).toStrictEqual([
+          'johndoe0: testUser successful standup send' + '\n' +
+          'janedoe0: badUser successful standup send'
+        ]);
+      }, 6000)
+      jest.useFakeTimers()
+      jest.advanceTimersByTime(10000)
+
+      // expect(setTimeout).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -296,7 +296,7 @@ app.get('/standup/active/v1', (req, res) => {
 
 app.post('/standup/send/v1', (req, res) => {
   const { token, channelId, message } = req.body;
-  res.json(standupStartV1(token, channelId, message));
+  res.json(standupSendV1(token, channelId, message));
 });
 
 // handles errors nicely

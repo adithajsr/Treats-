@@ -1,5 +1,26 @@
 import fs from 'fs';
 
+interface notification {
+  channelId: number,
+  dmId: number,
+  notificationMessage: string,
+}
+
+interface channelJoined {
+  numChannelsJoined: number,
+  timeStamp: number,
+}
+
+interface dmJoined {
+  numDmsJoined: number,
+  timeStamp: number,
+}
+
+interface messageSent {
+  numMessagesSent: number,
+  timeStamp: number,
+}
+
 interface user {
   uId: number,
   email: string,
@@ -8,6 +29,11 @@ interface user {
   nameLast: string,
   handle: string,
   globalPerms: number,
+  notifications: notification[],
+  channelsJoined: channelJoined[],
+  dmsJoined: dmJoined[],
+  messagesSent: messageSent[],
+  involvementRate: number,
 }
 
 interface channelMember {
@@ -24,7 +50,9 @@ interface message {
   messageId: number,
   uId: number,
   message: string,
-  timeSent: number
+  timeSent: number,
+  pinned: number,
+  react: number,
 }
 
 interface channel {
@@ -50,22 +78,46 @@ interface dm {
   messages: message[],
 }
 
+interface channelExist {
+  numChannelsExist: number,
+  timeStamp: number,
+}
+
+interface dmExist {
+  numDmsExist: number,
+  timeStamp: number,
+}
+
+interface messageExist {
+  numMessagesExist: number,
+  timeStamp: number,
+}
+
 interface database {
   user: user[],
   channel: channel[],
   token: token[],
   dm: dm[],
+  workspaceStats: {
+    channelsExist: channelExist[],
+    dmsExist: dmExist[],
+    messagesExist: messageExist[],
+    utilizationRate: number,
+  }
 }
 
-// YOU SHOULD MODIFY THIS OBJECT BELOW
 const emptyData: database = {
   user: [],
   channel: [],
   token: [],
   dm: [],
+  workspaceStats: {
+    channelsExist: [],
+    dmsExist: [],
+    messagesExist: [],
+    utilizationRate: 0,
+  },
 };
-
-// YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 
 /*
 Example usage

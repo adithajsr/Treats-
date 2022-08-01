@@ -151,6 +151,7 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
 }
 
 /* <Creates a new user and fills out their details and puts it into "dataStore.js">
+Also creates the first data points for all user analytics metrics
 
 Arguments:
 email (string) - <any>
@@ -183,6 +184,21 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     globalPermissions = 2; // memeber
   }
 
+  // Create the first data points for all analytics metrics
+  const accountCreationTime = Math.floor((new Date()).getTime() / 1000);
+  const firstChannelJoined = {
+    numChannelsJoined: 0,
+    timeStamp: accountCreationTime,
+  };
+  const firstDMJoined = {
+    numDmsJoined: 0,
+    timeStamp: accountCreationTime,
+  };
+  const firstMessageSent = {
+    numMessagesSent: 0,
+    timeStamp: accountCreationTime,
+  };
+
   dataSet.user.push({
     uId: newUserId,
     email: email,
@@ -191,13 +207,21 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     nameLast: nameLast,
     handle: newHandle,
     globalPerms: globalPermissions,
+    notifications: [],
+    channelsJoined: [firstChannelJoined],
+    dmsJoined: [firstDMJoined],
+    messagesSent: [firstMessageSent],
+    involvementRate: 0,
   });
+
   const uuid: string = newUuid();
   dataSet.token.push({
     token: uuid,
     uId: newUserId,
   });
+
   setData(dataSet);
+
   return {
     authUserId: newUserId,
     token: uuid,

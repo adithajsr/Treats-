@@ -697,7 +697,8 @@ describe('stats capabilities', () => {
 
       // standup/send messages only count when the final packaged
       // standup message from standup/start has been sent
-      // A standup should only count as single message
+      // A standup should only count as single message in the channel,
+      // timestamped at the moment the standup finished
 
       // numMsgs should decrease when messages or DMs are removed
       // message/remove (from either channel or DM)
@@ -714,7 +715,7 @@ describe('stats capabilities', () => {
       // message/senddm
 
       // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
+      // standup message from standup/start has been sent in the channel
       // When a standup is sent, the number of messages sent by the user
       // who started the standup should increase by 1
 
@@ -725,25 +726,6 @@ describe('stats capabilities', () => {
       // The user's involvement:
       // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
       // sum(numChannels, numDms, numMsgs)
-    });
-
-    test('numMsgs increase and decrease', () => {
-      // numMsgs is the number of messages that exist at the current time
-
-      // numMsgs can increase over time
-      // message/send
-      // message/senddm
-
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
-      // A standup should only count as single message
-
-      // numMsgs should decrease when messages or DMs are removed
-      // message/remove
-      // dm/remove
-
-      // Messages which have not been sent yet with message/sendlater or
-      // message/sendlaterdm are not included
     });
   });
 
@@ -918,8 +900,25 @@ describe('stats capabilities', () => {
       expect(testWorkspaceStatsI.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
     });
 
-    test('numChannelsExist increase, messagesExist increase and decrease', () => {
-      // channels/create
+    test('messagesExist/numMsgs increase and decrease, ', () => {
+
+      // numMsgs is the number of messages that exist at the current time
+
+      // numMsgs can increase over time
+      // message/send
+      // message/senddm
+
+      // standup/send messages only count when the final packaged
+      // standup message from standup/start has been sent
+      // A standup should only count as single message,
+      // timestamped at the moment the standup finished
+
+      // numMsgs should decrease when messages or DMs are removed
+      // message/remove (from either channel or DM)
+      // dm/remove
+
+      // Messages which have not been sent yet with message/sendlater or
+      // message/sendlaterdm are not included
 
       // FIXME: *********************************************************
     });

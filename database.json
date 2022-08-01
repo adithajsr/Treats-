@@ -2,116 +2,29 @@
     "user": [
         {
             "uId": 1,
-            "email": "validemail@gmail.com",
-            "password": "123abc!@#",
+            "email": "who.is.joe@is.the.question.com",
+            "password": "yourmumma",
             "nameFirst": "John",
-            "nameLast": "Doe",
-            "handle": "johndoe",
+            "nameLast": "Smith",
+            "handle": "johnsmith",
             "globalPerms": 1,
             "notifications": [],
             "channelsJoined": [
                 {
                     "numChannelsJoined": 0,
-                    "timeStamp": 1659353261
+                    "timeStamp": 1659355495
                 }
             ],
             "dmsJoined": [
                 {
                     "numDmsJoined": 0,
-                    "timeStamp": 1659353261
+                    "timeStamp": 1659355495
                 }
             ],
             "messagesSent": [
                 {
                     "numMessagesSent": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "involvementRate": 0
-        },
-        {
-            "uId": 2,
-            "email": "student@unsw.com",
-            "password": "password",
-            "nameFirst": "Alice",
-            "nameLast": "Schmoe",
-            "handle": "aliceschmoe",
-            "globalPerms": 2,
-            "notifications": [],
-            "channelsJoined": [
-                {
-                    "numChannelsJoined": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "dmsJoined": [
-                {
-                    "numDmsJoined": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "messagesSent": [
-                {
-                    "numMessagesSent": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "involvementRate": 0
-        },
-        {
-            "uId": 3,
-            "email": "tsmith@yahoo.com",
-            "password": "qwerty",
-            "nameFirst": "Tom",
-            "nameLast": "Smith",
-            "handle": "tomsmith",
-            "globalPerms": 2,
-            "notifications": [],
-            "channelsJoined": [
-                {
-                    "numChannelsJoined": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "dmsJoined": [
-                {
-                    "numDmsJoined": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "messagesSent": [
-                {
-                    "numMessagesSent": 0,
-                    "timeStamp": 1659353261
-                }
-            ],
-            "involvementRate": 0
-        },
-        {
-            "uId": 4,
-            "email": "jdoe@proton.com",
-            "password": "111111",
-            "nameFirst": "John",
-            "nameLast": "Doe",
-            "handle": "johndoe0",
-            "globalPerms": 2,
-            "notifications": [],
-            "channelsJoined": [
-                {
-                    "numChannelsJoined": 0,
-                    "timeStamp": 1659353262
-                }
-            ],
-            "dmsJoined": [
-                {
-                    "numDmsJoined": 0,
-                    "timeStamp": 1659353262
-                }
-            ],
-            "messagesSent": [
-                {
-                    "numMessagesSent": 0,
-                    "timeStamp": 1659353262
+                    "timeStamp": 1659355495
                 }
             ],
             "involvementRate": 0
@@ -120,20 +33,8 @@
     "channel": [],
     "token": [
         {
-            "token": "a27a1121-2f70-4835-9d54-4123ecc53c6c",
+            "token": "7c6dc061-98bc-45d8-8cac-f0ccb3eb82a5",
             "uId": 1
-        },
-        {
-            "token": "5398a30a-1569-4adf-933c-c8353a19b618",
-            "uId": 2
-        },
-        {
-            "token": "8cb334fe-8b64-4ce5-8f28-291f4d5a110c",
-            "uId": 3
-        },
-        {
-            "token": "41b1c483-cec5-45bb-94ad-be02609c34c9",
-            "uId": 4
         }
     ],
     "dm": [],

@@ -396,7 +396,7 @@ function requestUserStats(token: string) {
     'GET',
     `${url}:${port}/user/stats/v1`,
     {
-      qs: { token },
+      headers: { token },
     }
   );
   return {
@@ -410,7 +410,7 @@ function requestUsersStats(token: string) {
     'GET',
     `${url}:${port}/users/stats/v1`,
     {
-      qs: { token },
+      headers: { token },
     }
   );
   return {
@@ -424,7 +424,23 @@ function requestMessageSend(token: string, channelId: number, message: string) {
     'POST',
     `${url}:${port}/message/send/v2`,
     {
-      json: { token, channelId, message },
+      json: { channelId, message },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestMessageRemove(token: string, messageId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/message/remove/v2`,
+    {
+      qs: { messageId },
+      headers: { token },
     }
   );
   return {
@@ -438,7 +454,8 @@ function requestChannelJoin(token: string, channelId: number) {
     'POST',
     `${url}:${port}/channel/join/v3`,
     {
-      json: { token, channelId },
+      json: { channelId },
+      headers: { token },
     }
   );
   return {
@@ -452,7 +469,8 @@ function requestChannelLeave(token: string, channelId: number) {
     'POST',
     `${url}:${port}/channel/leave/v2`,
     {
-      json: { token, channelId },
+      json: { channelId },
+      headers: { token },
     }
   );
   return {
@@ -466,7 +484,8 @@ function requestChannelInvite(token: string, channelId: number, uId: number) {
     'POST',
     `${url}:${port}/channel/invite/v3`,
     {
-      json: { token, channelId, uId },
+      json: { channelId, uId },
+      headers: { token },
     }
   );
   return {
@@ -480,7 +499,23 @@ function requestAdminUserRemove(token: string, uId: number) {
     'DELETE',
     `${url}:${port}/admin/user/remove/v1`,
     {
-      qs: { token, uId },
+      qs: { uId },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestChannelAddOwner(token: string, channelId: number, uId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/addowner/v2`,
+    {
+      json: { channelId, uId },
+      headers: { token },
     }
   );
   return {
@@ -687,40 +722,86 @@ describe('stats capabilities', () => {
       expect(testUser1StatsE.bodyObj.userStats.involvementRate).toStrictEqual((1 + 0 + 1) / (1 + 1 + 1));
     });
 
-    test('numMsgs increase and decrease, numMsgsSent increase', () => {
+    test('channels: numMsgs increase and decrease, numMsgsSent increase', () => {
+      // testUser1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to metrics, basic test at this point
+      const testChannel1 = requestChannelsCreate(testUser1.bodyObj.token, 'channel1Name', true);
+      requestDMCreate(testUser1.bodyObj.token, []);
+      requestMessageSend(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, 'message 1A');
+
+      // testUser2 joins the channel and sends a message, increasing numMsgs
+      requestChannelJoin(testUser2.bodyObj.token, testChannel1.bodyObj.channelId);
+      const testMessage2 = requestMessageSend(testUser2.bodyObj.token, testChannel1.bodyObj.channelId, 'message 2');
+      const testUser1StatsA = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsA.res.statusCode).toBe(OK);
+      expect(testUser1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
+
+      // testUser1 sends another message to channel, increasing numMsgsSent (and numMsgs)
+      const testMessage1B = requestMessageSend(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, 'message 1B');
+      const testUser1StatsB = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsB.res.statusCode).toBe(OK);
+      expect(testUser1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(testUser1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
+
+      // testUser1 makes testUser2 a channel owner so that testUser2 can remove
+      // their message, decreasing numMsgs
+      requestChannelAddOwner(testUser1.bodyObj.token, testChannel1.bodyObj.channelId, testUser2.bodyObj.authUserId);
+      requestMessageRemove(testUser2.bodyObj.token, testMessage2.bodyObj.messageId);
+      const testUser1StatsC = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsC.res.statusCode).toBe(OK);
+      expect(testUser1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
+
+      // testUser1 removes their own message, decreasing numMsgs but
+      // not numMsgsSent since message removal does not affect numMsgsSent
+      requestMessageRemove(testUser1.bodyObj.token, testMessage1B.bodyObj.messageId);
+      const testUser1StatsD = requestUserStats(testUser1.bodyObj.token);
+      expect(testUser1StatsD.res.statusCode).toBe(OK);
+      expect(testUser1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      // If the involvement is greater than 1, it should be capped at 1
+      // (1 + 1 + 2) / (1 + 1 + 1) > 1
+      expect(testUser1StatsD.bodyObj.userStats.involvementRate).toStrictEqual(1);
+    });
+
+    test('DMs: numMsgs increase and decrease, numMsgsSent increase', () => {
       // numMsgs is the number of messages that exist at the current time
 
       // numMsgs can increase over time
-      // message/send
       // message/senddm
-
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
-      // A standup should only count as single message in the channel,
-      // timestamped at the moment the standup finished
 
       // numMsgs should decrease when messages or DMs are removed
       // message/remove (from either channel or DM)
       // dm/remove
 
-      // Messages which have not been sent yet with message/sendlater or
-      // message/sendlaterdm are not included
-
       // ***************************************************************
 
       // The number of messages sent will only increase over time
       // If the involvement is greater than 1, it should be capped at 1
-      // message/send
       // message/senddm
-
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent in the channel
-      // When a standup is sent, the number of messages sent by the user
-      // who started the standup should increase by 1
 
       // The removal of messages does NOT affect the number of messages sent
       // message/remove
       // dm/remove
+
+      // The user's involvement:
+      // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
+      // sum(numChannels, numDms, numMsgs)
+    });
+
+    test('standups & sendlater: numMsgs increase and decrease, numMsgsSent increase', () => {
+      // standup/send messages only count when the final packaged
+      // standup message from standup/start has been sent
+      // A standup should only count as single message in the channel,
+      // timestamped at the moment the standup finished
+
+      // When a standup is sent, the number of messages sent by the user
+      // who started the standup should increase by 1
+
+      // STANDUPS MAY END UP BEING UNDER CHANNELS TEST
+
+      // ***************************************************************
+
+      // Messages which have not been sent yet with message/sendlater or
+      // message/sendlaterdm are not included
 
       // The user's involvement:
       // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by

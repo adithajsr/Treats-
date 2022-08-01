@@ -58,7 +58,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
         // change all messages
         for (const k in channel[i].messages) {
           if (channel[i].messages[k].uId === uId) {
-            channel[i].messages[k].message = 'Removed User';
+            channel[i].messages[k].message = 'Removed user';
           }
         }
         memberIndex = channel[i].members.findIndex(a => a.uId === uId);
@@ -75,7 +75,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
         // change all messages
         for (const k in dm[i].messages) {
           if (dm[i].messages[k].uId === uId) {
-            dm[i].messages[k].message = 'Removed sser';
+            dm[i].messages[k].message = 'Removed user';
           }
         }
         memberIndex = dm[i].members.findIndex(a => a.uId === uId);

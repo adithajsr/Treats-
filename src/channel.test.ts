@@ -79,7 +79,7 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   };
 }
 
-function requestChannelMessages(token: string, channelId: number, start: number) {
+export function requestChannelMessages(token: string, channelId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/channel/messages/v3`,

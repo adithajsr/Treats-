@@ -326,3 +326,101 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
   setData(data);
   return { messageId: messageId };
 }
+
+export function MessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
+  const data = getData();
+
+  if (channelId !== -1 && dmId !== -1) {
+    throw HTTPError(400, 'Specify channel/DM');
+  }
+
+  if (message.length > 1000) {
+    throw HTTPError(400, 'Message length must be below 1000 characters');
+  }
+
+  const dmIndex = 0;
+
+  //if sending to DM
+  if (channelId === -1) {
+    //searching for ogMessageId in the DMs and sending associated message to specified DM
+    for (const element of data.dm) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        //token checking 
+        const tokenIndex = element.token.findIndex(a => a.token === token);
+        if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
+       //checking if member is a part of the dm they are trying to send a msg from
+        const uId = data.token[tokenIndex].uId;
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(400, 'Unauthorised access')
+        //Sharing to DM
+        const newMessage = element.messages[messageIndex].message + message;
+        const sharedMessageId = messageSendDmV2(dmId, newMessage);
+        break;
+      }
+    }
+
+    //searching for ogMessageId in the channels and sending associated message to specified DM
+    for (const element of data.channel) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        //token checking 
+        const tokenIndex = element.token.findIndex(a => a.token === token);
+        if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
+       //checking if member is a part of the channel they are trying to send a msg from
+        const uId = data.token[tokenIndex].uId;
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(400, 'Unauthorised access')
+        //Sharing to DM
+        const newMessage = element.messages[messageIndex].message + message;
+        const sharedMessageId = messageSendDmV2(dmId, newMessage);
+        break;
+      }
+    }
+  }
+
+  //if sending to channel
+  else {
+     //searching for ogMessageId in the DMs and sending associated message to specified channel
+    for (const element of data.dm) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        //token checking 
+        const tokenIndex = element.token.findIndex(a => a.token === token);
+        if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
+       //checking if member is a part of the dm they are trying to send a msg from
+        const uId = data.token[tokenIndex].uId;
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(400, 'Unauthorised access')
+        //Sharing to DM
+        const newMessage = element.messages[messageIndex].message + message;
+        const sharedMessageId = messageSendV2(channelId, newMessage);
+        break;
+      }
+    }
+
+    //searching for ogMessageId in the channels and sending associated message to specified channel
+    for (const element of data.channel) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        //token checking 
+        const tokenIndex = element.token.findIndex(a => a.token === token);
+        if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
+       //checking if member is a part of the channel they are trying to send a msg from
+        const uId = data.token[tokenIndex].uId;
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(400, 'Unauthorised access')
+        //Sharing to DM
+        const newMessage = element.messages[messageIndex].message + message;
+        const sharedMessageId = messageSendV2(channelId, newMessage);
+        break;
+      }
+    }    
+
+  }
+
+
+
+  
+  return sharedMessageId;
+}

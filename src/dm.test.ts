@@ -30,7 +30,7 @@ export function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestDMMessages(token: string, dmId: number, start: number) {
+export function requestDMMessages(token: string, dmId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/messages/v2`,

@@ -86,7 +86,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
 
   // edit token object
   const tokenIndex = data.token.findIndex(a => a.uId === uId);
-  data.token[tokenIndex].token = 'removed user, tokenstring';
+  data.token.splice(tokenIndex, 1);
 
   setData(data);
   return {};

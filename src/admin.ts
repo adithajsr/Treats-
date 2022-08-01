@@ -47,6 +47,8 @@ export function adminUserRemoveV1(token: string, uId: number) {
   user[uIdindex].nameFirst = 'Removed';
   user[uIdindex].nameLast = 'user';
   user[uIdindex].shouldRetrieve = false;
+  user[uIdindex].email = '';
+  user[uIdindex].handle = '';
 
   let memberIndex;
 

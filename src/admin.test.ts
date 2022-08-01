@@ -112,10 +112,10 @@ describe('admin/user/remove/v1 test', () => {
       expect(requestUserProfile(testUser.bodyObj.token, byeUser.bodyObj.authUserId).bodyObj).toStrictEqual(
         {
           uId: byeUser.bodyObj.authUserId,
-          email: 'avalidemail@gmail.com',
+          email: '',
           nameFirst: 'Removed',
           nameLast: 'user',
-          handleStr: 'janedoe'
+          handleStr: ''
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members

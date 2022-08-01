@@ -6,7 +6,7 @@ import { requestAuthRegister } from './auth.test';
 
 import { requestChannelsCreate } from './channels.test';
 
-import { requestDMCreate } from './dm.test';
+import { requestDMCreate, requestDMMessages } from './dm.test';
 
 const port = config.port;
 const url = config.url;
@@ -449,6 +449,21 @@ test('Unauthorised access to channel/DM', () => {
 
   expect(requestMessageShare(danielToken, messageId1, 'i want to be part of this :((', -1, samMaiyaDM).res.statusCode).toBe(403);
 
+});
+
+test('Default case', () => {
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'I like talking to myself');
+  requestMessageSend(danielToken, channelId, 'Its so fun');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDmCreate(danielToken, [samId]).bodyObj.dmId; 
+  const messageId2 = requestMessageSendDM(danielToken, dmId, 'Hey whats up homie');
+  requestMessageSendDM(danielToken, dmId, 'Why you ghosting me sammy g :((');
+  requestMessageShare(messageId1, 'this isnt true anymore: ', -1, dmId);
+
+  expect(requestDMMessages(danielToken, dmId, 2).bodyObj[0].messages.message).toBe('this isnt true anymore: I like talking to myself');
 });
 
 

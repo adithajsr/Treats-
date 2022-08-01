@@ -51,8 +51,8 @@ interface message {
   uId: number,
   message: string,
   timeSent: number,
-  pinned: number,
-  react: number,
+  isPinned: number,
+  reacts: number,
 }
 
 interface channel {

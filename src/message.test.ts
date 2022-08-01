@@ -13,7 +13,7 @@ const url = config.url;
 
 // -------------------------------------------------------------------------//
 
-function requestHelper(method: HttpVerb, path: string, payload: object) {
+export function requestHelper(method: HttpVerb, path: string, payload: object) {
   let qs = {};
   let json = {};
   let res;
@@ -46,7 +46,7 @@ function requestMessageRemove(token: string, messageId: number) {
   return requestHelper('DELETE', '/message/remove/v2', { token, messageId });
 }
 
-function requestSendDm(token: string, dmId: number, message: string) {
+export function requestSendDm(token: string, dmId: number, message: string) {
   return requestHelper('POST', '/message/senddm/v2', { token, dmId, message });
 }
 

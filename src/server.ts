@@ -136,7 +136,8 @@ app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
 
 app.post('/channels/create/v3', (req, res, next) => {
   try {
-    const { token, name, isPublic } = req.body;
+    const token = req.header('token');
+    const { name, isPublic } = req.body;
     return res.json(channelsCreateV3(token, name, isPublic));
   } catch (err) {
     next(err);

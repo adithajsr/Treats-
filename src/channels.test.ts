@@ -224,7 +224,8 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
     'POST',
     `${url}:${port}/channels/create/v3`,
     {
-      json: { token, name, isPublic },
+      json: { name, isPublic },
+      headers: { token }
     }
   );
   return {

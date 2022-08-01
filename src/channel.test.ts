@@ -279,7 +279,7 @@ type sendPostObj = {
   uId?: number;
 };
 
-function sendPost(path: string, body: sendPostObj) {
+function sendPost(path:string, body: sendPostObj) {
   // Check if token key exists in body
   if (body.token !== undefined) {
     headers = { token: body.token };
@@ -330,7 +330,6 @@ function requestChannelsCreateNoRes(token: string, name: string, isPublic: boole
 
 describe('Testing for channel/join/v2', () => {
   test('channel/join/v2 channel does not exist error', () => {
-    requestClear();
     setupDatabase();
     const body = { token: admin.token, channelId: 9999 };
     expect(sendPost('channel/join/v2', body)).toStrictEqual({ error: 'error' });
@@ -349,6 +348,7 @@ describe('Testing for channel/join/v2', () => {
   test('channel/join/v2 pass', () => {
     const body = { token: user1.token, channelId: channel2 };
     expect(sendPost('channel/join/v2', body)).toStrictEqual({});
+    requestClear();
   });
 });
 requestClear();

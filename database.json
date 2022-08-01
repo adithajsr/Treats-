@@ -1,42 +1,7 @@
 {
-    "user": [
-        {
-            "uId": 1,
-            "email": "who.is.joe@is.the.question.com",
-            "password": "yourmumma",
-            "nameFirst": "John",
-            "nameLast": "Smith",
-            "handle": "johnsmith",
-            "globalPerms": 1,
-            "notifications": [],
-            "channelsJoined": [
-                {
-                    "numChannelsJoined": 0,
-                    "timeStamp": 1659355495
-                }
-            ],
-            "dmsJoined": [
-                {
-                    "numDmsJoined": 0,
-                    "timeStamp": 1659355495
-                }
-            ],
-            "messagesSent": [
-                {
-                    "numMessagesSent": 0,
-                    "timeStamp": 1659355495
-                }
-            ],
-            "involvementRate": 0
-        }
-    ],
+    "user": [],
     "channel": [],
-    "token": [
-        {
-            "token": "7c6dc061-98bc-45d8-8cac-f0ccb3eb82a5",
-            "uId": 1
-        }
-    ],
+    "token": [],
     "dm": [],
     "workspaceStats": {
         "channelsExist": [],

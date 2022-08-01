@@ -1,5 +1,3 @@
-/* Array of objects, where each object contains types { messageId, uId, message, timeSent, reacts, isPinned  } */
-// NEED TO UPDATE TOKEN INPUT
 
 import request from 'sync-request';
 import config from './config.json';
@@ -143,7 +141,6 @@ test('default case', () => {
   const messageId3 = requestSendDm(maiyaToken, dmId, 'stfu bitch hehe').messageId;
   const time3 = Math.floor((new Date()).getTime() / 1000);
 
-  // how do I know what time data to input??
   const retObject = requestSearch(danielToken, 'hehe');
   const expectedObj1 = { messageId: messageId1, uId: danielId, message: 'omg hopefully he doesnt see this hehe', timeSent: time1, reacts: 0, isPinned: 0 };
   const expectedObj2 = { messageId: messageId2, uId: danielId, message: 'hehe', timeSent: time2, reacts: 0, isPinned: 0 };
@@ -151,4 +148,5 @@ test('default case', () => {
 
   const expectedObj = [expectedObj1, expectedObj2, expectedObj3];
   expect(retObject.bodyObj).toMatchObject(expectedObj);
+  requestClear();
 });

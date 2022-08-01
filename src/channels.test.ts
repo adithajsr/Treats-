@@ -219,13 +219,13 @@ describe('channels capabilities', () => {
   });
 });
 
-function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   const res = request(
     'POST',
     `${url}:${port}/channels/create/v3`,
     {
       json: { name, isPublic },
-      headers: { token }
+      headers: { token },
     }
   );
   return {
@@ -239,7 +239,7 @@ function requestChannelsList(token: string) {
     'GET',
     `${url}:${port}/channels/list/v3`,
     {
-      qs: { token },
+      headers: { token },
     }
   );
   return {
@@ -249,16 +249,28 @@ function requestChannelsList(token: string) {
 }
 // -------------------------------------------------------------------------//
 
-function requestHelper(method: HttpVerb, path: string, payload: object) {
+type payloadObj = {
+  token?: string;
+};
+
+function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
+  let headers: {};
+
+  // Check if token key exists in payload
+  if (payload.token !== undefined) {
+    headers = {token: payload.token}
+    delete payload.token; 
+  }
+
   let res;
   if (method === 'GET' || method === 'DELETE') {
     qs = payload;
-    res = request(method, `${url}:${port}` + path, { qs });
+    res = request(method, `${url}:${port}` + path, { qs, headers });
   } else {
     json = payload;
-    res = request(method, `${url}:${port}` + path, { json });
+    res = request(method, `${url}:${port}` + path, { json, headers });
   }
   if (res.statusCode === 400 || res.statusCode === 403) {
     return res.statusCode;
@@ -336,5 +348,3 @@ describe('channels functions testing', () => {
     });
   });
 });
-
-export { requestChannelsCreate };

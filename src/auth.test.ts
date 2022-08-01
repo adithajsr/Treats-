@@ -68,7 +68,7 @@ function requestAuthLogout(token: string) {
     'POST',
     `${url}:${port}/auth/logout/v2`,
     {
-      json: { token },
+      headers: { token },
     }
   );
   return {

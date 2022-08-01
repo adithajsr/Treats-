@@ -3,7 +3,7 @@ import request from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
-import { requestChannelsCreate } from './channel.test';
+import { requestChannelsCreate } from './channels.test';
 import { requestDMCreate } from './dm.test';
 import { requestMessageSend, requestSendDm } from './message.test';
 
@@ -106,6 +106,7 @@ test('search string does not match any messages in channels or dms', () => {
 
   expect(requestSearch(danielToken, 'upcomingbenchpr').bodyObj).toMatchObject([]);
   expect(requestSearch(danielToken, 'Fourth message ').bodyObj).toMatchObject([]);
+  expect(requestSearch(danielToken, 'upcomingbenchpr').res.statusCode).toBe(OK);
 });
 
 test('default case', () => {
@@ -148,5 +149,6 @@ test('default case', () => {
 
   const expectedObj = [expectedObj1, expectedObj2, expectedObj3];
   expect(retObject.bodyObj).toMatchObject(expectedObj);
+  expect(retObject.res.statusCode).toBe(OK);
   requestClear();
 });

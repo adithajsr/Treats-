@@ -75,7 +75,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
         // change all messages
         for (const k in dm[i].messages) {
           if (dm[i].messages[k].uId === uId) {
-            dm[i].messages[k].message = 'Removed User';
+            dm[i].messages[k].message = 'Removed sser';
           }
         }
         memberIndex = dm[i].members.findIndex(a => a.uId === uId);

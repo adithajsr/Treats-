@@ -151,7 +151,7 @@ describe('admin/user/remove/v1 test', () => {
           {
             messageId: m1.messageId,
             uId: byeUser.bodyObj.authUserId,
-            message: 'Removed User',
+            message: 'Removed user',
             timeSent: expect.any(Number),
             pinned: 0,
             react: 0,
@@ -159,7 +159,7 @@ describe('admin/user/remove/v1 test', () => {
           {
             messageId: m2.messageId,
             uId: byeUser.bodyObj.authUserId,
-            message: 'Removed User',
+            message: 'Removed user',
             timeSent: expect.any(Number),
             pinned: 0,
             react: 0,
@@ -174,8 +174,8 @@ describe('admin/user/remove/v1 test', () => {
       }]);
       // retrieve dm details - requestDMMessages - messages
       const dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
-      expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed User');
-      expect(dmM.bodyObj.messages[1].message).toStrictEqual('Removed User');
+      expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed user');
+      expect(dmM.bodyObj.messages[1].message).toStrictEqual('Removed user');
     });
   });
 

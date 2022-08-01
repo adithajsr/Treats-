@@ -20,10 +20,10 @@ export function requestUserProfileSetName(token: string, nameFirst: string, name
     `${url}:${port}/user/profile/setname/v2`,
     {
       json: {
-        token: token,
         nameFirst: nameFirst,
         nameLast: nameLast,
-      }
+      },
+      headers: { token },
     }
   );
 
@@ -53,10 +53,9 @@ export function requestUserProfileSetEmail(token: string, email: string) {
     `${url}:${port}/user/profile/email/v2`,
     {
       json: {
-        token: token,
         email: email,
-      }
-
+      },
+      headers: { token },
     }
   );
   return {
@@ -71,9 +70,9 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
     `${url}:${port}/user/profile/handle/v2`,
     {
       json: {
-        token: token,
         handleStr: handleStr,
-      }
+      },
+      headers: { token },
     }
   );
   return {
@@ -104,9 +103,9 @@ export function requestUserProfile(token: string, uId: number) {
     `${url}:${port}/user/profile/v3`,
     {
       qs: {
-        token: token,
         uId: uId
-      }
+      },
+      headers: { token },
     }
   );
   return {

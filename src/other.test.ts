@@ -40,7 +40,7 @@ function requestChannelsListAll(token: string) {
   };
 }
 
-function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI: number) {
+export function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI: number) {
   const res = request(
     'POST',
     `${url}:${port}/channel/invite/v2`,
@@ -114,3 +114,4 @@ test('Clearing channels containing multiple users', () => {
 
   expect(requestChannelsListAll(danielToken2).bodyObj.channels).toMatchObject([]);
 });
+

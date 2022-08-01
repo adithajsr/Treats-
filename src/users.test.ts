@@ -697,71 +697,47 @@ describe('stats capabilities', () => {
     });
 
     test('DMs: numMsgs increase and decrease, numMsgsSent increase', () => {
-      // numMsgs is the number of messages that exist at the current time
-
-      // numMsgs can increase over time
-      // message/senddm
-
-      // numMsgs should decrease when messages or DMs are removed
-      // message/remove (from either channel or DM)
-      // dm/remove
-
-      // ***************************************************************
-
-      // The number of messages sent will only increase over time
-      // If the involvement is greater than 1, it should be capped at 1
-      // message/senddm
-
-      // The removal of messages does NOT affect the number of messages sent
-      // message/remove
-      // dm/remove
-
-      // The user's involvement:
-      // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
-      // sum(numChannels, numDms, numMsgs)
-
       // testUser1 creates a channel and DM (directed to testUser2),
       // and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
-      requestDMCreate(user1Token, [user2Id]);
-      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
-
-      // FIXME: ********************************************************
+      const DM1 = requestDMCreate(user1Token, [user2Id]);
+      const message1A = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
 
       // testUser2 sends a message to the DM, increasing numMsgs
-      const message2 = requestMessageSend(user2Token, channel1.bodyObj.channelId, 'message 2');
+      requestMessageSendDM(user2Token, DM1.bodyObj.dmId, 'message 2');
       const user1StatsA = requestUserStats(user1Token);
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
 
-      // testUser1 sends another message to channel, increasing numMsgsSent (and numMsgs)
-      const message1B = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1B');
+      // testUser1 sends a message to DM, increasing numMsgsSent (and numMsgs)
+      const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
       const user1StatsB = requestUserStats(user1Token);
       expect(user1StatsB.res.statusCode).toBe(OK);
       expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
 
-      // testUser1 makes testUser2 a channel owner so that testUser2 can remove
-      // their message, decreasing numMsgs
-      requestChannelAddOwner(user1Token, channel1.bodyObj.channelId, user2Id);
-      requestMessageRemove(user2Token, message2.bodyObj.messageId);
-      const user1StatsC = requestUserStats(user1Token);
-      expect(user1StatsC.res.statusCode).toBe(OK);
-      expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
-
       // testUser1 removes their own message, decreasing numMsgs but
       // not numMsgsSent since message removal does not affect numMsgsSent
       requestMessageRemove(user1Token, message1B.bodyObj.messageId);
+      const user1StatsC = requestUserStats(user1Token);
+      expect(user1StatsC.res.statusCode).toBe(OK);
+      expect(user1StatsC.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
+
+      // testUser1 removes the DM, decreasing numMsgs again (and numDmsJoined and numDms)
+      requestDMRemove(user1Token, message1A.bodyObj.messageId);
       const user1StatsD = requestUserStats(user1Token);
       expect(user1StatsD.res.statusCode).toBe(OK);
       expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsD.bodyObj.userStats.numDmsJoined.length).toStrictEqual(1);
       // If the involvement is greater than 1, it should be capped at 1
-      // (1 + 1 + 2) / (1 + 1 + 1) > 1
+      // (1 + 0 + 2) / (1 + 0 + 1) > 1
       expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual(1);
     });
 
-    test('standups & sendlater: numMsgs increase and decrease, numMsgsSent increase', () => {
+    test('standups: numMsgs increase and decrease, numMsgsSent increase', () => {
+      // TODO:
       // standup/send messages only count when the final packaged
       // standup message from standup/start has been sent
       // A standup should only count as single message in the channel,
@@ -772,11 +748,6 @@ describe('stats capabilities', () => {
 
       // STANDUPS MAY END UP BEING UNDER CHANNELS TEST
 
-      // ***************************************************************
-
-      // Messages which have not been sent yet with message/sendlater or
-      // message/sendlaterdm are not included
-
       // The user's involvement:
       // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
       // sum(numChannels, numDms, numMsgs)
@@ -786,14 +757,12 @@ describe('stats capabilities', () => {
   describe('test /users/stats/v1 i.e. workspace stats', () => {
     let testUser1: wrapperOutput;
     let user1Token: string;
-    let user1Id: number;
     let expectedFirstUserTime: number;
 
     beforeEach(() => {
       // Create test user 1
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       user1Token = testUser1.bodyObj.token;
-      user1Id = testUser1.bodyObj.authUserId;
       expectedFirstUserTime = Math.floor((new Date()).getTime() / 1000);
     });
 
@@ -961,27 +930,28 @@ describe('stats capabilities', () => {
       expect(workspaceStatsI.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
     });
 
-    test('messagesExist/numMsgs increase and decrease, ', () => {
+    test('messagesExist increase and decrease, ', () => {
+      // testUser1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to metrics, basic test at this point
+      const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
+      requestDMCreate(user1Token, []);
+      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
 
-      // numMsgs is the number of messages that exist at the current time
+      // testUser1 sends another message to channel, increasing messagesExist
+      const message1B = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1B');
+      const workspaceStatsA = requestUsersStats(user1Token);
+      expect(workspaceStatsA.res.statusCode).toBe(OK);
+      expect(workspaceStatsA.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(3);
 
-      // numMsgs can increase over time
-      // message/send
-      // message/senddm
+      // testUser1 removes their own message, decreasing messagesExist
+      requestMessageRemove(user1Token, message1B.bodyObj.messageId);
+      const workspaceStatsB = requestUsersStats(user1Token);
+      expect(workspaceStatsB.res.statusCode).toBe(OK);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(2);
 
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
-      // A standup should only count as single message,
-      // timestamped at the moment the standup finished
-
-      // numMsgs should decrease when messages or DMs are removed
-      // message/remove (from either channel or DM)
-      // dm/remove
-
+      // TODO:
       // Messages which have not been sent yet with message/sendlater or
       // message/sendlaterdm are not included
-
-      // FIXME: *********************************************************
     });
   });
 });

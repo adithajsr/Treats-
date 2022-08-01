@@ -18,9 +18,8 @@ Arguments:
   data (database)     - database that is being interacted with
   message (string)      - message they want to send
 
-Return Value:
-  Returns { true } if token is valid
-  Returns { false } if token is invalid
+Throws Error
+  403 - if token is invalid
 */
 export function checkToken(token: string, data: Database) {
   if (data.token.find((a: any) => a.token === token) === undefined) {
@@ -95,10 +94,11 @@ Arguments:
   message (string)      - message they want to send
 
 Return Value:
-  Returns { } if no error
-  Returns { error: 'error' } on invalid token, length less than or over 1000 characters, not a valid messageId
-                              message wasn't sent by an authorised user, auth user does not have
-                              owner permission
+  Returns { messageId } - id of the message
+
+Throws a 400 error    - if channelId doesn't refer to a valid channel
+                      - length of message is less than 1 or over 1000 characters
+Throw a 403 error     - channelId was valid but auth user wasn't a member of channel  
 */
 
 export function messageSendV2 (token: string, channelId: number, message: string) {
@@ -143,15 +143,16 @@ export function messageSendV2 (token: string, channelId: number, message: string
 Edits an existing message in the channel
 
 Arguments:
-    token (string)         - represents the session of the user who is creating the channel
-    messageId (number)     - id of the message they want to edit
-    message (string)      - new message they want to update the old message with
+  token (string)         - represents the session of the user who is creating the channel
+  channelId (number)     - id of the channel they want to send a message to
+  message (string)      - message they want to send
 
 Return Value:
-    Returns { } if no error
-    Returns { error: 'error' } on invalid token, length over 1000 characters, not a valid messageId
-                               message wasn't sent by an authorised user, auth user does not have
-                               owner permission
+  Returns {} - if new message successfully created 
+
+Throws a 400 error    - length of message is over 1000 characters
+                      - messageId does not refer to a valid message within channel/DM
+Throw a 403 error     - auth user does not have owner permission and message wasn't sent by them
 */
 
 export function messageEditV2 (token: string, messageId: number, message: string) {
@@ -220,14 +221,14 @@ export function messageEditV2 (token: string, messageId: number, message: string
 Removes a message in the channel
 
 Arguments:
-    token (string)          - represents the session of the user who is creating the channel
-    messageId (number)      - id of message to be removed
+  token (string)          - represents the session of the user who is creating the channel
+  messageId (number)      - id of message to be removed
 
 Return Value:
-    Returns { } if no error
-    Returns { error: 'error' } on invalid token, not a valid messageId
-                               message wasn't sent by an authorised user, auth user does not have
-                               owner permission
+  Returns { } if no error  - if message successfully removed
+
+Throws a 400 error    - messageId does not refer to a valid message within channel/DM
+Throw a 403 error     - auth user does not have owner permission and message wasn't sent by them
 */
 
 export function messageRemoveV2(token: string, messageId: number) {
@@ -281,13 +282,16 @@ export function messageRemoveV2(token: string, messageId: number) {
 Send a message from the authorised user to a specified DM
 
 Arguments:
-    token (string)          - represents the session of the user who is creating the channel
-    dmId (number)           - id of the DM they want to send a message to
-    message (string)        - message they want to send
+  token (string)          - represents the session of the user who is creating the channel
+  dmId (number)           - id of the DM they want to send a message to
+  message (string)        - message they want to send
 
 Return Value:
-    Returns { messageId } if no error
-    Returns { error: 'error' } on invalid token, invalid dmId, or invalid message length
+  Returns { messageId }  - id of dm message, if successfully snet
+
+Throws a 400 error    - length of message is less than 1 or over 1000 characters
+                      - dmId does not refer to a valid DM
+Throw a 403 error     - dmId valid and auth user is not a member of the DM
 */
 
 export function messageSendDmV2 (token: string, dmId: number, message: string) {

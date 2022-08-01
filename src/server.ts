@@ -298,18 +298,20 @@ app.delete('/dm/remove/v2', (req, res, next) => {
 });
 
 app.post('/standup/start/v1', (req, res) => {
-  const { token, channelId, length } = req.body;
+  const token = req.header('token');
+  const { channelId, length } = req.body;
   res.json(standupStartV1(token, channelId, length));
 });
 
 app.get('/standup/active/v1', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const channelId = parseInt(req.query.channelId as string);
   res.json(standupActiveV1(token, channelId));
 });
 
 app.post('/standup/send/v1', (req, res) => {
-  const { token, channelId, message } = req.body;
+  const token = req.header('token');
+  const { channelId, message } = req.body;
   res.json(standupSendV1(token, channelId, message));
 });
 

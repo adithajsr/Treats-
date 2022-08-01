@@ -8,6 +8,7 @@ import { requestChannelJoinV2, generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
+jest.setTimeout(10000);
 
 // -------------------------------------------------------------------------//
 
@@ -50,8 +51,6 @@ let badUser: any;
 let testChannel: any;
 let timeNow: any;
 let timeFinish: any;
-
-// handle for testUser is johndoe0
 
 describe('standup capabilities', () => {
   describe('standup/start/v1 test', () => {
@@ -163,7 +162,7 @@ describe('standup capabilities', () => {
       requestClear();
       // Create a test user
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
-      badUser = requestAuthRegister('validemail@gmail.coma', '123aabc!@#', 'aJohn', 'aDoe');
+      badUser = requestAuthRegister('validemail@gmail.coma', '123aabc!@#', 'Jane', 'Doe');
       // Create a test channel
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
     });
@@ -208,48 +207,35 @@ describe('standup capabilities', () => {
       expect(checkSent.bodyObj.messages).toStrictEqual([]);
     });
 
-    test('successful standup send single', () => {
-      // check standup
+    test('successful standup send single', async () => {
+      // jest.useFakeTimers()
       timeNow = Math.floor((new Date()).getTime() / 1000);
       timeFinish = timeNow + 3;
-      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
-      // standup send check
+
+      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'single successful standup send');
       expect(testRequest).toStrictEqual({});
-      setTimeout(() => {
-        const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-        expect(checkSent.bodyObj.messages).toStrictEqual(['johndoe0: single successful standup send']);
-      }, 4000);
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(10000);
+      await new Promise((r) => setTimeout(r, 4000));
+
+      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      expect(checkSent.bodyObj.messages[0].message).toStrictEqual('johndoe: single successful standup send');
     });
 
-    test('successful standup send multiple', () => {
-      // check standup
+    test('successful standup send multiple', async () => {
       timeNow = Math.floor((new Date()).getTime() / 1000);
       timeFinish = timeNow + 3;
-      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
-      // standup send check
       requestChannelJoinV2(badUser.bodyObj.token, testChannel.bodyObj.channelId);
-      requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser string');
-      requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser string');
-      // expect for standup messages to be there
+      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
       expect(testRequest).toStrictEqual({});
       const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
       expect(testRequest2).toStrictEqual({});
-
-      setTimeout(() => {
-        const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-        expect(checkSent.bodyObj.messages).toStrictEqual([
-          'johndoe0: testUser successful standup send' + '\n' +
-          'janedoe0: badUser successful standup send'
-        ]);
-      }, 6000);
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(10000);
-
-      // expect(setTimeout).toHaveBeenCalledTimes(2);
+      await new Promise((r) => setTimeout(r, 4000));
+      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      expect(checkSent.bodyObj.messages[0].message + checkSent.bodyObj.messages[1].message).toStrictEqual(
+        'johndoe: testUser successful standup send' + '\n' +
+        'janedoe: badUser successful standup send'
+      );
     });
   });
 });

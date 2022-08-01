@@ -24,12 +24,7 @@ interface message {
   messageId: number,
   uId: number,
   message: string,
-  timeSent: number,
-}
-
-export interface standupmessage {
-  handle: string,
-  message: string
+  timeSent: number
 }
 
 interface channel {
@@ -40,7 +35,7 @@ interface channel {
   standupFinish: number,
   members: channelMember[],
   messages: message[],
-  queue: standupmessage[]
+  queue: any
 }
 
 interface token {

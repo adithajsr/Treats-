@@ -1,4 +1,4 @@
-import { getData, setData, channel, standupmessage } from './dataStore';
+import { getData, setData } from './dataStore';
 import { checkToken, tokenToUid } from './message';
 import HTTPError from 'http-errors';
 
@@ -21,15 +21,15 @@ export function checkChannelMemberExist(channelId: number, uId: number, data: Da
   }
 }
 
-let messageString: any;
-
-function doStandupStart(channel: channel, channelIndex: number, timeSent: number, uId: number, data: Database) {
-  console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% IN DO STAND UP START');
-  for (let i = 0; i < channel.queue.length; i++) {
-    if (i === channel.queue.length - 1) {
-      messageString += channel.queue[i].handle + ': ' + channel.queue[i].message;
+function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
+  const data = getData();
+  const { channel } = data;
+  let messageString = '';
+  for (let i = 0; i < channel[channelIndex].queue.length; i++) {
+    if (i === channel[channelIndex].queue.length - 1) {
+      messageString += channel[channelIndex].queue[i];
     } else {
-      messageString += channel.queue[i].handle + ': ' + channel.queue[i].message + '\n';
+      messageString += channel[channelIndex].queue[i] + '\n';
     }
   }
 
@@ -42,10 +42,10 @@ function doStandupStart(channel: channel, channelIndex: number, timeSent: number
     react: 0
   };
 
-  channel.messages.push(packageMessage);
-  channel.isActive = false;
-  channel.standupFinish = 0;
-  channel.queue = [];
+  channel[channelIndex].messages.push(packageMessage);
+  channel[channelIndex].isActive = false;
+  channel[channelIndex].standupFinish = 0;
+  channel[channelIndex].queue = [];
 
   setData(data);
 }
@@ -78,7 +78,7 @@ export function standupStartV1(token: string, channelId: number, length: number)
 
   if (standupActiveV1(token, channelId).isActive === true) throw HTTPError(400, 'standup already in progress!');
 
-  setTimeout(doStandupStart, length * 1000, channel[i], i, timeFinish, uId, data);
+  setTimeout(doStandupStart, length * 1000, i, timeFinish, uId, data);
   channel[i].isActive = true;
   channel[i].standupFinish = timeFinish;
 
@@ -128,7 +128,7 @@ Return Value:
                         - an active standup is currently running in the channel
   Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
 */
-let standupMessage: standupmessage;
+let standupMessage: string;
 export function standupSendV1(token: string, channelId: number, message: string) {
   if (message.length > 1000) throw HTTPError(403, 'length of standup message is over 1000!');
 
@@ -146,15 +146,8 @@ export function standupSendV1(token: string, channelId: number, message: string)
   const handleIndex = data.user.findIndex(user => user.uId === uId);
   const handle = data.user[handleIndex].handle;
 
-  standupMessage = {
-    handle: handle,
-    message: message
-  };
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ inside stand up message');
-  console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ handle and message ' + handle + ' ' + message);
-  console.log(channel[i].queue);
+  standupMessage = handle + ': ' + message;
   channel[i].queue.push(standupMessage);
-  console.log(channel[i].queue);
   setData(data);
   return {};
 }

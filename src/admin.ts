@@ -20,13 +20,16 @@ Throws Error:
 export function adminUserRemoveV1(token: string, uId: number) {
   const data = getData();
   checkToken(token, data);
+  const tokenUid = tokenToUid(token, data);
   const { user } = data;
+  const { channel } = data;
+  const { dm } = data;
 
   // check if uId refers to a valid user - 400
   if (user.find(a => a.uId === uId) === undefined) throw HTTPError(400, 'uId is not valid user!');
 
   // check if token user is a global owner - 403
-  const tokenId = user.findIndex(a => a.uId === uId);
+  const tokenId = user.findIndex(a => a.uId === tokenUid);
   if (user[tokenId].globalPerms !== 1) throw HTTPError(403, 'token user is not a global owner!');
 
   // check if uId is the only global owner - 400
@@ -39,7 +42,52 @@ export function adminUserRemoveV1(token: string, uId: number) {
   }
   if (user[uIdindex].globalPerms === 1 && globalPermNumber < 2) throw HTTPError(400, 'uId is only global owner!');
 
+  // edit user object
+  user[uIdindex].globalPerms = 3;
+  user[uIdindex].nameFirst = 'Removed';
+  user[uIdindex].nameLast = 'user';
+  user[uIdindex].shouldRetrieve = false;
 
+  let memberIndex;
 
+  // edit channel object
+  for (const i in channel) {
+    for (let j = 0; j < channel[i].members.length; j++) {
+      // if a member is in the channel
+      if (channel[i].members.find(a => a.uId === uId)) {
+        // change all messages
+        for (const k in channel[i].messages) {
+          if (channel[i].messages[k].uId === uId) {
+            channel[i].messages[k].message = 'Removed User';
+          }
+        }
+        memberIndex = channel[i].members.findIndex(a => a.uId === uId);
+        channel[i].members.splice(memberIndex, 1);
+      }
+    }
+  }
+
+  // edit dm object
+  for (const i in dm) {
+    for (let j = 0; j < dm[i].members.length; j++) {
+      // if a member is in the dm
+      if (dm[i].members.find(a => a.uId === uId)) {
+        // change all messages
+        for (const k in dm[i].messages) {
+          if (dm[i].messages[k].uId === uId) {
+            dm[i].messages[k].message = 'Removed User';
+          }
+        }
+        memberIndex = dm[i].members.findIndex(a => a.uId === uId);
+        dm[i].members.splice(memberIndex, 1);
+      }
+    }
+  }
+
+  // edit token object
+  const tokenIndex = data.token.findIndex(a => a.uId === uId);
+  data.token[tokenIndex].token = 'removed user, tokenstring';
+
+  setData(data);
   return {};
 }

@@ -1,30 +1,53 @@
 // In the database, there are arrays of object user, and arrays of object channel
 
-
-
-
-
-REMEMBER TO REPLACE WITH DATA FROM MASTER AFTER FINISHING
-
-
-
-
-
 let data = {
   user: [
     {
-      
       uId: 10,
       email: 'student@unsw.com',
       password: 'password',
-      // nameFirst -> Removed
       nameFirst: 'John',
-      // nameLast -> user
       nameLast: 'Doe',
       handle: 'johndoe0',
       globalPerms: 1,
-      // add: shouldRetrieve: true
-      
+      notifications: [
+        {
+          channelId: 999,
+          dmId: -1,
+          notificationMessage: 'johndoe0 tagged you in channel: Hello to myself',
+        },
+      ],
+      channelsJoined: [
+        {
+          numChannelsJoined: 0,
+          timeStamp: 1500000000,
+        },
+        {
+          numChannelsJoined: 1,
+          timeStamp: 1658848908,
+        },
+      ],
+      dmsJoined: [
+        {
+          numDmsJoined: 0,
+          timeStamp: 1500000000,
+        },
+        {
+          numDmsJoined: 1,
+          timeStamp: 1658848922,
+        },
+      ],
+      messagesSent: [
+        {
+          numMessagesSent: 0,
+          timeStamp: 1500000000,
+        },
+        {
+          numMessagesSent: 1,
+          timeStamp: 1858848922,
+        },
+      ], 
+      involvementRate: 0.6,
     },
   ],
 
@@ -33,7 +56,6 @@ let data = {
       channelId: 999,
       channelName: 'channel',
       isPublic: true,
-      // remove from members array
       members: [
         {
           uId: -999,
@@ -44,7 +66,6 @@ let data = {
         {
           messageId: 1,
           uId: -999,
-        // message string w/ uId: replace with "Removed User'
           message: 'Hello world',
           timeSent: '001',
           pinned: 0,
@@ -65,7 +86,6 @@ let data = {
     {
       dmId: 1,
       name: 'aliceschmoe, johndoe0',
-      // remove from members array
       members: [
         {
           uId: 3,
@@ -77,7 +97,6 @@ let data = {
         },
       ],
       messages: [
-        // message string w/ uId: replace with "Removed User'
         {
           messageId: 20,
           uId: 3,
@@ -90,3 +109,50 @@ let data = {
     }
   ],
 
+  workspaceStats: {
+    channelsExist: [
+      {
+        numChannelsExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
+        numChannelsExist: 1,
+        timeStamp: 1658848908,
+      },
+      {
+        numChannelsExist: 2,
+        timeStamp: 2323221432,
+      },
+    ], 
+    dmsExist: [
+      {
+        numDmsExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
+        numDmsExist: 1,
+        timeStamp: 1658848922,
+      },
+      {
+        numDmsExist: 2,
+        timeStamp: 2323221457,
+      },
+    ], 
+    messagesExist: [
+      {
+        numMessagesExist: 0,
+        timeStamp: 1500000000,
+      },
+      {
+        numMessagesExist: 1,
+        timeStamp: 1858848922,
+      },
+      {
+        numMessagesExist: 2,
+        timeStamp: 2058848922,
+      },
+    ], 
+    utilizationRate: 0.5,
+  }
+
+}

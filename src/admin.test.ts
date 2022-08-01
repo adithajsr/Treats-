@@ -13,7 +13,6 @@ import { requestUsersAll, requestUserProfile } from './users.test';
 import { requestChannelDetailsHelper, requestChannelMessages } from './channel.test';
 import { requestDMMessages, requestDMDetails } from './dm.test';
 
-
 // -------------------------------------------------------------------------//
 
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -63,7 +62,7 @@ describe('admin/user/remove/v1 test', () => {
       testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       byeUser = requestAuthRegister('avalidemail@gmail.com', 'a123abc!@#', 'Jane', 'Doe');
     });
-  
+
     afterEach(() => {
       requestClear();
     });
@@ -72,12 +71,12 @@ describe('admin/user/remove/v1 test', () => {
       const testRequest = requestAdminUserRemove(testUser.bodyObj.token + 'a', byeUser.bodyObj.authUserId);
       expect(testRequest).toBe(403);
     });
-  
+
     test('uId does not refer to a valid user, fail user remove', () => {
       const testRequest = requestAdminUserRemove(testUser.bodyObj.token, 9999);
       expect(testRequest).toBe(400);
     });
-  
+
     test('auth user is not a global owner, fail user remove', () => {
       const testRequest = requestAdminUserRemove(byeUser.bodyObj.token, testUser.bodyObj.authUserId);
       expect(testRequest).toBe(403);
@@ -94,8 +93,8 @@ describe('admin/user/remove/v1 test', () => {
       // testUser creates a DM
       testDm = requestDMCreate(testUser.bodyObj.token, [byeUser.bodyObj.authUserId]);
       // byeUser sends two dms
-      const dm1 = requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'first dm');
-      const dm2 = requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'second dm');
+      requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'first dm');
+      requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'second dm');
       const testRequest = requestAdminUserRemove(testUser.bodyObj.token, byeUser.bodyObj.authUserId);
       // check outputs
       expect(testRequest).toStrictEqual({});
@@ -103,26 +102,20 @@ describe('admin/user/remove/v1 test', () => {
       expect(requestUsersAll().bodyObj.users).toStrictEqual([
         {
           uId: testUser.bodyObj.authUserId,
-          email: 'student@unsw.com',
-          password: 'password',
+          email: 'validemail@gmail.com',
           nameFirst: 'John',
           nameLast: 'Doe',
-          handle: 'johndoe0',
-          globalPerms: 1,
-          shouldRetrieve: true          
-        },
+          handleStr: 'johndoe'
+        }
       ]);
       // retrieve user details user/profile
       expect(requestUserProfile(testUser.bodyObj.token, byeUser.bodyObj.authUserId).bodyObj).toStrictEqual(
         {
           uId: byeUser.bodyObj.authUserId,
-          email: 'student@unsw.com',
-          password: 'password',
+          email: 'avalidemail@gmail.com',
           nameFirst: 'Removed',
-          nameLast: 'User',
-          handle: 'johndoe0',
-          globalPerms: 1,
-          shouldRetrieve: false
+          nameLast: 'user',
+          handleStr: 'janedoe'
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
@@ -152,7 +145,7 @@ describe('admin/user/remove/v1 test', () => {
         }
       );
       // retrieve channel details - requestChannelMessages - message
-      let channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
       expect(channelM.bodyObj.messages).toStrictEqual(
         [
           {
@@ -174,21 +167,23 @@ describe('admin/user/remove/v1 test', () => {
         ]
       );
       // retrieve dm details - requestDMDetails - members
-      let dmD = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
-      expect(dmD.bodyObj.name).toStrictEqual('johndoe');
+      const dmD = requestDMDetails(testUser.bodyObj.token, testDm.bodyObj.dmId);
+      expect(dmD.bodyObj.members).toStrictEqual([{
+        dmPerms: 1,
+        uId: testUser.bodyObj.authUserId
+      }]);
       // retrieve dm details - requestDMMessages - messages
-      let dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
+      const dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
       expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed User');
       expect(dmM.bodyObj.messages[1].message).toStrictEqual('Removed User');
     });
-  
   });
 
   test('uId is the only global owner, fail user remove', () => {
     requestClear();
     testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
     const testRequest = requestAdminUserRemove(testUser.bodyObj.token, testUser.bodyObj.authUserId);
-    expect(testRequest).toBe(403);
+    expect(testRequest).toBe(400);
     requestClear();
   });
 });

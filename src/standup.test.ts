@@ -15,6 +15,8 @@ jest.setTimeout(10000);
 type payloadObj = {
   token?: string;
   channelId?: number;
+  length?: number;
+  message?: string;
 };
 
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -62,8 +64,6 @@ function requestStandupSend(token: string, channelId: number, message: string) {
 let testUser: any;
 let badUser: any;
 let testChannel: any;
-let timeNow: any;
-let timeFinish: any;
 
 describe('standup capabilities', () => {
   describe('standup/start/v1 test', () => {
@@ -153,8 +153,6 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup active - standup in progress', () => {
-      timeNow = Math.floor((new Date()).getTime() / 1000);
-      timeFinish = timeNow + 3;
       const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
       // expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(testStandup).toStrictEqual({ timeFinish: expect.any(Number) });

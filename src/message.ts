@@ -98,7 +98,7 @@ Return Value:
 
 Throws a 400 error    - if channelId doesn't refer to a valid channel
                       - length of message is less than 1 or over 1000 characters
-Throw a 403 error     - channelId was valid but auth user wasn't a member of channel  
+Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
 */
 
 export function messageSendV2 (token: string, channelId: number, message: string) {
@@ -148,7 +148,7 @@ Arguments:
   message (string)      - message they want to send
 
 Return Value:
-  Returns {} - if new message successfully created 
+  Returns {} - if new message successfully created
 
 Throws a 400 error    - length of message is over 1000 characters
                       - messageId does not refer to a valid message within channel/DM

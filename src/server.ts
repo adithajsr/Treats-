@@ -36,19 +36,17 @@ app.get('/echo', (req, res, next) => {
 // for logging errors
 app.use(morgan('dev'));
 
-
 app.use('/imgurl', express.static('profilePics'));
 
-/*
 app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
   try {
+    const token = req.header('token');
     const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
-    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd));
+    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token));
   } catch (err) {
     next(err);
   }
 });
-*/
 
 app.get('/channel/messages/v3', (req, res, next) => {
   try {
@@ -62,7 +60,7 @@ app.get('/channel/messages/v3', (req, res, next) => {
 });
 
 app.get('/user/profile/v3', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const uId = Number(req.query.uId) as number;
   return res.json(userProfileV3(token, uId));
 });
@@ -127,7 +125,7 @@ app.post('/auth/login/v3', (req, res, next) => {
 
 app.post('/auth/logout/v2', (req, res, next) => {
   try {
-    const { token } = req.body;
+    const token = req.header('token');
     return res.json(authLogoutV2(token));
   } catch (err) {
     next(err);
@@ -141,8 +139,9 @@ app.post('/auth/passwordreset/request/v1', (req, res) => {
 
 app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
   try {
+    const token = req.header('token');
     const { resetCode, newPassword } = req.body;
-    return res.json(passwordReset(resetCode, newPassword));
+    return res.json(passwordReset(resetCode, newPassword, token));
   } catch (err) {
     next(err);
   }
@@ -216,13 +215,19 @@ app.post('/channel/removeowner/v1', (req, res, next) => {
   }
 });
 
-app.get('/users/all/v2', (req, res) => {
-  res.json(usersAll());
+app.get('/users/all/v2', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(usersAll(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/setname/v2', (req, res, next) => {
   try {
-    const { token, nameFirst, nameLast } = req.body;
+    const token = req.header('token');
+    const { nameFirst, nameLast } = req.body;
     return res.json(userProfileSetName(token, nameFirst, nameLast));
   } catch (err) {
     next(err);
@@ -231,7 +236,8 @@ app.put('/user/profile/setname/v2', (req, res, next) => {
 
 app.put('/user/profile/email/v2', (req, res, next) => {
   try {
-    const { token, email } = req.body;
+    const token = req.header('token');
+    const { email } = req.body;
     return res.json(userProfileSetEmail(token, email));
   } catch (err) {
     next(err);
@@ -240,7 +246,8 @@ app.put('/user/profile/email/v2', (req, res, next) => {
 
 app.put('/user/profile/handle/v2', (req, res, next) => {
   try {
-    const { token, handleStr } = req.body;
+    const token = req.header('token');
+    const { handleStr } = req.body;
     return res.json(userProfileSetHandle(token, handleStr));
   } catch (err) {
     next(err);

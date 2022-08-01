@@ -69,6 +69,9 @@ function requestAuthLogout(token: string) {
     `${url}:${port}/auth/logout/v2`,
     {
       json: { token },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -93,7 +96,7 @@ function requestPasswordRequest(email: string) {
   };
 }
 
-function requestPasswordReset(resetCode: string, newPassword: string) {
+function requestPasswordReset(resetCode: string, newPassword: string, token: string) {
   const res = request(
     'POST',
     `${url}:${port}/auth/passwordreset/reset/v1`,
@@ -101,6 +104,9 @@ function requestPasswordReset(resetCode: string, newPassword: string) {
       json: {
         resetCode: resetCode,
         newPassword: newPassword,
+      },
+      headers: {
+        token: token,
       },
     }
   );
@@ -144,6 +150,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
@@ -219,6 +226,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: testUserFN,
       nameLast: testUserLN,
       handleStr: 'sebastianfitzagamemn',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -241,6 +249,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith4',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
@@ -270,6 +279,7 @@ describe('Testing for requestAuthLogin', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: 'invalid input details' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
@@ -383,12 +393,14 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
 
     // has logged out
     requestPasswordRequest('z5420895@ad.unsw.edu.au');
+    // logging in again
+    const testToken = requestAuthLogin('z5420895@ad.unsw.edu.au', '123abc!@#').bodyObj.token;
 
-    const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5');
+    const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5', testToken);
     expect(returnValue1.res.statusCode).toBe(400);
     expect(returnValue1.bodyObj.error).toStrictEqual({ message: 'password entered is less than 6 characters long' });
 
-    const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve');
+    const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve', testToken);
     expect(returnValue2.res.statusCode).toBe(400);
     expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
 

@@ -17,10 +17,12 @@ export function requestUserProfileSetName(token: string, nameFirst: string, name
     `${url}:${port}/user/profile/setname/v2`,
     {
       json: {
-        token: token,
         nameFirst: nameFirst,
         nameLast: nameLast,
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
 
@@ -50,9 +52,11 @@ export function requestUserProfileSetEmail(token: string, email: string) {
     `${url}:${port}/user/profile/email/v2`,
     {
       json: {
-        token: token,
         email: email,
-      }
+      },
+      headers: {
+        token: token,
+      },
 
     }
   );
@@ -68,9 +72,11 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
     `${url}:${port}/user/profile/handle/v2`,
     {
       json: {
-        token: token,
         handleStr: handleStr,
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -79,11 +85,10 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
-/*
-export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
   const res = request(
     'POST',
-    `${url}:${port}/user/profile/uploadphoto/v1${imgUrl}`,
+    `${url}:${port}/user/profile/uploadphoto/v1`,
     {
       json: {
         imgUrl: imgUrl,
@@ -91,7 +96,10 @@ export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: numbe
         yStart: yStart,
         xEnd: xEnd,
         yEnd: yEnd,
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -99,16 +107,18 @@ export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: numbe
     bodyObj: JSON.parse(res.body as string),
   };
 }
-*/
 
-function requestUsersAll() {
+function requestUsersAll(token: string) {
   const res = request(
     'GET',
     `${url}:${port}/users/all/v2`,
     {
       qs: {
 
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -123,9 +133,11 @@ export function requestUserProfile(token: string, uId: number) {
     `${url}:${port}/user/profile/v3`,
     {
       qs: {
-        token: token,
         uId: uId
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -159,6 +171,7 @@ test('Testing default case', () => {
     nameFirst: 'Maiya',
     nameLast: 'Taylor',
     handleStr: 'maiyataylor',
+    profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
   };
 
   const danielInfo = {
@@ -167,6 +180,7 @@ test('Testing default case', () => {
     nameFirst: 'Daniel',
     nameLast: 'Yung',
     handleStr: 'danielyung',
+    profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
   };
 
   expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject(danielInfo);
@@ -193,7 +207,8 @@ describe('Testing for requestUserProfileSetName', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'Jonathan',
       nameLast: 'Schmidt',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -212,6 +227,7 @@ describe('Testing for requestUserProfileSetName', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -229,6 +245,7 @@ describe('Testing for requestUserProfileSetName', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 });
@@ -250,7 +267,8 @@ describe('Testing for requestUserProfileSetEmail', () => {
       email: 'something@gmail.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -269,6 +287,7 @@ describe('Testing for requestUserProfileSetEmail', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 });
@@ -290,7 +309,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'BigChungas2000'
+      handleStr: 'BigChungas2000',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -309,6 +329,7 @@ describe('Testing for requestUserProfileSetHandle', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -325,7 +346,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -341,7 +363,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -358,27 +381,30 @@ describe('Testing for requestUsersAll', () => {
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
     const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
-    const response = requestUsersAll();
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll().bodyObj.users).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
         nameFirst: 'John',
         nameLast: 'Smith',
         handleStr: 'johnsmith',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }, {
         uId: uId2,
         email: 'z5420895@ad.unsw.edu.au',
         nameFirst: 'Jonathan',
         nameLast: 'Schmidt',
         handleStr: 'jonathanschmidt',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }, {
         uId: uId3,
         email: 'validemail@gmail.com',
         nameFirst: 'John',
         nameLast: 'Doe',
         handleStr: 'johndoe',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }
     ]);
   });
@@ -386,15 +412,16 @@ describe('Testing for requestUsersAll', () => {
   test('Test 2 affirmitive one user', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
-    const response = requestUsersAll();
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll().bodyObj.users).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
         nameFirst: 'John',
         nameLast: 'Smith',
         handleStr: 'johnsmith',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }
     ]);
   });

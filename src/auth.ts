@@ -7,6 +7,7 @@ import HTTPError from 'http-errors';
 import codec from 'string-codec';
 import nodemailer from 'nodemailer';
 import { findTokenIndex } from './channels';
+import { doesTokenExist } from './users';
 import config from './config.json';
 
 const url = config.url;
@@ -318,17 +319,20 @@ newPassword (string) - <greater then or equal to 6 in length>
 Return Value:
 throws HTTP Error on <invalid newPassword or wrong resetCode>
 returns <{}> on <changed password> */
-export function passwordReset(resetCode: string, newPassword: string) {
+export function passwordReset(resetCode: string, newPassword: string, token: string) {
+  const dataSet = getData();
+  if (!doesTokenExist(token)) {
+    throw HTTPError(403, 'Invalid token');
+  }
   if (newPassword.length < 6) {
     throw HTTPError(400, 'password entered is less than 6 characters long');
   }
   const decryptedCode = codec.decoder(resetCode, 'base64');
   const uId = decryptedCode.replace(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}-/i, '');
-  const token = decryptedCode.replace('-' + uId, '');
+  const tokenCode = decryptedCode.replace('-' + uId, '');
 
-  const dataSet = getData();
   for (const i in dataSet.token) {
-    if (dataSet.token[i].token === token && dataSet.token[i].uId === Number('-' + uId)) {
+    if (dataSet.token[i].token === tokenCode && dataSet.token[i].uId === Number('-' + uId)) {
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {
         if (user.uId === Number(uId)) {

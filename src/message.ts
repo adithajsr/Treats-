@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import HTTPError from 'http-errors';
 
+
 interface Database {
   user: any[];
   channel: any[];
@@ -418,9 +419,5 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
     }    
 
   }
-
-
-
-  
   return sharedMessageId;
 }

@@ -8,6 +8,8 @@ import { requestChannelsCreate } from './channels.test';
 
 import { requestDMCreate, requestDMMessages } from './dm.test';
 
+import { MessageShareV1 } from './message'
+
 const port = config.port;
 const url = config.url;
 
@@ -62,9 +64,10 @@ function requestChannelAddownerV1(token: string, channelId: number, uId: number)
   return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
 }
 
-function requestMessageShare(ogMessageId: number, message: string, channelId: number, dmId: number) {
+function requestMessageShare(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
   return requestHelper('POST', '/message/share/v1', {ogMessageId, message, channelId, dmId});
 }
+
 
 
 
@@ -461,7 +464,7 @@ test('Default case', () => {
   const dmId = requestDmCreate(danielToken, [samId]).bodyObj.dmId; 
   const messageId2 = requestMessageSendDM(danielToken, dmId, 'Hey whats up homie');
   requestMessageSendDM(danielToken, dmId, 'Why you ghosting me sammy g :((');
-  requestMessageShare(messageId1, 'this isnt true anymore: ', -1, dmId);
+  requestMessageShare(danielToken, messageId1, 'this isnt true anymore: ', -1, dmId);
 
   expect(requestDMMessages(danielToken, dmId, 2).bodyObj[0].messages.message).toBe('this isnt true anymore: I like talking to myself');
 });

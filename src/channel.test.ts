@@ -19,12 +19,12 @@ type payloadObj = {
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
-  let headers: {};
+  let headers = {};
 
   // Check if token key exists in payload
   if (payload.token !== undefined) {
-    headers = {token: payload.token}
-    delete payload.token; 
+    headers = { token: payload.token };
+    delete payload.token;
   }
 
   let res;
@@ -272,7 +272,7 @@ function setupDatabase() {
   sendPost('channel/invite/v2', body);
 }
 
-let headers: {};
+let headers = {};
 type sendPostObj = {
   token?: string;
   channelId?: number;
@@ -282,18 +282,19 @@ type sendPostObj = {
 function sendPost(path:string, body: sendPostObj) {
   // Check if token key exists in body
   if (body.token !== undefined) {
-    headers = {token: body.token}
-    delete body.token; 
+    headers = { token: body.token };
+    delete body.token;
   }
-  
+
   const res = request(
     'POST',
       `${url}:${port}/${path}`,
       {
         json: body,
+        headers,
       }
   );
-  return JSON.parse(res.getBody() as string);
+  return JSON.parse(res.body as string);
 }
 
 // Changed function name due to duplication errors

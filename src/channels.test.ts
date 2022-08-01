@@ -256,12 +256,12 @@ type payloadObj = {
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
-  let headers: {};
+  let headers = {};
 
   // Check if token key exists in payload
   if (payload.token !== undefined) {
-    headers = {token: payload.token}
-    delete payload.token; 
+    headers = { token: payload.token };
+    delete payload.token;
   }
 
   let res;

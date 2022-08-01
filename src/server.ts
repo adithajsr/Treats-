@@ -48,7 +48,7 @@ app.get('/channel/messages/v3', (req, res, next) => {
 });
 
 app.get('/user/profile/v3', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const uId = Number(req.query.uId) as number;
   return res.json(userProfileV3(token, uId));
 });
@@ -89,9 +89,9 @@ app.delete('/clear/v1', (req, res) => {
 });
 
 app.get('/channel/details/v3', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const channelId = req.query.channelId as string;
-  res.json(channelDetailsV3(token as string, parseInt(channelId as string)));
+  res.json(channelDetailsV3(token, parseInt(channelId)));
 });
 
 app.post('/auth/register/v3', (req, res, next) => {
@@ -215,7 +215,8 @@ app.get('/users/all/v2', (req, res) => {
 
 app.put('/user/profile/setname/v2', (req, res, next) => {
   try {
-    const { token, nameFirst, nameLast } = req.body;
+    const token = req.header('token');
+    const { nameFirst, nameLast } = req.body;
     return res.json(userProfileSetName(token, nameFirst, nameLast));
   } catch (err) {
     next(err);
@@ -224,7 +225,8 @@ app.put('/user/profile/setname/v2', (req, res, next) => {
 
 app.put('/user/profile/email/v2', (req, res, next) => {
   try {
-    const { token, email } = req.body;
+    const token = req.header('token');
+    const { email } = req.body;
     return res.json(userProfileSetEmail(token, email));
   } catch (err) {
     next(err);
@@ -233,7 +235,8 @@ app.put('/user/profile/email/v2', (req, res, next) => {
 
 app.put('/user/profile/handle/v2', (req, res, next) => {
   try {
-    const { token, handleStr } = req.body;
+    const token = req.header('token');
+    const { handleStr } = req.body;
     return res.json(userProfileSetHandle(token, handleStr));
   } catch (err) {
     next(err);
@@ -241,17 +244,19 @@ app.put('/user/profile/handle/v2', (req, res, next) => {
 });
 
 app.post('/message/send/v2', (req, res) => {
-  const { token, channelId, message } = req.body;
+  const token = req.header('token');
+  const { channelId, message } = req.body;
   res.json(messageSendV2(token, channelId, message));
 });
 
 app.put('/message/edit/v2', (req, res) => {
-  const { token, messageId, message } = req.body;
+  const token = req.header('token');
+  const { messageId, message } = req.body;
   res.json(messageEditV2(token, messageId, message));
 });
 
 app.delete('/message/remove/v2', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const messageId = parseInt(req.query.messageId as string);
   res.json(messageRemoveV2(token, messageId));
 });

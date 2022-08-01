@@ -99,7 +99,7 @@ function requestChannelMessages(token: string, channelId: number, start: number)
     `${url}:${port}/channel/messages/v3`,
     {
       qs: {
-        token, channelId, start,
+        channelId, start,
       },
       headers: { token },
     }

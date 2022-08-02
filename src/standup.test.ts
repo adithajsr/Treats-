@@ -229,7 +229,7 @@ describe('standup capabilities', () => {
       expect(testRequest2).toStrictEqual({});
       await new Promise((r) => setTimeout(r, 4000));
       const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-      expect(checkSent.bodyObj.messages[0].message + checkSent.bodyObj.messages[1].message).toStrictEqual(
+      expect(checkSent.bodyObj.messages[0].message).toStrictEqual(
         'johndoe: testUser successful standup send' + '\n' +
         'janedoe: badUser successful standup send'
       );

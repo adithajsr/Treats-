@@ -267,10 +267,14 @@ app.post('/message/senddm/v2', (req, res) => {
   res.json(messageSendDmV2(token, dmId, message));
 });
 
-app.post('message/share/v1', (req, res) => {
-  const token = req.header('token');
-  const { ogMessageId, message, channelId, dmId} = req.body;
-  res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+app.post('/message/share/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { ogMessageId, message, channelId, dmId } = req.body;
+    return res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/dm/create/v2', (req, res, next) => {

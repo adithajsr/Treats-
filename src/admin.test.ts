@@ -90,11 +90,13 @@ describe('admin/user/remove/v1 test', () => {
       // byeUser sends two messages to the channel
       const m1 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'first message');
       const m2 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'second message');
+      const m3 = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'third message');
       // testUser creates a DM
       testDm = requestDMCreate(testUser.bodyObj.token, [byeUser.bodyObj.authUserId]);
       // byeUser sends two dms
       requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'first dm');
       requestSendDm(byeUser.bodyObj.token, testDm.bodyObj.dmId, 'second dm');
+      requestSendDm(testUser.bodyObj.token, testDm.bodyObj.dmId, 'third dm');
       const testRequest = requestAdminUserRemove(testUser.bodyObj.token, byeUser.bodyObj.authUserId);
       // check outputs
       expect(testRequest).toStrictEqual({});
@@ -163,6 +165,14 @@ describe('admin/user/remove/v1 test', () => {
             timeSent: expect.any(Number),
             pinned: 0,
             react: 0,
+          },
+          {
+            messageId: m3.messageId,
+            uId: testUser.bodyObj.authUserId,
+            message: 'third message',
+            timeSent: expect.any(Number),
+            pinned: 0,
+            react: 0,
           }
         ]
       );
@@ -176,6 +186,7 @@ describe('admin/user/remove/v1 test', () => {
       const dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
       expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed user');
       expect(dmM.bodyObj.messages[1].message).toStrictEqual('Removed user');
+      expect(dmM.bodyObj.messages[2].message).toStrictEqual('third dm');
     });
   });
 

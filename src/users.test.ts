@@ -1,6 +1,7 @@
 import { requestAuthRegister } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
+import fs from 'fs';
 
 const OK = 200;
 const url = config.url;
@@ -32,24 +33,10 @@ export function requestUserProfileSetName(token: string, nameFirst: string, name
   };
 }
 
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
 export function requestUserProfileSetEmail(token: string, email: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/email/v2`,
+    `${url}:${port}/user/profile/setemail/v2`,
     {
       json: {
         email: email,
@@ -69,7 +56,7 @@ export function requestUserProfileSetEmail(token: string, email: string) {
 export function requestUserProfileSetHandle(token: string, handleStr: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/handle/v2`,
+    `${url}:${port}/user/profile/sethandle/v2`,
     {
       json: {
         handleStr: handleStr,
@@ -85,7 +72,7 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
-export function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
+function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
   const res = request(
     'POST',
     `${url}:${port}/user/profile/uploadphoto/v1`,
@@ -146,13 +133,26 @@ export function requestUserProfile(token: string, uId: number) {
   };
 }
 
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
+  };
+}
+
 test('Invalid uId', () => {
   requestClear();
   const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]);
   const maiyaToken = maiyaUser.bodyObj.token;
   const maiyaId = maiyaUser.bodyObj.authUserId;
   expect(requestUserProfile(maiyaToken, maiyaId + 20).res.statusCode).toEqual(400);
-  // expect(returnObject.res.statusCode).toBe(400);
 });
 
 test('Testing default case', () => {
@@ -424,5 +424,43 @@ describe('Testing for requestUsersAll', () => {
         profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }
     ]);
+  });
+});
+
+// ======================================== requestUploadPhoto Testing ========================================
+
+describe('Testing for requestUploadPhoto', () => {
+  requestClear();
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const profileImgUrl = 'https://images7.alphacoders.com/904/thumb-1920-904934.jpg';
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUploadPhoto(profileImgUrl, 15, 15, 1920, 1080, testToken);
+    expect(response.res.statusCode).toBe(OK);
+    let testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+    while (testImgUrl === `${url}:${port}/imgurl/default.jpg`) {
+      testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+    }
+    const res = request(
+      'GET',
+      testImgUrl
+    );
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+      profileImgUrl: expect.any(String),
+    });
+    const urlProfile = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl
+    let urlUuid = urlProfile.replace(`${url}:${port}/imgurl/`, '');
+    urlUuid = urlUuid.replace(/jpg$/, '');
+    urlUuid = urlUuid.replace('.', '');
+    const deletionUrl = `${__dirname}/profilePics/${urlUuid}.jpg`;
+    fs.unlinkSync(deletionUrl);
+    requestClear();
   });
 });

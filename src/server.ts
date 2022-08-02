@@ -36,7 +36,7 @@ app.get('/echo', (req, res, next) => {
 // for logging errors
 app.use(morgan('dev'));
 
-app.use('/imgurl', express.static('profilePics'));
+app.use('/imgurl', express.static(`${__dirname}/profilePics`));
 
 app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
   try {
@@ -234,7 +234,7 @@ app.put('/user/profile/setname/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/email/v2', (req, res, next) => {
+app.put('/user/profile/setemail/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { email } = req.body;
@@ -244,7 +244,7 @@ app.put('/user/profile/email/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/handle/v2', (req, res, next) => {
+app.put('/user/profile/sethandle/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { handleStr } = req.body;

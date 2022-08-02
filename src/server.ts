@@ -14,6 +14,7 @@ import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
+import { adminUserRemoveV1 } from './admin';
 
 // Set up web app, use JSON
 const app = express();
@@ -93,6 +94,12 @@ app.get('/channel/details/v3', (req, res) => {
   const token = req.header('token');
   const channelId = req.query.channelId as string;
   res.json(channelDetailsV3(token, parseInt(channelId)));
+});
+
+app.delete('/admin/user/remove/v1', (req, res) => {
+  const token = req.header('token');
+  const uId = parseInt(req.query.uId as string);
+  res.json(adminUserRemoveV1(token, uId));
 });
 
 app.post('/auth/register/v3', (req, res, next) => {

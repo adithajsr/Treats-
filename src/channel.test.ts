@@ -49,7 +49,7 @@ function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
 
 // -------------------------------------------------------------------------//
 
-function requestChannelDetailsHelper(token: string, channelId: number) {
+export function requestChannelDetailsHelper(token: string, channelId: number) {
   return requestHelper('GET', '/channel/details/v3', { token, channelId });
 }
 

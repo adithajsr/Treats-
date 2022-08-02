@@ -180,13 +180,15 @@ export function usersAll() {
   const dataSet = getData();
   const returnObject = [];
   for (const item of dataSet.user) {
-    returnObject.push({
-      uId: item.uId,
-      email: item.email,
-      nameFirst: item.nameFirst,
-      nameLast: item.nameLast,
-      handleStr: item.handle,
-    });
+    if (item.shouldRetrieve === true) {
+      returnObject.push({
+        uId: item.uId,
+        email: item.email,
+        nameFirst: item.nameFirst,
+        nameLast: item.nameLast,
+        handleStr: item.handle,
+      });
+    }
   }
   return { users: returnObject };
 }

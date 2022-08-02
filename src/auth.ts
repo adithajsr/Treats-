@@ -212,6 +212,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     dmsJoined: [firstDMJoined],
     messagesSent: [firstMessageSent],
     involvementRate: 0,
+    shouldRetrieve: true
   });
 
   const uuid: string = newUuid();

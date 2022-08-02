@@ -65,7 +65,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
         }
         memberIndex = channel[i].members.findIndex(a => a.uId === uId);
         channel[i].members.splice(memberIndex, 1);
-      } 
+      }
     }
   }
 
@@ -82,7 +82,7 @@ export function adminUserRemoveV1(token: string, uId: number) {
         }
         memberIndex = dm[i].members.findIndex(a => a.uId === uId);
         dm[i].members.splice(memberIndex, 1);
-      } 
+      }
     }
   }
 

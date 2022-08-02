@@ -13,7 +13,7 @@ const url = config.url;
 
 // -------------------------------------------------------------------------//
 
-type payloadObj = {
+export type payloadObj = {
   token?: string;
   channelId?: number;
   messageId?: number;
@@ -71,7 +71,7 @@ function requestRemoveOwner(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
 }
 
-function requestChannelJoinV2(token: string, channelId: number) {
+export function requestChannelJoinV2(token: string, channelId: number) {
   return requestHelper('POST', '/channel/join/v2', { token, channelId });
 }
 

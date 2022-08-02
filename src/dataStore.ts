@@ -34,6 +34,7 @@ interface user {
   dmsJoined: dmJoined[],
   messagesSent: messageSent[],
   involvementRate: number,
+  shouldRetrieve: boolean
 }
 
 interface channelMember {

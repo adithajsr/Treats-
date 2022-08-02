@@ -49,7 +49,7 @@ function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
 
 // -------------------------------------------------------------------------//
 
-function requestChannelDetailsHelper(token: string, channelId: number) {
+export function requestChannelDetailsHelper(token: string, channelId: number) {
   return requestHelper('GET', '/channel/details/v3', { token, channelId });
 }
 
@@ -93,7 +93,7 @@ export function requestChannelsCreate(token: string, name: string, isPublic: boo
   };
 }
 
-function requestChannelMessages(token: string, channelId: number, start: number) {
+export function requestChannelMessages(token: string, channelId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/channel/messages/v3`,

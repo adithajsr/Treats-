@@ -78,7 +78,7 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
-function requestUsersAll() {
+export function requestUsersAll() {
   const res = request(
     'GET',
     `${url}:${port}/users/all/v2`,

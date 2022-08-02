@@ -60,8 +60,12 @@ interface channel {
   channelId: number,
   channelName: string,
   isPublic: boolean,
+  isActive: boolean,
+  isActiveUid: number,
+  standupFinish: number,
   members: channelMember[],
   messages: message[],
+  queue: any
 }
 
 interface token {

@@ -269,10 +269,7 @@ app.post('/message/senddm/v2', (req, res) => {
 
 app.post('message/share/v1', (req, res) => {
   const token = req.header('token');
-  const ogMessageId = Number(req.body.ogMessageId) as number; 
-  const message = req.body.message as string;
-  const channelId = Number(req.body.channelId) as number; 
-  const dmId = Number(req.body.dmId) as number;
+  const { ogMessageId, message, channelId, dmId} = req.body;
   res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
 });
 

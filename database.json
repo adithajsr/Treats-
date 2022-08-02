@@ -1,55 +1,7 @@
 {
-    "user": [
-        {
-            "uId": 1,
-            "email": "validemail@gmail.com",
-            "password": "123abc!@#",
-            "nameFirst": "John",
-            "nameLast": "Doe",
-            "handle": "johndoe",
-            "globalPerms": 1,
-            "notifications": [],
-            "channelsJoined": [
-                {
-                    "numChannelsJoined": 0,
-                    "timeStamp": 1659436307
-                }
-            ],
-            "dmsJoined": [
-                {
-                    "numDmsJoined": 0,
-                    "timeStamp": 1659436307
-                }
-            ],
-            "messagesSent": [
-                {
-                    "numMessagesSent": 0,
-                    "timeStamp": 1659436307
-                }
-            ],
-            "involvementRate": 0
-        }
-    ],
-    "channel": [
-        {
-            "channelId": 1,
-            "channelName": "channelName",
-            "isPublic": true,
-            "members": [
-                {
-                    "uId": 1,
-                    "channelPerms": 1
-                }
-            ],
-            "messages": []
-        }
-    ],
-    "token": [
-        {
-            "token": "679f2b8c-960e-49de-aca5-655227242e32",
-            "uId": 1
-        }
-    ],
+    "user": [],
+    "channel": [],
+    "token": [],
     "dm": [],
     "workspaceStats": {
         "channelsExist": [],

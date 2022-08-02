@@ -329,8 +329,6 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
 }
 
 export function MessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
-  const data = getData();
-
   if (channelId !== -1 && dmId !== -1) {
     throw HTTPError(400, 'Specify channel/DM');
   }
@@ -338,6 +336,7 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
   if (message.length > 1000) {
     throw HTTPError(400, 'Message length must be below 1000 characters');
   }
+  const data = getData();
 
   const dmIndex = 0;
 

@@ -68,8 +68,13 @@ let data = {
           uId: -999,
           message: 'Hello world',
           timeSent: '001',
-          pinned: 0,
-          react: 0,
+          isPinned: 0,
+          reacts:[
+            {
+              uId:
+              reactStatus:
+            }
+          ]
         },
       ],
     },
@@ -102,8 +107,13 @@ let data = {
           uId: 3,
           message: 'Express',
           timeSent: '500',
-          pinned: 0,
-          react: 0
+          isPinned: 0,
+          reacts: [
+            {
+              uId:
+              reactStatus:
+            }
+          ]
         },
       ],
     }

@@ -44,6 +44,7 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
 
   channel[channelIndex].messages.push(packageMessage);
   channel[channelIndex].isActive = false;
+  channel[channelIndex].isActiveUid = -1;
   channel[channelIndex].standupFinish = 0;
   channel[channelIndex].queue = [];
 
@@ -80,6 +81,7 @@ export function standupStartV1(token: string, channelId: number, length: number)
 
   setTimeout(doStandupStart, length * 1000, i, timeFinish, uId, data);
   channel[i].isActive = true;
+  channel[i].isActiveUid = uId;
   channel[i].standupFinish = timeFinish;
 
   setData(data);

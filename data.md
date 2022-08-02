@@ -57,6 +57,7 @@ let data = {
       channelName: 'channel',
       isPublic: true,
       isActive: false,
+      isActiveUid: -1,
       queue: [
         {
           handle: 'a handle'

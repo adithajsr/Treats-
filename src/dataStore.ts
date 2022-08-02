@@ -60,6 +60,7 @@ interface channel {
   channelName: string,
   isPublic: boolean,
   isActive: boolean,
+  isActiveUid: number,
   standupFinish: number,
   members: channelMember[],
   messages: message[],

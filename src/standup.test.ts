@@ -102,7 +102,6 @@ describe('standup capabilities', () => {
 
     test('successful standup start', () => {
       const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
-      // expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
     });
 
@@ -111,7 +110,6 @@ describe('standup capabilities', () => {
       expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
       const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
       expect(badRequest).toBe(400);
-      // expect(setTimeout).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -154,7 +152,6 @@ describe('standup capabilities', () => {
 
     test('successful standup active - standup in progress', () => {
       const testStandup = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
-      // expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(testStandup).toStrictEqual({ timeFinish: expect.any(Number) });
       const testRequest = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
       expect(testRequest).toStrictEqual({

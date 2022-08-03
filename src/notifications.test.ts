@@ -22,6 +22,10 @@ import {requestClear} from './users.test'
 import {requestAuthRegister} from './auth.test'
 //import {requestChannelsCreate} from './channels.test'
 //import {requestChannelInvite} from './other.test'
+const OK = 200;
+const url = config.url;
+const port = config.port;
+
 export function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
   const res = request(
     'POST',
@@ -53,17 +57,6 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
   };
 }
 
-
-const OK = 200;
-const url = config.url;
-const port = config.port;
-
-//Test data 
-const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
-const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
-const authSam = ['samuelSchreyer@gmail.com', 'password', 'Samuel', 'Schreyer'];
-
-//Not sure if this is correct
 export function requestNotificationsGet(token: string) {
     const res = request(
       'GET',
@@ -80,6 +73,11 @@ export function requestNotificationsGet(token: string) {
       bodyObj: JSON.parse(res.body as string),
     };
   }
+
+//Test data 
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+const authSam = ['samuelSchreyer@gmail.com', 'password', 'Samuel', 'Schreyer'];
 
 test("User being added to multiple channels", () => {
     requestClear();

@@ -189,6 +189,7 @@ Return Value:
 export function channelInviteV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   const data = getData();
+  if (uIdExists(uId) === false) return {sex: 'sex'};
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
     memberExists(channelId, uId) === true ||

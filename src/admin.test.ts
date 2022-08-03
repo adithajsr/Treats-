@@ -1,6 +1,5 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-import { setupDatabase, sendPost } from './channel.test';
 const port = config.port;
 const url = config.url;
 
@@ -156,7 +155,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'Removed user',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           },
           {
             messageId: m2.messageId,
@@ -164,7 +163,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'Removed user',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           },
           {
             messageId: m3.messageId,
@@ -172,7 +171,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'third message',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           }
         ]
       );
@@ -209,6 +208,38 @@ let globalAdmin:id;
 let admin:id;
 let user1:id;
 let user2:id;
+
+
+function setupDatabase() {
+  let reg = { email: 'who.is.john@is.the.question.com', password: '12367dhd', nameFirst: 'Nathan', nameLast: 'Spencer' };
+  globalAdmin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
+  admin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.zac@is.the.question.com', password: 'zaccool', nameFirst: 'Zac', nameLast: 'Li' };
+  user1 = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.nick@is.the.question.com', password: 'yeyyey', nameFirst: 'Nick', nameLast: 'Smith' };
+  user2 = sendPost('auth/register/v3', 'a', reg);
+}
+
+export function sendPost(path:string, token:string, body: object) {
+  const res = request(
+    'POST',
+      `${url}:${port}/${path}`,
+      {
+        json: body,
+        headers: { token: token }
+      }
+  );
+
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
+}
 
 // // ======================================== admin/userpermission/change/v1 ========================================
 describe('Testing for userpermission/change/v1', () => {

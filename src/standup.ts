@@ -9,6 +9,11 @@ interface Database {
   dm: any[];
 }
 
+interface react {
+  reactId: number,
+  uIds: number[],
+}
+
 export function checkChannelMemberExist(channelId: number, uId: number, data: Database) {
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     throw HTTPError(400, 'invalid channelId');
@@ -39,7 +44,7 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
     message: messageString,
     timeSent: timeSent,
     isPinned: 0,
-    reacts: 0
+    reacts: [],
   };
 
   channel[channelIndex].messages.push(packageMessage);

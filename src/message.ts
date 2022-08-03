@@ -131,7 +131,7 @@ export function messageSendV2 (token: string, channelId: number, message: string
       message: message,
       timeSent: time,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
 
@@ -324,7 +324,7 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
       message: message,
       timeSent: time,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
   setData(data);

@@ -141,7 +141,7 @@ test('default case', () => {
   const messageId3 = requestSendDm(maiyaToken, dmId, 'stfu bitch hehe').messageId;
   const time3 = Math.floor((new Date()).getTime() / 1000);
 
-  const retObject = requestSearch(danielToken, 'hehe');
+  const retObject = requestSearch(danielToken, 'hEHe');
   const expectedObj1 = { messageId: messageId1, uId: danielId, message: 'omg hopefully he doesnt see this hehe', timeSent: time1, reacts: 0, isPinned: 0 };
   const expectedObj2 = { messageId: messageId2, uId: danielId, message: 'hehe', timeSent: time2, reacts: 0, isPinned: 0 };
   const expectedObj3 = { messageId: messageId3, uId: maiyaId, message: 'stfu bitch hehe', timeSent: time3, reacts: 0, isPinned: 0 };

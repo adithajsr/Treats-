@@ -16,7 +16,7 @@ export function searchV1(token: string, queryStr: string) {
   const data = getData();
 
   if (queryStr.length < 1 || queryStr.length > 1000) throw HTTPError(400, 'Invalid length');
-  queryStr.toLowerCase();
+  
   // finding correct user
   const tokenIndex = data.token.findIndex(a => a.token === token);
   if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');
@@ -28,7 +28,7 @@ export function searchV1(token: string, queryStr: string) {
     const memberIndex = element.members.findIndex(a => a.uId === uId);
     if (memberIndex !== -1) {
       for (const element2 of element.messages) {
-        if (element2.message.includes(queryStr) === true) messages.push(element2);
+        if (element2.message.toLowerCase().includes(queryStr.toLowerCase()) === true) messages.push(element2);
       }
     }
   }
@@ -37,7 +37,7 @@ export function searchV1(token: string, queryStr: string) {
     const memberIndex = element.members.findIndex(a => a.uId === uId);
     if (memberIndex !== -1) {
       for (const element2 of element.messages) {
-        if (element2.message.includes(queryStr) === true) messages.push(element2);
+        if (element2.message.toLowerCase().includes(queryStr.toLowerCase()) === true) messages.push(element2);
       }
     }
   }

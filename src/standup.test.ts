@@ -211,7 +211,7 @@ describe('standup capabilities', () => {
       requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'single successful standup send');
       expect(testRequest).toStrictEqual({});
-      await new Promise((r) => setTimeout(r, 4000));
+      await new Promise((r) => setTimeout(r, 2500));
 
       const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
       expect(checkSent.bodyObj.messages[0].message).toStrictEqual('johndoe: single successful standup send');
@@ -224,7 +224,7 @@ describe('standup capabilities', () => {
       expect(testRequest).toStrictEqual({});
       const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
       expect(testRequest2).toStrictEqual({});
-      await new Promise((r) => setTimeout(r, 4000));
+      await new Promise((r) => setTimeout(r, 2500));
       const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
       expect(checkSent.bodyObj.messages[0].message).toStrictEqual(
         'johndoe: testUser successful standup send' + '\n' +

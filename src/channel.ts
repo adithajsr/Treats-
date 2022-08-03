@@ -189,6 +189,7 @@ Return Value:
 */
 export function channelInviteV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
+  const data = getData();
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
     memberExists(channelId, uId) === true ||
@@ -196,6 +197,18 @@ export function channelInviteV2(token: string, channelId: number, uId: number) {
     return { error: 'error' };
   }
   addUser(channelId, uId);
+  
+  //Adding newNotification to user's notification array
+  const channelIndex = data.channel.findIndex((data) => data.channelId === channelId); 
+  const channelName = data.channel[channelIndex].channelName;
+  const authUserIndex = data.user.findIndex(a => a.uId = authUserId);
+  const userHandle = data.user[authUserIndex].handle + 'added you to ' + channelName;
+  const newNotification = { channelId: channelId, dmId: -1, notificationMessage: userHandle};
+  
+  const userIndex = data.user.findIndex(a => a.uId = uId);
+  data.user[userIndex].notifications.push(newNotification);
+  
+  setData(data);
   return {};
 }
 

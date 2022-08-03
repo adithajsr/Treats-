@@ -1,0 +1,12 @@
+{
+    "user": [],
+    "channel": [],
+    "token": [],
+    "dm": [],
+    "workspaceStats": {
+        "channelsExist": [],
+        "dmsExist": [],
+        "messagesExist": [],
+        "utilizationRate": 0
+    }
+}

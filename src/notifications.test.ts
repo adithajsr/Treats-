@@ -20,7 +20,7 @@ import request from 'sync-request';
 import config from './config.json';
 import {requestClear} from './users.test'
 import {requestAuthRegister} from './auth.test'
-import {requestChannelsCreate} from './channel.test'
+import {requestChannelsCreate} from './channels.test'
 import {requestChannelInvite} from './other.test'
 
 const OK = 200;
@@ -33,12 +33,14 @@ const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 const authSam = ['samuelSchreyer@gmail.com', 'password', 'Samuel', 'Schreyer'];
 
 //Not sure if this is correct
-export function requestNotificationsGet() {
+export function requestNotificationsGet(token: string) {
     const res = request(
       'GET',
       `${url}:${port}/notifications/get/v1`,
       {
-        qs: {
+        qs: 
+        { 
+          token,
         }
       }
     );
@@ -50,22 +52,28 @@ export function requestNotificationsGet() {
 
 test("User being added to multiple channels", () => {
     requestClear();
-    const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+    const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+    const maiyaId = maiyaUser.authUserId;
+    const maiyaToken = maiyaUser.token;
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
     const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
 
-    const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true);
-    const samChannel = requestChannelsCreate(samToken, 'wallowingChannel', true);
+    const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true).bodyObj.channelId;
+    const samChannel = requestChannelsCreate(samToken, 'wallowingChannel', true).bodyObj.channelId;
     requestChannelInvite(danielToken, danielChannel, maiyaId);
     requestChannelInvite(samToken, samChannel, maiyaId);
     
     const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung added you to gamingChannel"};
     const expectedValue1 = {channelId: samChannel, dmId: -1, notificationMessage: "samuelschreyer added you to wallowingChannel"};
-    const expectedValue = [expectedValue0, expectedValue1];      
+    const expectedValue = [expectedValue0, expectedValue1];
+    
+    console.log(requestNotificationsGet(maiyaToken))
                                                                                               
-    expect(requestNotificationsGet().bodyObj).toMatchObject(expectedValue);
-    expect(requestNotificationsGet.res.statusCode).toBe(OK);
+    expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
+    expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
 });
+
+/*
 
 test("User being added to multiple dms - thirst trap boi", () => {
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -147,7 +155,7 @@ test("User being added to channels, dms and getting tagged", () => {
 
     const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3, expectedValue4, expectedValue5];
 });
-
+*/
 
 
 

@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore'
-import { HTTPError } from 'http-errors';
+import HTTPError from 'http-errors';
 
 export function notificationsGetV1(token: string) {
     const data = getData();
@@ -13,9 +13,9 @@ export function notificationsGetV1(token: string) {
     let notifications = [];
     const notificationNumber = data.user[userIndex].notifications.length;
 
-    for (let i = notificationNumber; i > notificationNumber - 20; i++) {
-        notifications.push(data.user[userIndex].notifications[i]);
-    }
+   // for (let i = notificationNumber - 1; i > notificationNumber - 20; i--) {
+        notifications.push(data.user[userIndex].notifications);
+   // }
     
     return notifications;
 }

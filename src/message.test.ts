@@ -10,7 +10,7 @@ const url = config.url;
 
 // -------------------------------------------------------------------------//
 
-type payloadObj = {
+export type payloadObj = {
   token?: string;
   channelId?: number;
   messageId?: number;
@@ -19,7 +19,7 @@ type payloadObj = {
   message?: string;
 };
 
-function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
+export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
   let headers = {};
@@ -60,7 +60,7 @@ function requestMessageRemove(token: string, messageId: number) {
   return requestHelper('DELETE', '/message/remove/v2', { token, messageId });
 }
 
-function requestSendDm(token: string, dmId: number, message: string) {
+export function requestSendDm(token: string, dmId: number, message: string) {
   return requestHelper('POST', '/message/senddm/v2', { token, dmId, message });
 }
 
@@ -68,7 +68,7 @@ function requestRemoveOwner(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
 }
 
-function requestChannelJoinV2(token: string, channelId: number) {
+export function requestChannelJoinV2(token: string, channelId: number) {
   return requestHelper('POST', '/channel/join/v2', { token, channelId });
 }
 
@@ -108,7 +108,7 @@ Arguments:
 Return Value:
   Returns { string }      - consists of letters
 */
-function generateString() {
+export function generateString() {
   const length = 1005;
   const set = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
   let string = '';

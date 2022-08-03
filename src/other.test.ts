@@ -39,7 +39,7 @@ function requestChannelsListAll(token: string) {
   };
 }
 
-function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
+export function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
   const res = request(
     'POST',
     `${url}:${port}/channel/invite/v2`,

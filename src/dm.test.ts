@@ -90,7 +90,7 @@ function requestDMRemove(token: string, dmId: number) {
   };
 }
 
-function requestDMDetails(token: string, dmId: number) {
+export function requestDMDetails(token: string, dmId: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/details/v2`,

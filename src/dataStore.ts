@@ -34,6 +34,7 @@ interface user {
   dmsJoined: dmJoined[],
   messagesSent: messageSent[],
   involvementRate: number,
+  shouldRetrieve: boolean
 }
 
 interface channelMember {
@@ -51,16 +52,20 @@ interface message {
   uId: number,
   message: string,
   timeSent: number,
-  pinned: number,
-  react: number,
+  isPinned: number,
+  reacts: number,
 }
 
 interface channel {
   channelId: number,
   channelName: string,
   isPublic: boolean,
+  isActive: boolean,
+  isActiveUid: number,
+  standupFinish: number,
   members: channelMember[],
   messages: message[],
+  queue: any
 }
 
 interface token {

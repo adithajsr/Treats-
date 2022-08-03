@@ -345,11 +345,11 @@ Return Value:
   Returns sharedMessageId (number) if successful
 
 Throws a 400 error    - length of message is over 1000 characters
-                      - ogMessageId does not refer to a valid message within channel/DM that user is a part of 
+                      - ogMessageId does not refer to a valid message within channel/DM that user is a part of
                       - channelId and dmId are both -1
                       - both channelId and dmId do not refer to valid addresses
-Throw a 403 error     - if token is invalid 
-                      - if they are not a part of the channel/dm they wish to share a message to 
+Throw a 403 error     - if token is invalid
+                      - if they are not a part of the channel/dm they wish to share a message to
 */
 
 export function MessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {

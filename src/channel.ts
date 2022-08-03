@@ -474,13 +474,13 @@ export function reactStatus(uId: number, messageId: number, reactId: number): bo
   if (index.location === 'channel') {
     const z = data.channel[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === reactId);
     if (z !== ERROR) {
-      const search = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
+      const search = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data: any) => data === uId);
       return (search !== ERROR);
     }
   } else if (index.location === 'dm') {
     const z = data.dm[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === reactId);
     if (z !== ERROR) {
-      const search = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
+      const search = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data: any) => data === uId);
       return (search !== ERROR);
     }
   }
@@ -508,7 +508,7 @@ export function changeReact(uId:number, messageId:number, newReact:number): void
       uIdArray.push(uId);
       data.channel[index.i].messages[index.j].reacts.push({ reactId: newReact, uIds: uIdArray });
     } else if (newReact === 0) {
-      const x = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
+      const x = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data: any) => data === uId);
       data.channel[index.i].messages[index.j].reacts[z].uIds.splice(x, 1);
     } else {
       data.channel[index.i].messages[index.j].reacts[z].uIds.push(uId);
@@ -519,7 +519,7 @@ export function changeReact(uId:number, messageId:number, newReact:number): void
       uIdArray.push(uId);
       data.dm[index.i].messages[index.j].reacts.push({ reactId: newReact, uIds: uIdArray });
     } else if (newReact === 0) {
-      const x = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
+      const x = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data: any) => data === uId);
       data.dm[index.i].messages[index.j].reacts[z].uIds.splice(x, 1);
     } else {
       data.dm[index.i].messages[index.j].reacts[z].uIds.push(uId);

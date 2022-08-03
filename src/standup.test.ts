@@ -4,11 +4,11 @@ import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
 import { requestChannelMessages } from './channel.test';
 import { requestClear } from './users.test';
-import { requestChannelJoinV2, generateString } from './message.test';
+import { generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
-jest.setTimeout(10000);
+jest.setTimeout(5000);
 
 // -------------------------------------------------------------------------//
 
@@ -58,6 +58,23 @@ function requestStandupActive(token: string, channelId: number) {
 
 function requestStandupSend(token: string, channelId: number, message: string) {
   return requestHelper('POST', '/standup/send/v1', { token, channelId, message });
+}
+
+export function sendPost(path:string, token:string, body: object) {
+  const res = request(
+    'POST',
+      `${url}:${port}/${path}`,
+      {
+        json: body,
+        headers: { token: token }
+      }
+  );
+
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
 }
 
 // -------------------------------------------------------------------------//
@@ -218,17 +235,20 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send multiple', async () => {
-      requestChannelJoinV2(badUser.bodyObj.token, testChannel.bodyObj.channelId);
+      const reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
+      const user1 = sendPost('auth/register/v3', 'a', reg);
+      const body = { token: testUser.bodyObj.token, channelId: testChannel.bodyObj.channelId, uId: user1.authUserId };
+      sendPost('channel/join/v3', user1.token, body);
       requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
       expect(testRequest).toStrictEqual({});
-      const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
+      const testRequest2 = requestStandupSend(user1.token, testChannel.bodyObj.channelId, 'hancock successful standup send');
       expect(testRequest2).toStrictEqual({});
       await new Promise((r) => setTimeout(r, 4000));
       const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
       expect(checkSent.bodyObj.messages[0].message).toStrictEqual(
         'johndoe: testUser successful standup send' + '\n' +
-        'janedoe: badUser successful standup send'
+        'johnhancock: hancock successful standup send'
       );
     });
   });

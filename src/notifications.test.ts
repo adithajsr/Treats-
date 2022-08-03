@@ -20,8 +20,39 @@ import request from 'sync-request';
 import config from './config.json';
 import {requestClear} from './users.test'
 import {requestAuthRegister} from './auth.test'
-import {requestChannelsCreate} from './channels.test'
-import {requestChannelInvite} from './other.test'
+//import {requestChannelsCreate} from './channels.test'
+//import {requestChannelInvite} from './other.test'
+export function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/invite/v2`,
+    {
+      json: { channelId, InviteeAUI },
+      headers: { InviterAUI },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+
+function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v3`,
+    {
+      json: { name, isPublic },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
 
 const OK = 200;
 const url = config.url;
@@ -38,7 +69,7 @@ export function requestNotificationsGet(token: string) {
       'GET',
       `${url}:${port}/notifications/get/v1`,
       {
-        qs: 
+        headers:
         { 
           token,
         }
@@ -60,8 +91,8 @@ test("User being added to multiple channels", () => {
 
     const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true).bodyObj.channelId;
     const samChannel = requestChannelsCreate(samToken, 'wallowingChannel', true).bodyObj.channelId;
-    requestChannelInvite(danielToken, danielChannel, maiyaId);
-    requestChannelInvite(samToken, samChannel, maiyaId);
+    console.log(requestChannelInvite(danielToken, danielChannel, maiyaId));
+    console.log(requestChannelInvite(samToken, samChannel, maiyaId));
     
     const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung added you to gamingChannel"};
     const expectedValue1 = {channelId: samChannel, dmId: -1, notificationMessage: "samuelschreyer added you to wallowingChannel"};

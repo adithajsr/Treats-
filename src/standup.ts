@@ -38,8 +38,8 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
     uId: uId,
     message: messageString,
     timeSent: timeSent,
-    pinned: 0,
-    react: 0
+    isPinned: 0,
+    reacts: 0
   };
 
   channel[channelIndex].messages.push(packageMessage);

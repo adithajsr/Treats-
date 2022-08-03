@@ -22,7 +22,7 @@ export type payloadObj = {
   message?: string;
 };
 
-function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
+export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
   let headers = {};

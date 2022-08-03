@@ -1,7 +1,144 @@
 {
-    "user": [],
-    "channel": [],
-    "token": [],
+    "user": [
+        {
+            "uId": 1,
+            "email": "maiyaTaylor@gmail.com",
+            "password": "password",
+            "nameFirst": "Maiya",
+            "nameLast": "Taylor",
+            "handle": "maiyataylor",
+            "globalPerms": 1,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        },
+        {
+            "uId": 2,
+            "email": "danielYung@gmail.com",
+            "password": "password",
+            "nameFirst": "Daniel",
+            "nameLast": "Yung",
+            "handle": "danielyung",
+            "globalPerms": 2,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659508321
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        },
+        {
+            "uId": 3,
+            "email": "samuelSchreyer@gmail.com",
+            "password": "password",
+            "nameFirst": "Samuel",
+            "nameLast": "Schreyer",
+            "handle": "samuelschreyer",
+            "globalPerms": 2,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659508322
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659508322
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659508322
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        }
+    ],
+    "channel": [
+        {
+            "channelId": 1,
+            "channelName": "gamingChannel",
+            "isPublic": true,
+            "isActive": false,
+            "isActiveUid": -1,
+            "standupFinish": null,
+            "queue": [],
+            "members": [
+                {
+                    "uId": 2,
+                    "channelPerms": 1
+                }
+            ],
+            "messages": []
+        },
+        {
+            "channelId": 2,
+            "channelName": "wallowingChannel",
+            "isPublic": true,
+            "isActive": false,
+            "isActiveUid": -1,
+            "standupFinish": null,
+            "queue": [],
+            "members": [
+                {
+                    "uId": 3,
+                    "channelPerms": 1
+                }
+            ],
+            "messages": []
+        }
+    ],
+    "token": [
+        {
+            "token": "8cabfff6-e604-4aee-b68f-53424e04f92e",
+            "uId": 1
+        },
+        {
+            "token": "5f4f737a-5942-478f-aac7-6dddc8e784c3",
+            "uId": 2
+        },
+        {
+            "token": "670663da-aa4f-4d85-9b05-3a41fe9556a3",
+            "uId": 3
+        }
+    ],
     "dm": [],
     "workspaceStats": {
         "channelsExist": [],

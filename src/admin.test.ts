@@ -155,24 +155,24 @@ describe('admin/user/remove/v1 test', () => {
             uId: byeUser.bodyObj.authUserId,
             message: 'Removed user',
             timeSent: expect.any(Number),
-            pinned: 0,
-            react: 0,
+            isPinned: 0,
+            reacts: 0,
           },
           {
             messageId: m2.messageId,
             uId: byeUser.bodyObj.authUserId,
             message: 'Removed user',
             timeSent: expect.any(Number),
-            pinned: 0,
-            react: 0,
+            isPinned: 0,
+            reacts: 0,
           },
           {
             messageId: m3.messageId,
             uId: testUser.bodyObj.authUserId,
             message: 'third message',
             timeSent: expect.any(Number),
-            pinned: 0,
-            react: 0,
+            isPinned: 0,
+            reacts: 0,
           }
         ]
       );

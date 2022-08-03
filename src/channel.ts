@@ -201,9 +201,11 @@ export function channelInviteV2(token: string, channelId: number, uId: number) {
   const channelIndex = data.channel.findIndex((data) => data.channelId === channelId); 
   const channelName = data.channel[channelIndex].channelName;
   const authUserIndex = data.user.findIndex(a => a.uId = authUserId);
-  const userHandle = data.user[authUserIndex].handle + 'added you to ' + channelName;
+  const notificationMessage = data.user[authUserIndex].handle + 'added you to ' + channelName;
   const dmId = -1;
-  const newNotification = { channelId, dmId,  userHandle };
+  const newNotification = { channelId, dmId, notificationMessage };
+
+  console.log(channelId, dmId, notificationMessage);
   
   const userIndex = data.user.findIndex(a => a.uId = uId);
   data.user[userIndex].notifications.push(newNotification);  

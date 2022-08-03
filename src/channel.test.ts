@@ -76,7 +76,6 @@ export function requestAuthRegister(email: string, password: string, nameFirst: 
     res: res,
     bodyObj: JSON.parse(res.body as string),
   };
-
 } 
 
 export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {

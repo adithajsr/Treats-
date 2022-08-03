@@ -39,10 +39,6 @@ function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
     return res.statusCode;
   }
   if (res.statusCode === 200) {
-    // return {
-    //   res: res,
-    //   bodyObj: JSON.parse(res.body as string),
-    // };
     return JSON.parse(res.getBody() as string);
   }
 }

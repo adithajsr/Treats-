@@ -81,12 +81,12 @@ describe('standup capabilities', () => {
     });
 
     test('invalid token, fail standup start', () => {
-      const testRequest = requestStandupStart(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId, 3);
+      const testRequest = requestStandupStart(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId, 2);
       expect(testRequest).toBe(403);
     });
 
     test('channelId does not refer to a valid channel, fail standup start', () => {
-      const testRequest = requestStandupStart(testUser.bodyObj.token, 9999, 3);
+      const testRequest = requestStandupStart(testUser.bodyObj.token, 9999, 2);
       expect(testRequest).toBe(400);
     });
 
@@ -96,19 +96,19 @@ describe('standup capabilities', () => {
     });
 
     test('channelId valid but auth user is not a member of the channel, fail standup start', () => {
-      const testRequest = requestStandupStart(badUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      const testRequest = requestStandupStart(badUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       expect(testRequest).toBe(403);
     });
 
     test('successful standup start', () => {
-      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
     });
 
     test('active standup currently running in channel, fail standup start', () => {
       const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
       expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
-      const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       expect(badRequest).toBe(400);
     });
   });
@@ -197,7 +197,7 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send none', () => {
-      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testActive = requestStandupActive(testUser.bodyObj.token, testChannel.bodyObj.channelId);
       expect(testActive).toStrictEqual({
         isActive: true,

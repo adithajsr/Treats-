@@ -13,6 +13,7 @@ import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetH
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
+import { searchV1 } from './search';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 import { adminUserRemoveV1 } from './admin';
 
@@ -37,6 +38,13 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.get('/search/v1', (req, res, next) => {
+  const token = req.header('token');
+  const queryStr = req.query.queryStr as string;
+
+  return res.json(searchV1(token, queryStr));
+});
 
 app.get('/channel/messages/v3', (req, res, next) => {
   try {

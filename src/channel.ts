@@ -51,7 +51,6 @@ export function channelMessagesV2(token: string, channelId: number, start: numbe
   // Checking whether there are less messages than the endIndex
   let endIndex = start + 50;
   if (messageAmount < endIndex) endIndex = -1;
-
   return { messages, start, endIndex };
 }
 

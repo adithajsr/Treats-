@@ -13,16 +13,33 @@ const url = config.url;
 
 // -------------------------------------------------------------------------//
 
-function requestHelper(method: HttpVerb, path: string, payload: object) {
+export type payloadObj = {
+  token?: string;
+  channelId?: number;
+  messageId?: number;
+  dmId?: number;
+  uId?: number;
+  message?: string;
+};
+
+function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
+  let headers = {};
+
+  // Check if token key exists in payload
+  if (payload.token !== undefined) {
+    headers = { token: payload.token };
+    delete payload.token;
+  }
+
   let res;
   if (method === 'GET' || method === 'DELETE') {
     qs = payload;
-    res = request(method, `${url}:${port}` + path, { qs });
+    res = request(method, `${url}:${port}` + path, { qs, headers });
   } else {
     json = payload;
-    res = request(method, `${url}:${port}` + path, { json });
+    res = request(method, `${url}:${port}` + path, { json, headers });
   }
   if (res.statusCode === 400 || res.statusCode === 403) {
     return res.statusCode;
@@ -46,7 +63,7 @@ function requestMessageRemove(token: string, messageId: number) {
   return requestHelper('DELETE', '/message/remove/v2', { token, messageId });
 }
 
-function requestSendDm(token: string, dmId: number, message: string) {
+export function requestSendDm(token: string, dmId: number, message: string) {
   return requestHelper('POST', '/message/senddm/v2', { token, dmId, message });
 }
 
@@ -54,7 +71,7 @@ function requestRemoveOwner(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
 }
 
-function requestChannelJoinV2(token: string, channelId: number) {
+export function requestChannelJoinV2(token: string, channelId: number) {
   return requestHelper('POST', '/channel/join/v2', { token, channelId });
 }
 
@@ -73,7 +90,7 @@ Arguments:
 Return Value:
   Returns { string }      - consists of letters
 */
-function generateString() {
+export function generateString() {
   const length = 1005;
   const set = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
   let string = '';

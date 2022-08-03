@@ -51,7 +51,6 @@ export function channelMessagesV2(token: string, channelId: number, start: numbe
   // Checking whether there are less messages than the endIndex
   let endIndex = start + 50;
   if (messageAmount < endIndex) endIndex = -1;
-
   return { messages, start, endIndex };
 }
 
@@ -203,11 +202,11 @@ export function channelInviteV2(token: string, channelId: number, uId: number) {
   const channelName = data.channel[channelIndex].channelName;
   const authUserIndex = data.user.findIndex(a => a.uId = authUserId);
   const userHandle = data.user[authUserIndex].handle + 'added you to ' + channelName;
-  const newNotification = { channelId: channelId, dmId: -1, notificationMessage: userHandle};
+  const dmId = -1;
+  const newNotification = { channelId, dmId,  userHandle };
   
   const userIndex = data.user.findIndex(a => a.uId = uId);
-  data.user[userIndex].notifications.push(newNotification);
-  
+  data.user[userIndex].notifications.push(newNotification);  
   setData(data);
   return {};
 }

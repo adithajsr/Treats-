@@ -65,10 +65,7 @@ test("User being added to multiple channels", () => {
     
     const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung added you to gamingChannel"};
     const expectedValue1 = {channelId: samChannel, dmId: -1, notificationMessage: "samuelschreyer added you to wallowingChannel"};
-    const expectedValue = [expectedValue0, expectedValue1];
-    
-    console.log(requestNotificationsGet(maiyaToken))
-                                                                                              
+    const expectedValue = [expectedValue0, expectedValue1];                                                                                     
     expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
     expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
 });

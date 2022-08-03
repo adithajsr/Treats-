@@ -14,7 +14,7 @@ export function notificationsGetV1(token: string) {
     const notificationNumber = data.user[userIndex].notifications.length;
 
    // for (let i = notificationNumber - 1; i > notificationNumber - 20; i--) {
-        notifications.push(data.user[userIndex].notifications);
+        notifications.push(data.user[userIndex].notifications[0]);
    // }
     
     return notifications;

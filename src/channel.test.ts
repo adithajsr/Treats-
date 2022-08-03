@@ -11,16 +11,29 @@ const authSam = ['samuelSchreyer@gmail.com', 'password', 'Sam', 'Schreyer'];
 
 // -------------------------------------------------------------------------//
 
-function requestHelper(method: HttpVerb, path: string, payload: object) {
+type payloadObj = {
+  token?: string;
+  channelId?: number;
+};
+
+function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
   let json = {};
+  let headers = {};
+
+  // Check if token key exists in payload
+  if (payload.token !== undefined) {
+    headers = { token: payload.token };
+    delete payload.token;
+  }
+
   let res;
   if (method === 'GET' || method === 'DELETE') {
     qs = payload;
-    res = request(method, `${url}:${port}` + path, { qs });
+    res = request(method, `${url}:${port}` + path, { qs, headers });
   } else {
     json = payload;
-    res = request(method, `${url}:${port}` + path, { json });
+    res = request(method, `${url}:${port}` + path, { json, headers });
   }
   if (res.statusCode === 400 || res.statusCode === 403) {
     return res.statusCode;
@@ -36,7 +49,7 @@ function requestHelper(method: HttpVerb, path: string, payload: object) {
 
 // -------------------------------------------------------------------------//
 
-function requestChannelDetailsHelper(token: string, channelId: number) {
+export function requestChannelDetailsHelper(token: string, channelId: number) {
   return requestHelper('GET', '/channel/details/v3', { token, channelId });
 }
 
@@ -71,7 +84,8 @@ export function requestChannelsCreate(token: string, name: string, isPublic: boo
     'POST',
     `${url}:${port}/channels/create/v3`,
     {
-      json: { token, name, isPublic },
+      json: { name, isPublic },
+      headers: { token },
     }
   );
   return {
@@ -80,14 +94,15 @@ export function requestChannelsCreate(token: string, name: string, isPublic: boo
   };
 }
 
-function requestChannelMessages(token: string, channelId: number, start: number) {
+export function requestChannelMessages(token: string, channelId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/channel/messages/v3`,
     {
       qs: {
-        token, channelId, start,
-      }
+        channelId, start,
+      },
+      headers: { token },
     }
   );
   return {
@@ -258,15 +273,29 @@ function setupDatabase() {
   sendPost('channel/invite/v2', body);
 }
 
-function sendPost(path:string, body: object) {
+let headers = {};
+type sendPostObj = {
+  token?: string;
+  channelId?: number;
+  uId?: number;
+};
+
+function sendPost(path:string, body: sendPostObj) {
+  // Check if token key exists in body
+  if (body.token !== undefined) {
+    headers = { token: body.token };
+    delete body.token;
+  }
+
   const res = request(
     'POST',
       `${url}:${port}/${path}`,
       {
-        json: body
+        json: body,
+        headers,
       }
   );
-  return JSON.parse(res.getBody() as string);
+  return JSON.parse(res.body as string);
 }
 
 // Changed function name due to duplication errors
@@ -291,7 +320,8 @@ function requestChannelsCreateNoRes(token: string, name: string, isPublic: boole
     'POST',
     `${url}:${port}/channels/create/v3`,
     {
-      json: { token, name, isPublic },
+      json: { name, isPublic },
+      headers: { token },
     }
   );
   return JSON.parse(res.body as string);
@@ -323,6 +353,7 @@ describe('Testing for channel/join/v2', () => {
   });
 });
 requestClear();
+
 // // ======================================== channel/invite/v2 ========================================
 describe('Testing for channel/invite/v2', () => {
   test('channel/invite/v2 channel does not exist error', () => {
@@ -363,6 +394,7 @@ describe('Testing for channel/leave/v1  ', () => {
   });
 });
 requestClear();
+
 // // ======================================== channel/addowner/v1 ========================================
 describe('Testing for channel/addowner/v1  ', () => {
   test('channel/addowner/v1 channel does not exist error', () => {

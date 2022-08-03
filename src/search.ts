@@ -16,7 +16,7 @@ export function searchV1(token: string, queryStr: string) {
   const data = getData();
 
   if (queryStr.length < 1 || queryStr.length > 1000) throw HTTPError(400, 'Invalid length');
-  
+
   // finding correct user
   const tokenIndex = data.token.findIndex(a => a.token === token);
   if (tokenIndex === -1) throw HTTPError(403, 'Invalid token');

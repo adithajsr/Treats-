@@ -383,10 +383,7 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
         return sharedMessageId;
       }
     }
-  }
-
-  // if sending to channel
-  else {
+  } else { // if sending to channel
     if (data.channel.find(a => a.channelId === channelId) === undefined) {
       throw HTTPError(400, 'invalid channelId!');
     }

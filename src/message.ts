@@ -332,6 +332,89 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
 }
 
 /*
+Pushes given data into a specified channel's messages array
+
+Arguments:
+  dmIndex (number)         - represents the index of the channel the message will get added to
+  messageId (number)       - represents the messageId of the message to get added
+  message (string)         - message to be added
+  timeSent (number)        - time the message was added
+
+Return Value:
+  N/A
+
+Errors:
+  N/A
+*/
+
+function pushMessage(channelIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
+  const data = getData();
+  data.channel[channelIndex].messages.push(
+    {
+      messageId: messageId,
+      uId: uId,
+      message: message,
+      timeSent: timeSent,
+      isPinned: 0,
+      reacts: 0,
+    }
+  );
+
+  setData(data);
+  return {};
+}
+/*
+Sends a message to a channel at a specified time in the future
+
+Arguments:
+  token (string)         - represents the session of the user who wishes to send a message
+  channelId (number)     - represents the id of the channe; they want to send the message to
+  message (string)       - message they want to share
+  timeSent (number)      - time in the future user want to send message
+
+Return Value:
+  Returns messageId if successful
+
+Throws a 400 error    - channeId does not refer to a valid Id
+                      - length of message is less than 1 or greater than 1000 characters
+                      - timeSent is a time in the past
+
+Throw a 403 error     - if token is invalid
+                      - if the user is not a part of the channe; they are trying to send a message to
+*/
+
+export function messageSendLaterV1(token: string, channelId: number, message: string, timeSent: number) {
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'invalid message length!');
+  }
+
+  if (timeSent < Math.floor(Date.now() / 1000)) {
+    throw HTTPError(400, 'Time must be in the future!');
+  }
+
+  const waitingTime = timeSent - Math.floor(Date.now() / 1000);
+
+  const data = getData();
+  checkToken(token, data);
+
+  const uId = tokenToUid(token, data);
+  // check for channel in database
+  if (data.channel.find(a => a.channelId === channelId) === undefined) {
+    throw HTTPError(400, 'invalid channelId!');
+    // check for user in channel
+  } else {
+    const i = data.channel.findIndex(data => data.channelId === channelId);
+    if (data.channel[i].members.find(a => a.uId === uId) === undefined) {
+      throw HTTPError(403, 'authorised user is not a member!');
+    }
+  }
+  const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
+  const messageId = Math.floor(Math.random() * 1000);
+
+  setTimeout(pushMessage, waitingTime * 1000, channelIndex, messageId, uId, message, timeSent); // THIS ISN'T WAITING
+  return { messageId: messageId };
+}
+/*
 Shares a message from a channel/DM to another channel/DM
 
 Arguments:
@@ -450,7 +533,7 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
 Pushes given data into a specified DM's messages array
 
 Arguments:
-  dmIndex (number)         - represents the index of the dm the message will get added to 
+  dmIndex (number)         - represents the index of the dm the message will get added to
   messageId (number)       - represents the messageId of the message to get added
   message (string)         - message to be added
   timeSent (number)        - time the message was added
@@ -458,7 +541,7 @@ Arguments:
 Return Value:
   N/A
 
-Errors: 
+Errors:
   N/A
 */
 

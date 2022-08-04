@@ -93,7 +93,7 @@ function requestPasswordRequest(email: string) {
   };
 }
 
-function requestPasswordReset(resetCode: string, newPassword: string, token: string) {
+function requestPasswordReset(resetCode: string, newPassword: string) {
   const res = request(
     'POST',
     `${url}:${port}/auth/passwordreset/reset/v1`,
@@ -101,9 +101,6 @@ function requestPasswordReset(resetCode: string, newPassword: string, token: str
       json: {
         resetCode: resetCode,
         newPassword: newPassword,
-      },
-      headers: {
-        token: token,
       },
     }
   );
@@ -391,19 +388,15 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
     // has logged out
     requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
     // logging in again
-    const testToken = requestAuthLogin('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#').bodyObj.token;
+    requestAuthLogin('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#');
 
-    const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5', testToken);
+    const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5');
     expect(returnValue1.res.statusCode).toBe(400);
     expect(returnValue1.bodyObj.error).toStrictEqual({ message: 'password entered is less than 6 characters long' });
 
-    const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve', testToken);
+    const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve');
     expect(returnValue2.res.statusCode).toBe(400);
     expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
-
-    const returnValue3 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve', 'incorrecttoken');
-    expect(returnValue3.res.statusCode).toBe(403);
-    expect(returnValue3.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
 
     requestClear();
   });

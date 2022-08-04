@@ -55,11 +55,6 @@ interface message {
   reacts: number,
 }
 
-interface queue {
-  handle: string,
-  message: string,
-}
-
 interface channel {
   channelId: number,
   channelName: string,
@@ -69,7 +64,7 @@ interface channel {
   standupFinish: number,
   members: channelMember[],
   messages: message[],
-  queue: queue[],
+  queue: string[],
 }
 
 interface token {

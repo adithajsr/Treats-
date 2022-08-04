@@ -57,12 +57,7 @@ let data = {
       isPublic: true,
       isActive: false,
       isActiveUid: -1,
-      queue: [
-        {
-          handle: 'a handle',
-          message: 'a message',
-        }
-      ],
+      queue: ['handle: message'],
       members: [
         {
           uId: -999,

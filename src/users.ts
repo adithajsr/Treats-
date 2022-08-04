@@ -216,7 +216,19 @@ export function userStatsV1(token: string) {
   const numDms = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
   const numMsgs = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
 
-  const involvementRate = (numChannelsJoined + numDmsJoined + numMsgsSent) / (numChannels + numDms + numMsgs);
+  let involvementRate: number;
+
+  const involvementDenominator = numChannels + numDms + numMsgs;
+  if (involvementDenominator === 0) {
+    // If denominator is 0, involvement is 0
+    involvementRate = 0;
+  } else {
+    involvementRate = (numChannelsJoined + numDmsJoined + numMsgsSent) / (involvementDenominator);
+    if (involvementRate > 1) {
+      // If involvement is greater than 1, cap it at 1
+      involvementRate = 1;
+    }
+  }
 
   return {
     userStats: {
@@ -233,19 +245,31 @@ export function usersStatsV1(token: string) {
   const data = getData();
 
   // Check token is valid
-  const tokenIndex = findTokenIndex(token);
+  findTokenIndex(token);
 
+  // Calculate utilization rate
   const workspaceObj = data.workspaceStats;
+  const numUsers = data.user.length;
 
-  // The workspace's utilization:
-  // numUsersWhoAreInLeastOneChannelOrDm / numUsers
+  let numUsersWhoAreInLeastOneChannelOrDm = 0;
+  for (let i = 0; i < numUsers; i++) {
+    const userObj = data.user[i];
+    const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+
+    if (numChannelsJoined >= 1 || numDmsJoined >= 1) {
+      numUsersWhoAreInLeastOneChannelOrDm++;
+    }
+  }
+
+  const utilizationRate = numUsersWhoAreInLeastOneChannelOrDm / numUsers;
 
   return {
     workspaceStats: {
       channelsExist: workspaceObj.channelsExist,
       dmsExist: workspaceObj.dmsExist,
       messagesExist: workspaceObj.messagesExist,
-      utilizationRate,
+      utilizationRate: utilizationRate,
     },
   };
 }

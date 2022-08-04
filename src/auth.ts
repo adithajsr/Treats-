@@ -196,7 +196,6 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
       numMessagesExist: 0,
       timeStamp: accountCreationTime,
     });
-    dataSet.workspaceStats.utilizationRate = 0;
   } else {
     globalPermissions = 2; // member
   }
@@ -227,7 +226,6 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     channelsJoined: [firstChannelJoined],
     dmsJoined: [firstDMJoined],
     messagesSent: [firstMessageSent],
-    involvementRate: 0,
     shouldRetrieve: true
   });
 

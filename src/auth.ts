@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import crypto from 'crypto';
 // eslint-disable-next-line
 // @ts-ignore
 import codec from 'string-codec';
@@ -12,6 +13,7 @@ import config from './config.json';
 
 const url = config.url;
 const port = config.port;
+const SECRET = 'AERO';
 
 /* <cycles through making new uuid's until one is valid>
 
@@ -122,7 +124,7 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
-      if (item.password === password) {
+      if (item.password === crypto.createHash('sha256', SECRET + password)) {
         // If both arguments match an account
         const uuid: string = newUuid();
         dataSet.token.push({
@@ -196,7 +198,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   dataSet.user.push({
     uId: newUserId,
     email: email,
-    password: password,
+    password: crypto.createHash('sha256', SECRET + password),
     nameFirst: nameFirst,
     nameLast: nameLast,
     handle: newHandle,
@@ -350,7 +352,7 @@ export function passwordReset(resetCode: string, newPassword: string, token: str
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {
         if (user.uId === Number(uId)) {
-          user.password = newPassword;
+          user.password = crypto.createHash('sha256', SECRET + newPassword);
           dataSet.token.splice(Number(i), 1);
           setData(dataSet);
           return {};

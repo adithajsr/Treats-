@@ -207,10 +207,7 @@ export function userStatsV1(token: string) {
   const userObj = data.user[userIndex];
   const workspaceObj = data.workspaceStats;
 
-  // The user's involvement:
-  // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
-  // sum(numChannels, numDms, numMsgs)
-
+  // Calculate involvement rate
   const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
   const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
   const numMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
@@ -219,12 +216,14 @@ export function userStatsV1(token: string) {
   const numDms = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
   const numMsgs = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
 
+  const involvementRate = (numChannelsJoined + numDmsJoined + numMsgsSent) / (numChannels + numDms + numMsgs);
+
   return {
     userStats: {
       channelsJoined: userObj.channelsJoined,
       dmsJoined: userObj.dmsJoined,
       messagesSent: userObj.messagesSent,
-      involvementRate,
+      involvementRate: involvementRate,
     },
   };
 }

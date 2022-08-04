@@ -203,8 +203,7 @@ export function userStatsV1(token: string) {
 
   // Find the user corresponding to the given token
   const userId = data.token[tokenIndex].uId;
-  const userIndex = data.user.findIndex(a => a.uId === userId);
-  const userObj = data.user[userIndex];
+  const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
   const workspaceObj = data.workspaceStats;
 
   // Calculate involvement rate

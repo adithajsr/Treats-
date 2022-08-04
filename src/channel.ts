@@ -164,7 +164,7 @@ Return Value:
   Returns <{}> on <successfully added user to channel>
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-export function channelJoinV2(token: string, channelId: number) {
+export function channelJoinV3(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     uIdExists(authUserId) === false ||
@@ -173,6 +173,18 @@ export function channelJoinV2(token: string, channelId: number) {
     return { error: 'error' };
   }
   addUser(channelId, authUserId);
+
+  // Update analytics metrics
+  const data = getData();
+  const channelJoinTime = Math.floor((new Date()).getTime() / 1000);
+  const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+  userObj.channelsJoined.push({
+    numChannelsJoined: oldnumChJoined + 1,
+    timeStamp: channelJoinTime,
+  });
+  setData(data);
+
   return {};
 }
 
@@ -186,7 +198,7 @@ Return Value:
   Returns <{}> on <successfully added user to channel>
   Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-export function channelInviteV2(token: string, channelId: number, uId: number) {
+export function channelInviteV3(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
@@ -195,6 +207,18 @@ export function channelInviteV2(token: string, channelId: number, uId: number) {
     return { error: 'error' };
   }
   addUser(channelId, uId);
+
+  // Update analytics metrics
+  const data = getData();
+  const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+  userObj.channelsJoined.push({
+    numChannelsJoined: oldnumChJoined + 1,
+    timeStamp: channelInviteTime,
+  });
+  setData(data);
+
   return {};
 }
 
@@ -207,13 +231,25 @@ Return Value:
     Returns <{}> on <successfully removed user from the channel.>
     Returns <error: 'error'> on <user couldn't be removed from channel.>
 */
-export function channelLeaveV1(token: string, channelId: number) {
+export function channelLeaveV2(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     memberExists(channelId, authUserId) === false) {
     return { error: 'error' };
   }
   leaveChannel(channelId, authUserId);
+
+  // Update analytics metrics
+  const data = getData();
+  const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
+  const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+  userObj.channelsJoined.push({
+    numChannelsJoined: oldnumChJoined - 1,
+    timeStamp: channelLeaveTime,
+  });
+  setData(data);
+
   return {};
 }
 
@@ -227,7 +263,7 @@ Return Value:
     Returns <{}> on <successfully made user owner>
     Returns <{error: 'error'}> on <user was not made an owner>
 */
-export function channelAddownerV1(token: string, channelId: number, uId: number) {
+export function channelAddownerV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
@@ -250,7 +286,7 @@ Return Value:
     Returns <{}> on <successfully removed user as owner>
     Returns <{error: 'error'}> on <user was not removed as an owner>
 */
-export function channelRemoveownerV1(token: string, channelId: number, uId: number) {
+export function channelRemoveownerV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||

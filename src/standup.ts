@@ -48,6 +48,23 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   channel[channelIndex].standupFinish = 0;
   channel[channelIndex].queue = [];
 
+  // Update analytics metrics
+  const startUserObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = startUserObj.messagesSent[startUserObj.messagesSent.length - 1].numMessagesSent;
+
+  startUserObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: timeSent,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: timeSent,
+  });
+
   setData(data);
 }
 

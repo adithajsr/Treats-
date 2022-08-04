@@ -586,7 +586,6 @@ describe('stats capabilities', () => {
       });
     });
 
-    /*
     test('numChannels increase, numChannelsJoined increase and decrease', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
@@ -689,7 +688,7 @@ describe('stats capabilities', () => {
       expect(user1StatsE.bodyObj.userStats.involvementRate).toStrictEqual((1 + 0 + 1) / (1 + 1 + 1));
     });
 
-    test('channels: numMsgs increase and decrease, numMsgsSent increase', () => {
+    test('Channels: numMsgs increase and decrease, numMsgsSent increase', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
@@ -774,8 +773,8 @@ describe('stats capabilities', () => {
 
       expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsD.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
-      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numMessagesSent).toStrictEqual(0);
-      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
+      expect(user1StatsD.bodyObj.userStats.dmsJoined[2].numDmsJoined).toStrictEqual(0);
+      expect(user1StatsD.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
 
       // If the involvement is greater than 1, it should be capped at 1
       // (1 + 0 + 2) / (1 + 0 + 1) > 1
@@ -816,7 +815,7 @@ describe('stats capabilities', () => {
         timeStamp: standupFinish.bodyObj.timeFinish,
       });
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
-    }); */
+    });
   });
 
   describe('test /users/stats/v1 i.e. workspace stats', () => {
@@ -1055,6 +1054,10 @@ describe('stats capabilities', () => {
       // TODO:
       // Messages which have not been sent yet with message/sendlater or
       // message/sendlaterdm are not included
+
+      // TODO:
+      // not related to messages but check that all members of a DM
+      // have the new DM added to their dmsJoined array
     }); */
   });
 });

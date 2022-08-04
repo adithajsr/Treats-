@@ -4,7 +4,7 @@ import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
 import { requestChannelMessages } from './channel.test';
 import { requestClear } from './users.test';
-import { requestChannelJoinV2, generateString } from './message.test';
+import { requestChannelJoinV3, generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
@@ -218,7 +218,7 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send multiple', async () => {
-      requestChannelJoinV2(badUser.bodyObj.token, testChannel.bodyObj.channelId);
+      requestChannelJoinV3(badUser.bodyObj.token, testChannel.bodyObj.channelId);
       requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
       expect(testRequest).toStrictEqual({});

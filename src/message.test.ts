@@ -67,15 +67,15 @@ export function requestSendDm(token: string, dmId: number, message: string) {
 }
 
 function requestRemoveOwner(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
+  return requestHelper('POST', '/channel/removeowner/v2', { token, channelId, uId });
 }
 
-export function requestChannelJoinV2(token: string, channelId: number) {
-  return requestHelper('POST', '/channel/join/v2', { token, channelId });
+export function requestChannelJoinV3(token: string, channelId: number) {
+  return requestHelper('POST', '/channel/join/v3', { token, channelId });
 }
 
-function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
+function requestChannelAddownerV2(token: string, channelId: number, uId: number) {
+  return requestHelper('POST', '/channel/addowner/v2', { token, channelId, uId });
 }
 
 function requestMessageSendLaterDM(token: string, dmId: number, message: string, timeSent: number) {
@@ -224,8 +224,8 @@ describe('messages capabilities', () => {
 
       test('auth user does not have owner permissions in channel', () => {
         const addUser = requestAuthRegister('valiademail@gmail.com', '123abc!a@#', 'Joahn', 'Doea');
-        requestChannelJoinV2(addUser.bodyObj.token, testChannel.bodyObj.channelId);
-        requestChannelAddownerV1(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
+        requestChannelJoinV3(addUser.bodyObj.token, testChannel.bodyObj.channelId);
+        requestChannelAddownerV2(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
         const addtestMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'added a message');
         requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
         const testRequest = requestMessageEdit(addUser.bodyObj.token, addtestMessage.messageId, 'testing auth user does not have owner permissions in channel');
@@ -309,8 +309,8 @@ describe('messages capabilities', () => {
 
       test('auth user does not have owner permission in channel, fail message remove', () => {
         const addUser = requestAuthRegister('valiademail@gmail.com', '123abc!a@#', 'Joahn', 'Doea');
-        requestChannelJoinV2(addUser.bodyObj.token, testChannel.bodyObj.channelId);
-        requestChannelAddownerV1(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
+        requestChannelJoinV3(addUser.bodyObj.token, testChannel.bodyObj.channelId);
+        requestChannelAddownerV2(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
         const addtestMessage = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'added a message');
         requestRemoveOwner(testUser.bodyObj.token, testChannel.bodyObj.channelId, addUser.bodyObj.authUserId);
         const testRequest = requestMessageRemove(addUser.bodyObj.token, addtestMessage.messageId);

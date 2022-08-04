@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import hash from 'hash.js';
 // eslint-disable-next-line
 // @ts-ignore
 import codec from 'string-codec';
@@ -11,27 +12,7 @@ import config from './config.json';
 
 const url = config.url;
 const port = config.port;
-
-/* <cycles through making new uuid's until one is valid>
-
-Arguments:
-Return Value:
-returns <uid> on <finding a valid uuid> */
-function newUuid() {
-  const dataSet = getData();
-  let uuid: string = generateV4uuid();
-  let oldUuid = 'invalidUuid';
-  while (oldUuid !== uuid) {
-    oldUuid = uuid;
-    for (const item of dataSet.token) {
-      if (item.token === uuid) {
-        // this function is only called after a random uuidv4 is generated so it is unlikely and random there is a match, hence it is virtually impossible to test
-        uuid = generateV4uuid();
-      }
-    }
-  }
-  return uuid;
-}
+const SECRET = 'AERO';
 
 /* <Checks if a email is already used by another user>
 
@@ -121,9 +102,9 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
-      if (item.password === password) {
+      if (item.password === hash.sha256().update(SECRET + password).digest('hex')) {
         // If both arguments match an account
-        const uuid: string = newUuid();
+        const uuid: string = hash.sha256().update(SECRET + generateV4uuid()).digest('hex');
         dataSet.token.push({
           token: uuid,
           uId: item.uId,
@@ -210,7 +191,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   dataSet.user.push({
     uId: newUserId,
     email: email,
-    password: password,
+    password: hash.sha256().update(SECRET + password).digest('hex'),
     nameFirst: nameFirst,
     nameLast: nameLast,
     handle: newHandle,
@@ -223,7 +204,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     shouldRetrieve: true
   });
 
-  const uuid: string = newUuid();
+  const uuid: string = hash.sha256().update(SECRET + generateV4uuid()).digest('hex');
   dataSet.token.push({
     token: uuid,
     uId: newUserId,
@@ -360,7 +341,7 @@ export function passwordReset(resetCode: string, newPassword: string) {
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {
         if (user.uId === Number(uId)) {
-          user.password = newPassword;
+          user.password = hash.sha256().update(SECRET + newPassword).digest('hex');
           dataSet.token.splice(Number(i), 1);
           setData(dataSet);
           return {};

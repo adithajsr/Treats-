@@ -9,6 +9,7 @@ const OK = 200;
 const INVALID_TOKEN = 403;
 const url = config.url;
 const port = config.port;
+jest.setTimeout(10000);
 
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
@@ -574,6 +575,14 @@ function requestMessageSendDM(token: string, dmId: number, message: string) {
   return requestHelper('POST', '/message/senddm/v2', token, { dmId, message });
 }
 
+function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlater/v1', token, { channelId, message, timeSent });
+}
+
+function requestMessageSendLaterDM(token: string, dmId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlaterdm/v1', token, { dmId, message, timeSent });
+}
+
 function requestStandupStart(token: string, channelId: number, length: number) {
   return requestHelper('POST', '/standup/start/v1', token, { channelId, length });
 }
@@ -930,7 +939,6 @@ describe('stats capabilities', () => {
       const user1StatsA = requestUserStats(user1Token);
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.messagesSent.length).toStrictEqual(2);
-      expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 1));
 
       // A standup should only count as a single message in the channel,
       // timestamped at the moment the standup finished
@@ -946,6 +954,54 @@ describe('stats capabilities', () => {
         timeStamp: standupFinish.bodyObj.timeFinish,
       });
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
+    });
+
+    test('sendlater: numMsgs increase and decrease, numMsgsSent increase', async () => {
+      // user1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to metrics, basic test at this point
+      const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
+      const DM1 = requestDMCreate(user1Token, []);
+      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
+
+      // Messages not yet sent with message/sendlater are not included
+      let futureTime = Math.floor(Date.now() / 1000) + 2;
+      requestMessageSendLater(user1Token, channel1.bodyObj.channelId, 'send later channel', futureTime);
+
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeLessThan(futureTime);
+      const user1StatsA = requestUserStats(user1Token);
+      expect(user1StatsA.res.statusCode).toBe(OK);
+      expect(user1StatsA.bodyObj.userStats.messagesSent.length).toStrictEqual(2);
+
+      await new Promise((r) => setTimeout(r, 4000));
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeGreaterThanOrEqual(futureTime);
+      const user1StatsB = requestUserStats(user1Token);
+      expect(user1StatsB.res.statusCode).toBe(OK);
+      expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2]).toStrictEqual({
+        numMessagesSent: 2,
+        timeStamp: futureTime,
+      });
+      expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
+
+      // Messages not yet sent with message/sendlaterdm are not included
+      futureTime = Math.floor(Date.now() / 1000) + 2;
+      requestMessageSendLaterDM(user1Token, DM1.bodyObj.dmId, 'send later DM', futureTime);
+
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeLessThan(futureTime);
+      const user1StatsC = requestUserStats(user1Token);
+      expect(user1StatsC.res.statusCode).toBe(OK);
+      expect(user1StatsC.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+
+      await new Promise((r) => setTimeout(r, 4000));
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeGreaterThanOrEqual(futureTime);
+      const user1StatsD = requestUserStats(user1Token);
+      expect(user1StatsD.res.statusCode).toBe(OK);
+      expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(4);
+      expect(user1StatsD.bodyObj.userStats.messagesSent[3]).toStrictEqual({
+        numMessagesSent: 3,
+        timeStamp: futureTime,
+      });
+      expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 3) / (1 + 1 + 3));
     });
   });
 
@@ -1128,7 +1184,6 @@ describe('stats capabilities', () => {
       expect(workspaceStatsI.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
     });
 
-    /*
     test('messagesExist increase and decrease, ', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
@@ -1164,22 +1219,18 @@ describe('stats capabilities', () => {
       const workspaceStatsC = requestUsersStats(user1Token);
       expect(workspaceStatsC.res.statusCode).toBe(OK);
       expect(workspaceStatsC.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(7);
-      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[6].numMessagesExist).toStrictEqual(4);
+      expect(workspaceStatsC.bodyObj.workspaceStats.messagesExist[6].numMessagesExist).toStrictEqual(4);
 
       // user1 removes the DM, also removes the 3 messages that were in it
       // and logs them as one change
       requestDMRemove(user1Token, DM1.bodyObj.dmId);
       const dm1RemoveTime = Math.floor((new Date()).getTime() / 1000);
-      const workspaceStatsD = requestUserStats(user1Token);
+      const workspaceStatsD = requestUsersStats(user1Token);
       expect(workspaceStatsD.res.statusCode).toBe(OK);
 
       expect(workspaceStatsD.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(8);
-      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[7].numMessagesExist).toStrictEqual(1);
-      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[7].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
-
-      // TODO:
-      // Messages which have not been sent yet with message/sendlater or
-      // message/sendlaterdm are not included
-    }); */
+      expect(workspaceStatsD.bodyObj.workspaceStats.messagesExist[7].numMessagesExist).toStrictEqual(1);
+      expect(workspaceStatsD.bodyObj.workspaceStats.messagesExist[7].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
+    });
   });
 });

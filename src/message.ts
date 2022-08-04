@@ -405,6 +405,23 @@ function pushMessage(channelIndex: number, messageId: number, uId: number, messa
     }
   );
 
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: timeSent,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: timeSent,
+  });
+
   setData(data);
   return {};
 }
@@ -602,6 +619,24 @@ function pushMessageDM (dmIndex: number, messageId: number, uId: number, message
       reacts: 0,
     }
   );
+
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: timeSent,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: timeSent,
+  });
+
   setData(data);
 }
 

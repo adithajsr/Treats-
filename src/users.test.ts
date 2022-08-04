@@ -617,7 +617,7 @@ describe('stats capabilities', () => {
       const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsC = requestUserStats(user1Token);
       expect(user1StatsC.res.statusCode).toBe(OK);
-      
+
       expect(user1StatsC.bodyObj.userStats.channelsJoined.length).toStrictEqual(4);
       expect(user1StatsC.bodyObj.userStats.channelsJoined[3].numChannelsJoined).toStrictEqual(1);
       expect(user1StatsC.bodyObj.userStats.channelsJoined[3].timeStamp).toBeLessThanOrEqual(channelLeaveTime);
@@ -738,7 +738,7 @@ describe('stats capabilities', () => {
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       const DM1 = requestDMCreate(user1Token, [user2Id]);
-      const message1A = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
+      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
 
       // user2 sends a message to the DM, increasing numMsgs
       requestMessageSendDM(user2Token, DM1.bodyObj.dmId, 'message 2');
@@ -790,9 +790,9 @@ describe('stats capabilities', () => {
 
       // user1 starts a standup in that channel and sends messages to the queue
       const standupFinish = requestStandupStart(user1Token, channel1.bodyObj.channelId, 2);
-      const standupMessage1A = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1A');
-      const standupMessage1B = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1B');
-      const standupMessage1C = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1C');
+      requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1A');
+      requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1B');
+      requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1C');
 
       // Standup messages only count when final packaged standup message is sent
       expect(Math.floor((new Date()).getTime() / 1000)).toBeLessThan(standupFinish.bodyObj.timeFinish);

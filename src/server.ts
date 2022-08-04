@@ -9,7 +9,7 @@ import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, chann
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1 } from './message';
-import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, userStatsV1, usersStatsV1 } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
@@ -338,6 +338,24 @@ app.post('/standup/send/v1', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
   res.json(standupSendV1(token, channelId, message));
+});
+
+app.get('/user/stats/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(userStatsV1(token));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/users/stats/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(usersStatsV1(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 // handles errors nicely

@@ -192,3 +192,17 @@ export function usersAll() {
   }
   return { users: returnObject };
 }
+
+// TODO: documentation
+export function userStatsV1(token: string) {
+  return {
+    userStats: {},
+  };
+}
+
+// TODO: documentation
+export function usersStatsV1(token: string) {
+  return {
+    workspaceStats: {},
+  };
+}

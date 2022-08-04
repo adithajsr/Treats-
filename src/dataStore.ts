@@ -28,6 +28,7 @@ interface user {
   nameFirst: string,
   nameLast: string,
   handle: string,
+  profileImgUrl: string,
   globalPerms: number,
   notifications: notification[],
   channelsJoined: channelJoined[],

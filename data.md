@@ -9,6 +9,7 @@ let data = {
       nameFirst: 'John',
       nameLast: 'Doe',
       handle: 'johndoe0',
+      profileImgUrl: 'http://localhost:5001/imgurl/randomstring.jpg',
       globalPerms: 1,
       notifications: [
         {

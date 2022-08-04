@@ -205,17 +205,26 @@ export function userStatsV1(token: string) {
   const userId = data.token[tokenIndex].uId;
   const userIndex = data.user.findIndex(a => a.uId === userId);
   const userObj = data.user[userIndex];
+  const workspaceObj = data.workspaceStats;
 
   // The user's involvement:
   // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
   // sum(numChannels, numDms, numMsgs)
+
+  const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+  const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+  const numMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  const numChannels = workspaceObj.channelsExist[workspaceObj.channelsExist.length - 1].numChannelsExist;
+  const numDms = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
+  const numMsgs = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
 
   return {
     userStats: {
       channelsJoined: userObj.channelsJoined,
       dmsJoined: userObj.dmsJoined,
       messagesSent: userObj.messagesSent,
-      involvementRate: userObj.involvementRate,
+      involvementRate,
     },
   };
 }
@@ -237,7 +246,7 @@ export function usersStatsV1(token: string) {
       channelsExist: workspaceObj.channelsExist,
       dmsExist: workspaceObj.dmsExist,
       messagesExist: workspaceObj.messagesExist,
-      utilizationRate: workspaceObj.utilizationRate,
+      utilizationRate,
     },
   };
 }

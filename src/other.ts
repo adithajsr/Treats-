@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore';
+import { getData, setData, emptyData } from './dataStore';
 
 /*
 This function clears the data
@@ -10,14 +10,8 @@ Returns:
 - NONE
 */
 export function clearV1() {
-  const data = getData();
-
-  data.user = [];
-  data.channel = [];
-
-  data.token = [];
-  data.dm = [];
-
+  let data = getData();
+  data = emptyData;
   setData(data);
 
   return {};

@@ -33,7 +33,6 @@ interface user {
   channelsJoined: channelJoined[],
   dmsJoined: dmJoined[],
   messagesSent: messageSent[],
-  involvementRate: number,
   shouldRetrieve: boolean
 }
 
@@ -56,6 +55,11 @@ interface message {
   reacts: number,
 }
 
+interface queue {
+  handle: string,
+  message: string,
+}
+
 interface channel {
   channelId: number,
   channelName: string,
@@ -65,7 +69,7 @@ interface channel {
   standupFinish: number,
   members: channelMember[],
   messages: message[],
-  queue: any
+  queue: queue[],
 }
 
 interface token {
@@ -104,11 +108,10 @@ interface database {
     channelsExist: channelExist[],
     dmsExist: dmExist[],
     messagesExist: messageExist[],
-    utilizationRate: number,
   }
 }
 
-const emptyData: database = {
+export const emptyData: database = {
   user: [],
   channel: [],
   token: [],
@@ -117,7 +120,6 @@ const emptyData: database = {
     channelsExist: [],
     dmsExist: [],
     messagesExist: [],
-    utilizationRate: 0,
   },
 };
 

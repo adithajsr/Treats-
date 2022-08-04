@@ -46,8 +46,7 @@ let data = {
           numMessagesSent: 1,
           timeStamp: 1858848922,
         },
-      ], 
-      involvementRate: 0.6,
+      ],
     },
   ],
 
@@ -60,10 +59,10 @@ let data = {
       isActiveUid: -1,
       queue: [
         {
-          handle: 'a handle'
-          message: 'a message'
+          handle: 'a handle',
+          message: 'a message',
         }
-      ]
+      ],
       members: [
         {
           uId: -999,
@@ -159,8 +158,7 @@ let data = {
         numMessagesExist: 2,
         timeStamp: 2058848922,
       },
-    ], 
-    utilizationRate: 0.5,
+    ],
   }
 
 }

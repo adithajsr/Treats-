@@ -197,9 +197,8 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
       timeStamp: accountCreationTime,
     });
     dataSet.workspaceStats.utilizationRate = 0;
-
   } else {
-    globalPermissions = 2; // memeber
+    globalPermissions = 2; // member
   }
 
   // Create the first data points for user analytics metrics

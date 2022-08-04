@@ -12,19 +12,49 @@
             "channelsJoined": [
                 {
                     "numChannelsJoined": 0,
-                    "timeStamp": 1659588458
+                    "timeStamp": 1659591741
                 }
             ],
             "dmsJoined": [
                 {
                     "numDmsJoined": 0,
-                    "timeStamp": 1659588458
+                    "timeStamp": 1659591741
                 }
             ],
             "messagesSent": [
                 {
                     "numMessagesSent": 0,
-                    "timeStamp": 1659588458
+                    "timeStamp": 1659591741
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        },
+        {
+            "uId": 2,
+            "email": "samuelSchreyer@gmail.com",
+            "password": "password",
+            "nameFirst": "Samuel",
+            "nameLast": "Schreyer",
+            "handle": "samuelschreyer",
+            "globalPerms": 2,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659591741
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659591741
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659591741
                 }
             ],
             "involvementRate": 0,
@@ -48,26 +78,18 @@
             ],
             "messages": [
                 {
-                    "messageId": 534,
+                    "messageId": 983,
                     "uId": 1,
-                    "message": "First message",
-                    "timeSent": 1659588458,
+                    "message": "I like talking to myself",
+                    "timeSent": 1659591741,
                     "isPinned": 0,
                     "reacts": 0
                 },
                 {
-                    "messageId": 889,
+                    "messageId": 734,
                     "uId": 1,
-                    "message": "Second message",
-                    "timeSent": 1659588458,
-                    "isPinned": 0,
-                    "reacts": 0
-                },
-                {
-                    "messageId": 271,
-                    "uId": 1,
-                    "message": "Third message",
-                    "timeSent": 1659588458,
+                    "message": "Its so fun",
+                    "timeSent": 1659591741,
                     "isPinned": 0,
                     "reacts": 0
                 }
@@ -76,11 +98,56 @@
     ],
     "token": [
         {
-            "token": "c80734d1-1e28-4fe3-819b-62e286811365",
+            "token": "97718716-c558-4b14-8e27-554d0ebb91e9",
             "uId": 1
+        },
+        {
+            "token": "423c2de8-cdc2-4d20-b086-d30a2d0d99dc",
+            "uId": 2
         }
     ],
-    "dm": [],
+    "dm": [
+        {
+            "dmId": 1,
+            "name": "danielyung, samuelschreyer",
+            "members": [
+                {
+                    "uId": 1,
+                    "dmPerms": 1
+                },
+                {
+                    "uId": 2,
+                    "dmPerms": 2
+                }
+            ],
+            "messages": [
+                {
+                    "messageId": 46,
+                    "uId": 1,
+                    "message": "Hey whats up homie",
+                    "timeSent": 1659591741,
+                    "isPinned": 0,
+                    "reacts": 0
+                },
+                {
+                    "messageId": 24,
+                    "uId": 1,
+                    "message": "Why you ghosting me sammy g :((",
+                    "timeSent": 1659591741,
+                    "isPinned": 0,
+                    "reacts": 0
+                },
+                {
+                    "messageId": 84,
+                    "uId": 1,
+                    "message": "this isnt true anymore: I like talking to myself",
+                    "timeSent": 1659591741,
+                    "isPinned": 0,
+                    "reacts": 0
+                }
+            ]
+        }
+    ],
     "workspaceStats": {
         "channelsExist": [],
         "dmsExist": [],

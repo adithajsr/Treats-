@@ -130,6 +130,53 @@ describe('standup capabilities', () => {
     });
   });
 
+  describe('standup/start/v1 test', () => {
+    beforeEach(() => {
+      requestClear();
+      // Create a test user
+      testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
+      badUser = requestAuthRegister('validemail@gmail.coma', '123aabc!@#', 'Jane', 'Doe');
+      // Create a test channel
+      testChannel = requestChannelsCreate(testUser.bodyObj.token, 'name', true);
+    });
+
+    afterEach(() => {
+      requestClear();
+    });
+
+    test('invalid token, fail standup start', () => {
+      const testRequest = requestStandupStart(testUser.bodyObj.token + 'a', testChannel.bodyObj.channelId, 3);
+      expect(testRequest).toBe(403);
+    });
+
+    test('channelId does not refer to a valid channel, fail standup start', () => {
+      const testRequest = requestStandupStart(testUser.bodyObj.token, 9999, 3);
+      expect(testRequest).toBe(400);
+    });
+
+    test('length is a negative integer, fail standup start', () => {
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, -3);
+      expect(testRequest).toBe(400);
+    });
+
+    test('channelId valid but auth user is not a member of the channel, fail standup start', () => {
+      const testRequest = requestStandupStart(badUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      expect(testRequest).toBe(403);
+    });
+
+    test('successful standup start', () => {
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
+    });
+
+    test('active standup currently running in channel, fail standup start', () => {
+      const testRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 6);
+      expect(testRequest).toStrictEqual({ timeFinish: expect.any(Number) });
+      const badRequest = requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 3);
+      expect(badRequest).toBe(400);
+    });
+  });
+
   describe('standup/active/v1 test', () => {
     beforeEach(() => {
       requestClear();
@@ -236,7 +283,7 @@ describe('standup capabilities', () => {
 
     test('successful standup send multiple', async () => {
       const body = { token: testUser.bodyObj.token, channelId: testChannel.bodyObj.channelId, uId: badUser.bodyObj.authUserId };
-      sendPost('channel/join/v2', badUser.bodyObj.token, body);
+      sendPost('channel/join/v3', badUser.bodyObj.token, body);
       requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
       const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
       expect(testRequest).toStrictEqual({});
@@ -250,4 +297,5 @@ describe('standup capabilities', () => {
       );
     });
   });
+
 });

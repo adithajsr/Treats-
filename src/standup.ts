@@ -49,6 +49,8 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   const data = getData();
   const { channel } = data;
   let messageString = '';
+  console.log({a:"Channel index is", channelIndex: channelIndex});
+  if(channel[channelIndex].queue.length === undefined){console.log("UNDEFINED QUEUE PROBLEM")}
   for (let i = 0; i < channel[channelIndex].queue.length; i++) {
     if (i === channel[channelIndex].queue.length - 1) {
       messageString += channel[channelIndex].queue[i];

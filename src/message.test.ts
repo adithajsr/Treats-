@@ -2,7 +2,8 @@ import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
-import { requestChannelsCreate } from './channel.test';
+import { requestChannelsCreate } from './channels.test';
+import { requestChannelMessages } from './channel.test';
 import { requestDMCreate, requestDMMessages } from './dm.test';
 
 const port = config.port;
@@ -17,6 +18,7 @@ export type payloadObj = {
   dmId?: number;
   uId?: number;
   message?: string;
+  timeSent?: number;
 };
 
 export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -65,15 +67,19 @@ export function requestSendDm(token: string, dmId: number, message: string) {
 }
 
 function requestRemoveOwner(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
+  return requestHelper('POST', '/channel/removeowner/v2', { token, channelId, uId });
 }
 
 export function requestChannelJoinV2(token: string, channelId: number) {
-  return requestHelper('POST', '/channel/join/v2', { token, channelId });
+  return requestHelper('POST', '/channel/join/v3', { token, channelId });
 }
 
 function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
+  return requestHelper('POST', '/channel/addowner/v2', { token, channelId, uId });
+}
+
+export function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlater/v1', { token, channelId, message, timeSent });
 }
 
 export function requestMessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
@@ -400,15 +406,60 @@ describe('messages capabilities', () => {
 
 export { requestAuthRegister, requestChannelsCreate, requestMessageSend };
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// TESTING MESSAGE/SHARE/V1
-// takes in a message and channel/dm
-// put in messages array in given channel/dm
+// -------------------------------------- TESTING MESSAGESENDLATERV1 --------------------------------------
 
 // Test data
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 const authSam = ['samuelSchreyer@gmail.com', 'password', 'Samuel', 'Schreyer'];
+
+test('timeSent is a time in the past', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  const pastTime = Math.floor(Date.now() / 1000) - 50;
+  expect(requestMessageSendLater(danielToken, channelId, 'does time travel work?', pastTime)).toBe(400);
+});
+
+test('success case with one message', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  const futureTime = Math.floor(Date.now() / 1000) + 3;
+  requestMessageSendLater(danielToken, channelId, 'Reminder: stop gaming and start assignment bitch. Also love yourself.', futureTime);
+  await new Promise((r) => setTimeout(r, 3500));
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual('Reminder: stop gaming and start assignment bitch. Also love yourself.');
+});
+
+test('success case', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+  requestMessageSend(danielToken, channelId, 'Third message');
+  const returnObject = ['First message', 'Second message', 'Third message', 'Fourth message'];
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual(returnObject[0]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[1].message).toStrictEqual(returnObject[1]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[2].message).toStrictEqual(returnObject[2]);
+  requestMessageSendLater(danielToken, channelId, 'Fourth message', Math.floor(Date.now() / 1000) + 2);
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3]).toStrictEqual(undefined);
+
+  await new Promise((r) => setTimeout(r, 2500));
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
+});
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TESTING MESSAGE/SHARE/V1
+// takes in a message and channel/dm
+// put in messages array in given channel/dm
 
 test('Invalid channelId and invalid dmId', () => {
   requestClear();

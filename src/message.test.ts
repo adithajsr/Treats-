@@ -2,9 +2,15 @@ import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
+<<<<<<< HEAD
 import { requestChannelsCreate } from './channels.test';
 import { requestChannelMessages } from './channel.test';
 import { requestDMCreate, requestDMMessages } from './dm.test';
+=======
+import { requestChannelsCreate } from './channel.test';
+import { requestDMCreate, requestDMMessages, requestMessageSendDM } from './dm.test';
+import { requestChannelMessages } from './channel.test';
+>>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e
 
 const port = config.port;
 const url = config.url;
@@ -18,7 +24,11 @@ export type payloadObj = {
   dmId?: number;
   uId?: number;
   message?: string;
+<<<<<<< HEAD
   timeSent?: number;
+=======
+  timeSent?: number
+>>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e
 };
 
 export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -76,6 +86,35 @@ export function requestChannelJoinV2(token: string, channelId: number) {
 
 function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/addowner/v2', { token, channelId, uId });
+}
+
+export function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlater/v1', { token, channelId, message, timeSent });
+}
+
+export function requestMessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/share/v1`,
+    {
+      json: {
+        ogMessageId, message, channelId, dmId
+      },
+
+      headers: {
+        token
+      },
+    }
+  );
+
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+function requestMessageSendLaterDM(token: string, dmId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlaterdm/v1', { token, dmId, message, timeSent });
 }
 
 export function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
@@ -547,3 +586,56 @@ test('Default case', () => {
 
   expect(requestDMMessages(danielToken, dmId, 2).bodyObj.messages[0].message).toBe('this isnt true anymore: I like talking to myself');
 });
+<<<<<<< HEAD
+=======
+
+// ----------------------------- Testing message/sendlaterdm/v1 -----------------------------
+test('timeSent is a time in the past', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  const pastTime = Math.floor(Date.now() / 1000) - 2;
+  expect(requestMessageSendLaterDM(danielToken, dmId, 'maiya stop wearing crocs fool', pastTime)).toBe(400);
+});
+
+test('success case with one message', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  const futureTime = Math.floor(Date.now() / 1000) + 2;
+  requestMessageSendLaterDM(danielToken, dmId, 'maiya stop wearing crocs fool', futureTime);
+
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0]).toBe(undefined);
+
+  await new Promise((r) => setTimeout(r, 2500));
+
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0].message).toBe('maiya stop wearing crocs fool');
+});
+
+test('success case', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, maiyaId).bodyObj.dmId;
+
+  requestMessageSendDM(danielToken, dmId, 'First message');
+  requestMessageSendDM(danielToken, dmId, 'Second message');
+  requestMessageSendDM(danielToken, dmId, 'Third message');
+
+  const returnObject = ['First message', 'Second message', 'Third message', 'Fourth message'];
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0].message).toBe(returnObject[0]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[1].message).toBe(returnObject[1]);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[2].message).toBe(returnObject[2]);
+
+  const timeSent = Math.floor(Date.now() / 1000 + 2);
+  requestMessageSendLaterDM(danielToken, dmId, 'Fourth message', timeSent);
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[3]).toBe(undefined);
+
+  await new Promise((r) => setTimeout(r, 2500));
+  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[3].message).toBe(returnObject[3]);
+});
+>>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e

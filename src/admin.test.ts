@@ -101,13 +101,14 @@ describe('admin/user/remove/v1 test', () => {
       // check outputs
       expect(testRequest).toStrictEqual({});
       // check users/all array
-      expect(requestUsersAll().bodyObj.users).toStrictEqual([
+      expect(requestUsersAll(testUser.bodyObj.token).bodyObj.users).toStrictEqual([
         {
           uId: testUser.bodyObj.authUserId,
           email: 'validemail@gmail.com',
           nameFirst: 'John',
           nameLast: 'Doe',
-          handleStr: 'johndoe'
+          handleStr: 'johndoe',
+          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
         }
       ]);
       // retrieve user details user/profile
@@ -117,7 +118,8 @@ describe('admin/user/remove/v1 test', () => {
           email: '',
           nameFirst: 'Removed',
           nameLast: 'user',
-          handleStr: ''
+          handleStr: '',
+          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members

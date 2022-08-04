@@ -144,6 +144,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
@@ -219,6 +220,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: testUserFN,
       nameLast: testUserLN,
       handleStr: 'sebastianfitzagamemn',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -241,6 +243,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith4',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
@@ -270,6 +273,7 @@ describe('Testing for requestAuthLogin', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: 'invalid input details' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
@@ -372,17 +376,19 @@ describe('test /auth/logout/v2', () => {
 describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', () => {
   requestClear();
   test('Success user log out', () => {
-    const testUser = requestAuthRegister('z5420895@ad.unsw.edu.au', '123abc!@#', 'John', 'Doe');
+    const testUser = requestAuthRegister('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#', 'John', 'Doe');
 
     // has not logged out
-    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+    requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
 
     const testLogout = requestAuthLogout(testUser.bodyObj.token);
     expect(testLogout.res.statusCode).toBe(OK);
     expect(testLogout.bodyObj).toStrictEqual({});
 
     // has logged out
-    requestPasswordRequest('z5420895@ad.unsw.edu.au');
+    requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
+    // logging in again
+    requestAuthLogin('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#');
 
     const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5');
     expect(returnValue1.res.statusCode).toBe(400);

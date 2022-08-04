@@ -35,10 +35,6 @@ export function requestSearch(token: string, queryStr: string) {
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
-afterEach(() => {
-  requestClear();
-});
-
 test('search string is empty', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -142,12 +138,11 @@ test('default case', () => {
   const time3 = Math.floor((new Date()).getTime() / 1000);
 
   const retObject = requestSearch(danielToken, 'hEHe');
-  const expectedObj1 = { messageId: messageId1, uId: danielId, message: 'omg hopefully he doesnt see this hehe', timeSent: time1, reacts: 0, isPinned: 0 };
-  const expectedObj2 = { messageId: messageId2, uId: danielId, message: 'hehe', timeSent: time2, reacts: 0, isPinned: 0 };
-  const expectedObj3 = { messageId: messageId3, uId: maiyaId, message: 'stfu bitch hehe', timeSent: time3, reacts: 0, isPinned: 0 };
+  const expectedObj1 = { messageId: messageId1, uId: danielId, message: 'omg hopefully he doesnt see this hehe', timeSent: time1, reacts: [], isPinned: 0 };
+  const expectedObj2 = { messageId: messageId2, uId: danielId, message: 'hehe', timeSent: time2, reacts: [], isPinned: 0 };
+  const expectedObj3 = { messageId: messageId3, uId: maiyaId, message: 'stfu bitch hehe', timeSent: time3, reacts: [], isPinned: 0 };
 
   const expectedObj = [expectedObj1, expectedObj2, expectedObj3];
   expect(retObject.bodyObj).toMatchObject(expectedObj);
   expect(retObject.res.statusCode).toBe(OK);
-  requestClear();
 });

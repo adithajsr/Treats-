@@ -1,11 +1,6 @@
 import { getData, setData } from './dataStore';
 import HTTPError from 'http-errors';
 import { checkToken, tokenToUid } from './message';
-import { tokenConvert, globalPermissions, uIdExists, numGlobalOwners } from './channel';
-
-// Constants
-const OWNER = 1;
-const USER = 2;
 
 /*
 Arguments:
@@ -97,33 +92,4 @@ export function adminUserRemoveV1(token: string, uId: number) {
 
   setData(data);
   return {};
-}
-
-/* Description: Changes a users global permissions
-Arguments:
-    <token> (integer)    - <The token of the user who initates the function>
-    <uId> (integer)    - <The uId of the user whose permissions are being changed.>
-    <permissionId> (integer)    - <The new permission for the user.>
-
-Return Value:
-    Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
-*/
-export function userPermissionChange(token: string, uId: number, permissionId: number): object {
-  const authUserId = tokenConvert(token);
-  if (globalPermissions(authUserId) !== 1) {
-    throw HTTPError(403, 'error userPermission');
-  } else if (uIdExists(uId) === false ||
-     (permissionId !== USER && permissionId !== OWNER) ||
-     (numGlobalOwners() <= 1 && globalPermissions(uId) === OWNER) ||
-     globalPermissions(uId) === permissionId) {
-    throw HTTPError(400, 'error userPermission');
-  } else {
-    const data = getData();
-    const i = data.user.findIndex((data) => data.uId === uId);
-    data.user[i].globalPerms = permissionId;
-    setData(data);
-    return {};
-  }
 }

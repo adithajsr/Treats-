@@ -16,11 +16,6 @@ interface dmJoined {
   timeStamp: number,
 }
 
-interface react {
-  reactId: number,
-  uIds: number[],
-}
-
 interface messageSent {
   numMessagesSent: number,
   timeStamp: number,
@@ -58,7 +53,7 @@ interface message {
   message: string,
   timeSent: number,
   isPinned: number,
-  reacts: react[];
+  reacts: [],
 }
 
 interface channel {

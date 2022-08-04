@@ -1,9 +1,6 @@
-import createHttpError from 'http-errors';
-import HTTPError from 'http-errors';
 import { getData, setData } from './dataStore';
 import { checkToken } from './message';
-
-// COMP1531 middleware - must use AFTER declaring your routes
+import HTTPError from 'http-errors';
 
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
@@ -152,12 +149,11 @@ export function channelDetailsV3(token: string, channelId: number) {
   return { channelDetails: details };
 }
 
-// ======================================== Imports. ========================================
+// ======================================== Main Functions. ========================================
+
 // Constants
 const OWNER = 1;
 const USER = 2;
-const ERROR = -1;
-// ======================================== Main Functions. =======================================
 
 /* Description: Adds a user to a channel
 Arguments:
@@ -166,22 +162,18 @@ Arguments:
 
 Return Value:
   Returns <{}> on <successfully added user to channel>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
+  Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-
-export function channelJoinV3(token: string, channelId: number): object {
+export function channelJoinV2(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
-  if (channelExists(channelId) === true && channelPublic(channelId) === false && globalPermissions(authUserId) !== OWNER) {
-    throw createHttpError(403, '403 error');
-  } else if (channelExists(channelId) === false ||
+  if (channelExists(channelId) === false ||
     uIdExists(authUserId) === false ||
-    memberExists(channelId, authUserId) === true) {
-    throw createHttpError(400, 'error');
-  } else {
-    addUser(channelId, authUserId);
-    return {};
+    memberExists(channelId, authUserId) === true ||
+    (channelPublic(channelId) === false && globalPermissions(authUserId) !== OWNER)) {
+    return { error: 'error' };
   }
+  addUser(channelId, authUserId);
+  return {};
 }
 
 /* Description: Invites user to the channel
@@ -192,22 +184,18 @@ Arguments:
 
 Return Value:
   Returns <{}> on <successfully added user to channel>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
+  Returns <{error: 'error'}> on <user was not added due to failing an error test>
 */
-export function channelInviteV3(token: string, channelId: number, uId: number): object {
+export function channelInviteV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
-  if (channelExists(channelId) === true && memberExists(channelId, authUserId) === false) {
-    throw createHttpError(403, 'error');
-  } else if (channelExists(channelId) === false ||
+  if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
-    memberExists(channelId, uId) === true) {
-    throw createHttpError(400, 'error userPermission');
-  } else {
-    addUser(channelId, uId);
-    // pushNotification(authUserId, channelId, messageId); - NEED TO FIGURE OUT WHAT THE NOTIFICATION IS
-    return {};
+    memberExists(channelId, uId) === true ||
+    memberExists(channelId, authUserId) === false) {
+    return { error: 'error' };
   }
+  addUser(channelId, uId);
+  return {};
 }
 
 /* Description: Removes a user from a channel.
@@ -217,19 +205,16 @@ Arguments:
 
 Return Value:
     Returns <{}> on <successfully removed user from the channel.>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
+    Returns <error: 'error'> on <user couldn't be removed from channel.>
 */
-export function channelLeaveV2(token: string, channelId: number): object {
+export function channelLeaveV1(token: string, channelId: number) {
   const authUserId = tokenConvert(token);
-  if (channelExists(channelId) === true && memberExists(channelId, authUserId) === false) {
-    throw createHttpError(403, 'error');
-  } else if (channelExists(channelId) === false || standupActive(channelId, authUserId) === true) {
-    throw createHttpError(400, 'error');
-  } else {
-    leaveChannel(channelId, authUserId);
-    return {};
+  if (channelExists(channelId) === false ||
+    memberExists(channelId, authUserId) === false) {
+    return { error: 'error' };
   }
+  leaveChannel(channelId, authUserId);
+  return {};
 }
 
 /* Description: Make a member an owner of a channel
@@ -240,22 +225,19 @@ Arguments:
 
 Return Value:
     Returns <{}> on <successfully made user owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
+    Returns <{error: 'error'}> on <user was not made an owner>
 */
-export function channelAddownerV2(token: string, channelId: number, uId: number): object {
+export function channelAddownerV1(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
-  if (channelExists(channelId) === true && channelPermissions(channelId, authUserId) !== OWNER) {
-    throw createHttpError(403, 'error');
-  } else if (channelExists(channelId) === false ||
+  if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
     memberExists(channelId, uId) === false ||
-    channelPermissions(channelId, uId) === OWNER) {
-    throw createHttpError(400, 'error');
-  } else {
-    changePerms(channelId, uId, OWNER);
-    return {};
+    channelPermissions(channelId, uId) === OWNER ||
+    channelPermissions(channelId, authUserId) !== OWNER) {
+    return { error: 'error' };
   }
+  changePerms(channelId, uId, OWNER);
+  return {};
 }
 
 /* Description: Remove member as an owner of a channel
@@ -266,111 +248,19 @@ Arguments:
 
 Return Value:
     Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
+    Returns <{error: 'error'}> on <user was not removed as an owner>
 */
-export function channelRemoveownerV2(token: string, channelId: number, uId: number): object {
+export function channelRemoveownerV1(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
-  if (channelExists(channelId) === true && channelPermissions(channelId, authUserId) !== OWNER) {
-    throw createHttpError(403, 'error');
-  } else if (channelExists(channelId) === false ||
+  if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
     channelPermissions(channelId, uId) !== OWNER ||
-    numOwners(channelId) <= 1) {
-    throw createHttpError(400, 'error');
-  } else {
-    changePerms(channelId, uId, USER);
-    return {};
+    numOwners(channelId) <= 1 ||
+    channelPermissions(channelId, authUserId) !== OWNER) {
+    return { error: 'error' };
   }
-}
-
-/* Description: Adds a react to a message
-Arguments:
-    <token> (integer)    - <The token of the user who initates the function>
-    <messageId> (integer)    - <The messageId of the message.>
-    <reactId> (<integer>)    - <The new reactId.>
-
-Return Value:
-    Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
-*/
-export function react(token: string, messageId: number, reactId: number): object {
-  const authUserId = tokenConvert(token);
-  if (messageValid(authUserId, messageId) === false ||
-reactId !== 1 ||
-reactStatus(authUserId, messageId, reactId) === true) {
-    throw createHttpError(400, 'error');
-  } else {
-    changeReact(authUserId, messageId, 1);
-    return {};
-  }
-}
-
-/* Description: Unreacts a message
-Arguments:
-    <token> (integer)    - <The token of the user who initates the function>
-    <messageId> (integer)    - <The messageId of the message.>
-    <reactId> (<integer>)    - <The reactId to remove.>
-
-Return Value:
-    Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
-*/
-export function unReact(token: string, messageId: number, reactId: number): object {
-  const authUserId = tokenConvert(token);
-  if (messageValid(authUserId, messageId) === false ||
-  reactId !== 1 || reactStatus(authUserId, messageId, reactId) === false) {
-    throw createHttpError(400, 'error');
-  } else {
-    changeReact(authUserId, messageId, 0);
-    return {};
-  }
-}
-
-/* Description: Unreacts a message
-Arguments:
-    <token> (integer)    - <The token of the user who initates the function>
-    <messageId> (integer)    - <The messageId of the message thats being pinned.>
-
-Return Value:
-    Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
-*/
-export function pin(token: string, messageId: number): object {
-  const authUserId = tokenConvert(token);
-  if (messageLocation(messageId).location !== 'error' && channelPermissions(messageLocation(messageId).channelId, authUserId) !== OWNER) {
-    throw createHttpError(403, 'error');
-  } else if (messageValid(authUserId, messageId) === false || pinStatus(messageId) === true) {
-    throw createHttpError(400, 'error');
-  } else {
-    changePin(messageId, 1);
-    return {};
-  }
-}
-
-/* Description: Unreacts a message
-Arguments:
-    <token> (integer)    - <The token of the user who initates the function>
-    <messageId> (integer)    - <The messageId of the message thats being unpinned.>
-
-Return Value:
-    Returns <{}> on <successfully removed user as owner>
-    Returns <403> on <authId does not have permissions>
-    Returns <403> on <error>
-*/
-export function unPin(token: string, messageId: number): object {
-  const authUserId = tokenConvert(token);
-  if (messageLocation(messageId).location !== 'error' && channelPermissions(messageLocation(messageId).channelId, authUserId) !== OWNER) {
-    throw createHttpError(403, 'error');
-  } else if (messageLocation(messageId).location === 'error' || pinStatus(messageId) === false) {
-    throw createHttpError(400, 'error');
-  } else {
-    changePin(messageId, 0);
-    return {};
-  }
+  changePerms(channelId, uId, USER);
+  return {};
 }
 
 // ======================================== Helper Functions ========================================
@@ -384,7 +274,7 @@ Return Value:
     Returns <true> on <uId is found in the channel.>
     Returns <false> on <uId was not found in the channel.>
 */
-export function memberExists(channelId: number, uId: number): boolean {
+function memberExists(channelId: number, uId: number): boolean {
   let uidSearch = null;
   const data = getData();
   const channelSearch = data.channel.find((data) => data.channelId === channelId);
@@ -395,161 +285,6 @@ export function memberExists(channelId: number, uId: number): boolean {
   return (uidSearch != null);
 }
 
-/* Description: Checks whether a Uid is a member of a dm
-Arguments:
-    <dmId> (integer)    - <The dmId of the channel thats being checked.>
-    <uId> (<integer>)    - <The uId of the user thats being checked.>
-
-Return Value:
-    Returns <true> on <uId is found in the dm.>
-    Returns <false> on <uId was not found in the dm.>
-*/
-export function dmMemberExists(dmId: number, uId: number): boolean {
-  let uidSearch = null;
-  const data = getData();
-  const dmSearch = data.dm.find((data) => data.dmId === dmId);
-  if (dmSearch != null) {
-    const { members } = dmSearch;
-    uidSearch = members.find((data) => data.uId === uId);
-  }
-  return (uidSearch != null);
-}
-
-/* Description: Given a messageId find its location.
-Arguments:
-  <messageId> (integer)    - <The id of the message thats being pinned.>
-
-Return Value:
-  Returns <{i: number, j: number, location: string, channelId: number}> (on <successfully found message>)
-*/
-export function messageLocation(messageId: number): {i: number, j: number, location: string, channelId: number} {
-  const data = getData();
-  for (let i = 0; i < data.channel.length; i++) {
-    const messageIndex = data.channel[i].messages.findIndex((data) => data.messageId === messageId);
-    if (messageIndex !== ERROR) {
-      return { i: i, j: messageIndex, location: 'channel', channelId: data.channel[i].channelId };
-    }
-  }
-  for (let i = 0; i < data.dm.length; i++) {
-    const messageIndex = data.dm[i].messages.findIndex((data) => data.messageId === messageId);
-    if (messageIndex !== ERROR) {
-      return { i: i, j: messageIndex, location: 'dm', channelId: data.dm[i].dmId };
-    }
-  }
-  return { i: ERROR, j: ERROR, location: 'error', channelId: ERROR };
-}
-/* Description: Changes react state
-Arguments:
-  <messageId> (integer)    - <The id of the message thats being pinned.>
-  <newReact> (integer)    - <The new react state.>
-
-Return Value:
-  Returns <void>
-*/
-export function pinStatus(messageId: number): boolean {
-  const data = getData();
-  const index = messageLocation(messageId);
-  if (index.location === 'channel') {
-    return (data.channel[index.i].messages[index.j].isPinned === 1);
-  } else if (index.location === 'dm') {
-    return (data.dm[index.i].messages[index.j].isPinned === 1);
-  } else {
-    return false;
-  }
-}
-
-/* Description: Checks whether message has been reacted to.
-Arguments:
-  <messageId> (integer)    - <The id of the message thats being pinned.>
-  <newReact> (integer)    - <The new react state.>
-
-Return Value:
-  Returns <true> on <message found in dm or channel is reacted to .>
-  Returns <false> on <Channel was not found.>
-*/
-// Check dm or channel. Then search to see if can find id matches and react matches. Similar to previous search functions.
-export function reactStatus(uId: number, messageId: number, reactId: number): boolean {
-  const data = getData();
-  const index = messageLocation(messageId);
-  if (index.location === 'channel') {
-    const z = data.channel[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === reactId);
-    if (z !== ERROR) {
-      const search = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
-      return (search !== ERROR);
-    }
-  } else if (index.location === 'dm') {
-    const z = data.dm[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === reactId);
-    if (z !== ERROR) {
-      const search = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
-      return (search !== ERROR);
-    }
-  }
-  return false;
-}
-
-/* Description: Changes react state
-Arguments:
-  <messageId> (integer)    - <The id of the message thats being pinned.>
-  <newReact> (integer)    - <The new react state.>
-
-Return Value:
-  Returns <void>
-*/
-export function changeReact(uId:number, messageId:number, newReact:number): void {
-  const data = getData();
-  const index = messageLocation(messageId);
-  const uIdArray: number[] = [];
-  if (index.location === 'error') {
-    return;
-  }
-  if (index.location === 'channel') {
-    const z = data.channel[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === newReact);
-    if (z === -1) {
-      uIdArray.push(uId);
-      data.channel[index.i].messages[index.j].reacts.push({ reactId: newReact, uIds: uIdArray });
-    } else if (newReact === 0) {
-      const x = data.channel[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
-      data.channel[index.i].messages[index.j].reacts[z].uIds.splice(x, 1);
-    } else {
-      data.channel[index.i].messages[index.j].reacts[z].uIds.push(uId);
-    }
-  } else {
-    const z = data.dm[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === newReact);
-    if (z === -1) {
-      uIdArray.push(uId);
-      data.dm[index.i].messages[index.j].reacts.push({ reactId: newReact, uIds: uIdArray });
-    } else if (newReact === 0) {
-      const x = data.dm[index.i].messages[index.j].reacts[z].uIds.findIndex((data) => data === uId);
-      data.dm[index.i].messages[index.j].reacts[z].uIds.splice(x, 1);
-    } else {
-      data.dm[index.i].messages[index.j].reacts[z].uIds.push(uId);
-    }
-  }
-
-  setData(data);
-}
-
-/* Description: Changes pinned state
-Arguments:
-  <messageId> (integer)    - <The id of the message thats being pinned.>
-  <newPin> (integer)    - <The new pin state.>
-
-Return Value:
-  Returns <void>
-*/
-export function changePin(messageId:number, newPin:number): void {
-  const data = getData();
-  const index = messageLocation(messageId);
-  if (index.location !== 'error') {
-    if (index.location === 'channel') {
-      data.channel[index.i].messages[index.j].isPinned = newPin;
-    } else {
-      data.dm[index.i].messages[index.j].isPinned = newPin;
-    }
-  }
-  setData(data);
-}
-
 /* Description: Checks whether a chanel exists in the database
 Arguments:
   <channelId> (integer)    - <The channelId of the channel thats being checked.>
@@ -557,10 +292,10 @@ Return Value:
   Returns <true> on <Channel is found.>
   Returns <false> on <Channel was not found.>
 */
-export function channelExists(channelId:number) :boolean {
+function channelExists(channelId: number) :boolean {
   const data = getData();
   const search = data.channel.find((data) => data.channelId === channelId);
-  return (search !== undefined);
+  return (search != null);
 }
 
 /* Description: Checks whether a user  exists in the database
@@ -570,10 +305,10 @@ Return Value:
   Returns <true> on <uId is found.>
   Returns <false> on <uId was not found.>
 */
-export function uIdExists(uId:number): boolean {
+function uIdExists(uId: number): boolean {
   const data = getData();
   const search = data.user.find((data) => data.uId === uId);
-  return (search !== undefined);
+  return (search != null);
 }
 
 /* Description: Checks what the channel permissions are of a user
@@ -583,18 +318,18 @@ Arguments:
 
 Return Value:
   Returns <permissions> if <user is found, its permissions are returned as a string. ie 0>
-  Returns <ERROR> on <uId was not found in the channel.>
+  Returns <invalid> on <uId was not found in the channel.>
 */
-export function channelPermissions(channelId: number, uId: number): number {
-  let uidSearch;
+function channelPermissions(channelId: number, uId: number) {
+  let uidSearch = null;
   const data = getData();
   const { channel } = data;
   const channelSearch = channel.find((data) => data.channelId === channelId);
-  if (channelSearch !== undefined) {
+  if (channelSearch != null) {
     const { members } = channelSearch;
     uidSearch = members.find((data) => data.uId === uId);
   }
-  return ((uidSearch !== undefined) ? uidSearch.channelPerms : ERROR);
+  return (uidSearch != null) ? uidSearch.channelPerms : 'invalid';
 }
 
 /* Description: Checks what the global permission are of a user
@@ -603,12 +338,12 @@ Arguments:
 
 Return Value:
   Returns <permissions> if <user is found, its permissions are returned as a string. ie 0>
-  Returns <ERROR> on <uId was not found in the channel.>
+  Returns <invalid> on <uId was not found in the channel.>
 */
-export function globalPermissions(uId: number): number {
+function globalPermissions(uId: number) {
   const data = getData();
   const search = data.user.find((data) => data.uId === uId);
-  return (search !== undefined) ? search.globalPerms : ERROR;
+  return (search != null) ? search.globalPerms : 'invalid';
 }
 
 /* Description: Checks whether the channel is private or public.
@@ -619,10 +354,10 @@ Return Value:
   Returns <true> on <when channel key IsPublic is set to true>
   Returns <false> on <when channel key IsPublic is set to false>
 */
-export function channelPublic(channelId: number): boolean {
+function channelPublic(channelId: number): boolean {
   const data = getData();
   const search = data.channel.find((data) => data.channelId === channelId && data.isPublic === true);
-  return (search !== undefined);
+  return (search != null);
 }
 
 /* Description: Changes a user permissions in a channel.
@@ -634,7 +369,7 @@ export function channelPublic(channelId: number): boolean {
   Return Value:
       Returns <null>
   */
-export function changePerms(channelId: number, uId: number, newPerm:number): void {
+function changePerms(channelId: number, uId: number, newPerm: number) {
   const data = getData();
   const i = data.channel.findIndex((data) => data.channelId === channelId);
   const j = data.channel[i].members.findIndex((data) => data.uId === uId);
@@ -649,16 +384,11 @@ export function changePerms(channelId: number, uId: number, newPerm:number): voi
   Return Value:
     Returns <number> the <number of owners that are in the channel.>
   */
-export function numOwners(channelId: number): number {
+function numOwners(channelId: number) {
   const data = getData();
   const { channel } = data;
   const i = channel.findIndex((data) => data.channelId === channelId);
   return channel[i].members.filter((x) => x.channelPerms === OWNER).length;
-}
-
-export function numGlobalOwners(): number {
-  const data = getData();
-  return data.user.filter((x) => x.globalPerms === OWNER).length;
 }
 
 /* Description: Converts a token to a userId
@@ -667,12 +397,12 @@ export function numGlobalOwners(): number {
 
   Return Value:
     Returns <uId> on <string was found in the database attached to the returned uId>
-    Returns <ERROR> on <string could not be found in the>
+    Returns <invalid> on <string could not be found in the>
   */
-export function tokenConvert(token: string) : number {
+function tokenConvert(token: string) : number {
   const data = getData();
-  const tokenSearch = data.token.find(data => data.token === token);
-  return (tokenSearch !== undefined) ? tokenSearch.uId : ERROR;
+  const tokenSearch = data.token.find((data) => data.token === token);
+  return (tokenSearch != null) ? tokenSearch.uId : 0;
 }
 
 /* Description: removes user from a channels database.
@@ -683,9 +413,9 @@ export function tokenConvert(token: string) : number {
   Return Value:
       Returns <null>
   */
-export function leaveChannel(channelId: number, uId: number) {
+function leaveChannel(channelId: number, uId: number) {
   const data = getData();
-  const i = data.channel.findIndex(data => data.channelId === channelId);
+  const i = data.channel.findIndex((data) => data.channelId === channelId);
   const j = data.channel[i].members.findIndex((data) => data.uId === uId);
   data.channel[i].members.splice(j, 1);
   setData(data);
@@ -699,30 +429,10 @@ export function leaveChannel(channelId: number, uId: number) {
   Return Value:
     Returns <null>
 */
-export function addUser(channelId: number, uId: number): void {
+function addUser(channelId: number, uId: number) {
   const data = getData();
   const newUser = { uId, channelPerms: USER };
   const i = data.channel.findIndex((data) => data.channelId === channelId);
   data.channel[i].members.push(newUser);
   setData(data);
-}
-
-export function messageValid(authUserId: number, messageId:number): boolean {
-  const data = getData();
-  const message = messageLocation(messageId);
-  if (message.location === 'error') {
-    return false;
-  } else if (message.location === 'channel') {
-    const channel = data.channel[message.i].channelId;
-    return memberExists(channel, authUserId);
-  } else {
-    const dm = data.dm[message.i].dmId;
-    return dmMemberExists(dm, authUserId);
-  }
-}
-
-export function standupActive(channelId: number, authUserId: number): boolean {
-  const data = getData();
-  const i = data.channel.findIndex((data) => data.channelId === channelId);
-  return data.channel[i].isActiveUid === authUserId;
 }

@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore';
+import { getData, setData, message } from './dataStore';
 import { checkToken, tokenToUid } from './message';
 import HTTPError from 'http-errors';
 
@@ -9,11 +9,18 @@ interface Database {
   dm: any[];
 }
 
-interface react {
-  reactId: number,
-  uIds: number[],
-}
+/*
+Checks if channelId is valid and if a uId
 
+Arguments:
+  channelId (number)      - channelId in question
+  uId(number)             - uId of person to check if existing in channel
+  data (Database)         - database to inspect
+
+Return Value:
+  Throws a 400 error    - if channelId doesn't refer to a valid channel
+  Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
+*/
 export function checkChannelMemberExist(channelId: number, uId: number, data: Database) {
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     throw HTTPError(400, 'invalid channelId');
@@ -25,6 +32,18 @@ export function checkChannelMemberExist(channelId: number, uId: number, data: Da
     }
   }
 }
+
+/*
+Packages messages received from standups and pushes it to the message queue to the channel
+
+Arguments:
+  channelIndex (number) - index of the channel the stand up is sent to
+  timeSent (number) - time the standup will be sent
+  uId (number) - uId of the person that started the standup
+
+Return Value:
+  Returns nothing
+*/
 
 function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   const data = getData();
@@ -38,7 +57,7 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
     }
   }
 
-  const packageMessage = {
+  const packageMessage: message = {
     messageId: Math.floor(Math.random() * 1000),
     uId: uId,
     message: messageString,

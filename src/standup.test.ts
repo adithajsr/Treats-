@@ -249,10 +249,12 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send single', async () => {
-      const body = { channelId: channel1, length: 2 };
+      const body = { channelId: channel1, length: 3 };
       expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
-      const testRequest = requestStandupSend(user1.token, channel1, 'single successful standup send');
-      expect(testRequest).toStrictEqual({});
+
+      const dbody = { channelId: channel1, message: 'single successful standup send' };
+      expect(sendPost('standup/send/v1', user1.token, dbody)).toStrictEqual({});
+
       await new Promise((r) => setTimeout(r, 3000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);
       expect(checkSent.bodyObj.messages[0].message).toStrictEqual('zacli: single successful standup send');

@@ -156,14 +156,13 @@ Return Value:
 */
 let standupMessage: string;
 export function standupSendV1(token: string, channelId: number, message: string) {
-  if (message.length > 1000) throw HTTPError(403, 'length of standup message is over 1000!');
-
   const data = getData();
+  if (message.length > 1000) throw HTTPError(403, 'length of standup message is over 1000!');
+  // const data = getData();
   checkToken(token, data);
   const uId = tokenToUid(token, data);
   const { channel } = data;
   checkChannelMemberExist(channelId, uId, data);
-
   if (standupActiveV1(token, channelId).isActive === false) throw HTTPError(400, 'standup not active!');
 
   const i = channel.findIndex(channel => channel.channelId === channelId);
@@ -171,7 +170,6 @@ export function standupSendV1(token: string, channelId: number, message: string)
   // find handle
   const handleIndex = data.user.findIndex(user => user.uId === uId);
   const handle = data.user[handleIndex].handle;
-
   standupMessage = handle + ': ' + message;
   channel[i].queue.push(standupMessage);
   setData(data);

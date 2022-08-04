@@ -498,9 +498,6 @@ export function changeReact(uId:number, messageId:number, newReact:number): void
   const data = getData();
   const index = messageLocation(messageId);
   const uIdArray: number[] = [];
-  if (index.location === 'error') {
-    return;
-  }
   if (index.location === 'channel') {
     const z = data.channel[index.i].messages[index.j].reacts.findIndex((data) => data.reactId === newReact);
     if (z === -1) {
@@ -524,7 +521,6 @@ export function changeReact(uId:number, messageId:number, newReact:number): void
       data.dm[index.i].messages[index.j].reacts[z].uIds.push(uId);
     }
   }
-
   setData(data);
 }
 

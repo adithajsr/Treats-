@@ -2,7 +2,7 @@ import { getData, setData } from './dataStore';
 import { v4 as generateV4uuid } from 'uuid';
 import validator from 'validator';
 import HTTPError from 'http-errors';
-import crypto from 'crypto';
+import hash from 'hash.js';
 // eslint-disable-next-line
 // @ts-ignore
 import codec from 'string-codec';
@@ -102,9 +102,9 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
   const dataSet = getData();
   for (const item of dataSet.user) {
     if (item.email === email) {
-      if (item.password === crypto.createHash('sha256', SECRET + password)) {
+      if (item.password === hash.sha256().update(SECRET + password).digest('hex')) {
         // If both arguments match an account
-        const uuid: string = crypto.createHash('sha256', SECRET + generateV4uuid());
+        const uuid: string = hash.sha256().update(SECRET + generateV4uuid()).digest('hex');
         dataSet.token.push({
           token: uuid,
           uId: item.uId,
@@ -176,7 +176,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
   dataSet.user.push({
     uId: newUserId,
     email: email,
-    password: crypto.createHash('sha256', SECRET + password),
+    password: hash.sha256().update(SECRET + password).digest('hex'),
     nameFirst: nameFirst,
     nameLast: nameLast,
     handle: newHandle,
@@ -190,7 +190,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     shouldRetrieve: true
   });
 
-  const uuid: string = crypto.createHash('sha256', SECRET + generateV4uuid());
+  const uuid: string = hash.sha256().update(SECRET + generateV4uuid()).digest('hex');
   dataSet.token.push({
     token: uuid,
     uId: newUserId,
@@ -327,7 +327,7 @@ export function passwordReset(resetCode: string, newPassword: string) {
       // above condition cannot be accessed except through the email, therefore coverage can't get here
       for (const user of dataSet.user) {
         if (user.uId === Number(uId)) {
-          user.password = crypto.createHash('sha256', SECRET + newPassword);
+          user.password = hash.sha256().update(SECRET + newPassword).digest('hex');
           dataSet.token.splice(Number(i), 1);
           setData(dataSet);
           return {};

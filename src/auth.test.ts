@@ -1,6 +1,5 @@
 import validator from 'validator';
 import { requestUserProfile } from './users.test';
-import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
 // eslint-disable-next-line
@@ -148,7 +147,6 @@ describe('Testing for requestAuthRegister', () => {
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
-    expect(validateV4uuid(testToken)).toBe(true);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 
@@ -247,7 +245,6 @@ describe('Testing for requestAuthRegister', () => {
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
-    expect(validateV4uuid(testToken)).toBe(true);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 });

@@ -2,15 +2,9 @@ import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
-<<<<<<< HEAD
-import { requestChannelsCreate } from './channels.test';
-import { requestChannelMessages } from './channel.test';
-import { requestDMCreate, requestDMMessages } from './dm.test';
-=======
 import { requestChannelsCreate } from './channel.test';
 import { requestDMCreate, requestDMMessages, requestMessageSendDM } from './dm.test';
 import { requestChannelMessages } from './channel.test';
->>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e
 
 const port = config.port;
 const url = config.url;
@@ -24,11 +18,7 @@ export type payloadObj = {
   dmId?: number;
   uId?: number;
   message?: string;
-<<<<<<< HEAD
-  timeSent?: number;
-=======
   timeSent?: number
->>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e
 };
 
 export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -77,40 +67,15 @@ export function requestSendDm(token: string, dmId: number, message: string) {
 }
 
 function requestRemoveOwner(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/removeowner/v2', { token, channelId, uId });
+  return requestHelper('POST', '/channel/removeowner/v1', { token, channelId, uId });
 }
 
 export function requestChannelJoinV2(token: string, channelId: number) {
-  return requestHelper('POST', '/channel/join/v3', { token, channelId });
+  return requestHelper('POST', '/channel/join/v2', { token, channelId });
 }
 
 function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
-  return requestHelper('POST', '/channel/addowner/v2', { token, channelId, uId });
-}
-
-export function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
-  return requestHelper('POST', '/message/sendlater/v1', { token, channelId, message, timeSent });
-}
-
-export function requestMessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
-  const res = request(
-    'POST',
-    `${url}:${port}/message/share/v1`,
-    {
-      json: {
-        ogMessageId, message, channelId, dmId
-      },
-
-      headers: {
-        token
-      },
-    }
-  );
-
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
+  return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
 }
 
 function requestMessageSendLaterDM(token: string, dmId: number, message: string, timeSent: number) {
@@ -586,8 +551,6 @@ test('Default case', () => {
 
   expect(requestDMMessages(danielToken, dmId, 2).bodyObj.messages[0].message).toBe('this isnt true anymore: I like talking to myself');
 });
-<<<<<<< HEAD
-=======
 
 // ----------------------------- Testing message/sendlaterdm/v1 -----------------------------
 test('timeSent is a time in the past', async() => {
@@ -638,4 +601,3 @@ test('success case', async() => {
   await new Promise((r) => setTimeout(r, 2500));
   expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[3].message).toBe(returnObject[3]);
 });
->>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e

@@ -5,19 +5,14 @@
         "lint": "eslint src/**.ts",
         "lint-fix": "eslint --fix src/**.ts",
         "ts-node-coverage": "nyc --reporter=text --reporter=lcov ts-node src/server.ts",
-        "posttest": "pkill -f 'node_modules/sync-rpc/lib/worker.js' > /dev/null 2>&1",
-        "start": "ts-node src/server.ts"
+        "posttest": "pkill -f 'node_modules/sync-rpc/lib/worker.js' > /dev/null 2>&1"
     },
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.18.0",
         "http-errors": "^2.0.0",
-<<<<<<< HEAD
-        "http-errors-middleware": "^0.2.2",
-=======
         "image-size": "^1.0.2",
         "image-type": "^4.1.0",
->>>>>>> 2ce2e6b85f074d74b76783ebef9839cc2b21ea6e
         "middleware-http-errors": "^0.1.1",
         "morgan": "^1.10.0",
         "nodemailer": "^6.7.7",
@@ -48,9 +43,7 @@
         "eslint-plugin-jest": "^26.1.5",
         "jest": "^28.1.0",
         "nyc": "^15.1.0",
-        "ts-jest": "^28.0.2",
-        "ts-node": "^10.9.1",
-        "typescript": "^4.7.4"
+        "ts-jest": "^28.0.2"
     },
     "nyc": {
         "exclude": [

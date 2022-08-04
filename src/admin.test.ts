@@ -86,7 +86,11 @@ describe('admin/user/remove/v1 test', () => {
       // testUser creates a channel
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
       // byeUser joins the channel
-      requestChannelJoinV2(byeUser.bodyObj.token, testChannel.bodyObj.channelId);
+
+      const body = { channelId: testChannel.bodyObj.channelId };
+      sendPost('channel/join/v3', byeUser.bodyObj.token, body);
+
+      // requestChannelJoinV2(byeUser.bodyObj.token, testChannel.bodyObj.channelId);
       // byeUser sends two messages to the channel
       const m1 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'first message');
       const m2 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'second message');
@@ -108,7 +112,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port +'/imgurl/default.jpg'
         }
       ]);
       // retrieve user details user/profile
@@ -119,7 +123,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'Removed',
           nameLast: 'user',
           handleStr: '',
-          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port +'/imgurl/default.jpg'
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
@@ -150,6 +154,7 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve channel details - requestChannelMessages - message
       const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+      console.log(channelM.bodyObj)
       expect(channelM.bodyObj.messages).toStrictEqual(
         [
           {

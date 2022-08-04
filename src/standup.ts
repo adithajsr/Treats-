@@ -48,6 +48,16 @@ Return Value:
 function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   const data = getData();
   const { channel } = data;
+
+  if (channel[channelIndex].queue.length === 0) {
+    channel[channelIndex].isActive = false;
+    channel[channelIndex].isActiveUid = -1;
+    channel[channelIndex].standupFinish = 0;
+    channel[channelIndex].queue = [];
+    setData(data);
+    return;
+  }
+
   let messageString = '';
   for (let i = 0; i < channel[channelIndex].queue.length; i++) {
     if (i === channel[channelIndex].queue.length - 1) {

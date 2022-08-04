@@ -236,20 +236,16 @@ describe('standup capabilities', () => {
       expect(testRequest).toBe(400);
     });
 
-    test('successful standup send none', () => {
-      const body = { channelId: channel1, length: 2 };
+    test('successful standup send none', async () => {
+      const body = { channelId: channel1, length: 1 };
       expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
-      const testActive = requestStandupActive(user1.token, channel1);
-      expect(testActive).toStrictEqual({
-        isActive: true,
-        timeFinish: expect.any(Number)
-      });
+      await new Promise((r) => setTimeout(r, 1000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);
       expect(checkSent.bodyObj.messages).toStrictEqual([]);
     });
 
     test('successful standup send single', async () => {
-      const body = { channelId: channel1, length: 3 };
+      const body = { channelId: channel1, length: 2 };
       expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
 
       const dbody = { channelId: channel1, message: 'single successful standup send' };
@@ -264,7 +260,7 @@ describe('standup capabilities', () => {
       const ubody = { channelId: channel1 };
       sendPost('channel/join/v3', user2.token, ubody);
 
-      const body = { channelId: channel1, length: 3 };
+      const body = { channelId: channel1, length: 2 };
       expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
 
       const dbody = { channelId: channel1, message: 'single successful standup send' };
@@ -273,7 +269,7 @@ describe('standup capabilities', () => {
       const abody = { channelId: channel1, message: 'single successful standup send' };
       expect(sendPost('standup/send/v1', user2.token, abody)).toStrictEqual({});
 
-      await new Promise((r) => setTimeout(r, 4000));
+      await new Promise((r) => setTimeout(r, 3000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);
       expect(checkSent.bodyObj.messages[0].message).toStrictEqual(
         'zacli: single successful standup send' + '\n' +

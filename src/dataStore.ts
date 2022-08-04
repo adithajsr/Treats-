@@ -16,6 +16,11 @@ interface dmJoined {
   timeStamp: number,
 }
 
+interface react {
+  reactId: number,
+  uIds: number[],
+}
+
 interface messageSent {
   numMessagesSent: number,
   timeStamp: number,
@@ -54,7 +59,7 @@ interface message {
   message: string,
   timeSent: number,
   isPinned: number,
-  reacts: number,
+  reacts: react[];
 }
 
 interface channel {
@@ -156,4 +161,4 @@ function setData(newData: database) {
 }
 
 export { getData, setData };
-export { user, channelMember, dmMember, message, channel, token, dm, database };
+export { user, channelMember, dmMember, message, channel, token, dm, database, react };

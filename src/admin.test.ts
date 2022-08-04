@@ -1,13 +1,13 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-
+import { sendPost } from './channel.test';
 const port = config.port;
 const url = config.url;
 
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
-import { requestMessageSend, requestSendDm, payloadObj, requestChannelJoinV2 } from './message.test';
+import { requestMessageSend, requestSendDm, payloadObj } from './message.test';
 import { requestDMCreate } from './dm.test';
 import { requestUsersAll, requestUserProfile } from './users.test';
 import { requestChannelDetailsHelper, requestChannelMessages } from './channel.test';
@@ -86,7 +86,11 @@ describe('admin/user/remove/v1 test', () => {
       // testUser creates a channel
       testChannel = requestChannelsCreate(testUser.bodyObj.token, 'channelName', true);
       // byeUser joins the channel
-      requestChannelJoinV2(byeUser.bodyObj.token, testChannel.bodyObj.channelId);
+
+      const body = { channelId: testChannel.bodyObj.channelId };
+      sendPost('channel/join/v3', byeUser.bodyObj.token, body);
+
+      // requestChannelJoinV2(byeUser.bodyObj.token, testChannel.bodyObj.channelId);
       // byeUser sends two messages to the channel
       const m1 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'first message');
       const m2 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'second message');
@@ -108,7 +112,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
         }
       ]);
       // retrieve user details user/profile
@@ -119,7 +123,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'Removed',
           nameLast: 'user',
           handleStr: '',
-          profileImgUrl: 'http://127.0.0.1:3973/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
@@ -158,7 +162,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'Removed user',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           },
           {
             messageId: m2.messageId,
@@ -166,7 +170,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'Removed user',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           },
           {
             messageId: m3.messageId,
@@ -174,7 +178,7 @@ describe('admin/user/remove/v1 test', () => {
             message: 'third message',
             timeSent: expect.any(Number),
             isPinned: 0,
-            reacts: 0,
+            reacts: [],
           }
         ]
       );
@@ -197,6 +201,63 @@ describe('admin/user/remove/v1 test', () => {
     testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
     const testRequest = requestAdminUserRemove(testUser.bodyObj.token, testUser.bodyObj.authUserId);
     expect(testRequest).toBe(400);
+    requestClear();
+  });
+});
+
+// ======================================== Setup ========================================
+type id = {
+  token: string,
+  authUserId: number,
+}
+
+let globalAdmin:id;
+let admin:id;
+let user1:id;
+let user2:id;
+
+// ======================================== Helper functions ========================================
+
+export function setupDatabase() {
+  let reg = { email: 'who.is.john@is.the.question.com', password: '12367dhd', nameFirst: 'Nathan', nameLast: 'Spencer' };
+  globalAdmin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
+  admin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.zac@is.the.question.com', password: 'zaccool', nameFirst: 'Zac', nameLast: 'Li' };
+  user1 = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.nick@is.the.question.com', password: 'yeyyey', nameFirst: 'Nick', nameLast: 'Smith' };
+  user2 = sendPost('auth/register/v3', 'a', reg);
+}
+
+// // ======================================== admin/userpermission/change/v1 ========================================
+describe('Testing for userpermission/change/v1', () => {
+  test('uId is not a valid id', () => {
+    setupDatabase();
+    const body = { uId: 999999, permissionId: 1 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('permissionId invalid', () => {
+    const body = { uId: user1.authUserId, permissionId: 10 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Setting same permission', () => {
+    const body = { uId: user1.authUserId, permissionId: 2 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Only One global owner being demoted.', () => {
+    const body = { uId: globalAdmin.authUserId, permissionId: 2 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Authuser is not a globaladmin.', () => {
+    const body = { uId: user2.authUserId, permissionId: 1 };
+    expect(sendPost('admin/userpermission/change/v1', admin.token, body)).toBe(403);
     requestClear();
   });
 });

@@ -35,10 +35,6 @@ export function requestSearch(token: string, queryStr: string) {
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
-afterEach(() => {
-  requestClear();
-});
-
 test('search string is empty', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -149,5 +145,4 @@ test('default case', () => {
   const expectedObj = [expectedObj1, expectedObj2, expectedObj3];
   expect(retObject.bodyObj).toMatchObject(expectedObj);
   expect(retObject.res.statusCode).toBe(OK);
-  requestClear();
 });

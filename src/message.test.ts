@@ -1,12 +1,9 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
-
 import { requestAuthRegister } from './auth.test';
-
-import { requestChannelsCreate } from './channels.test';
-
-import { requestDMCreate } from './dm.test';
+import { requestChannelsCreate } from './channel.test';
+import { requestDMCreate, requestDMMessages } from './dm.test';
 
 const port = config.port;
 const url = config.url;
@@ -77,6 +74,27 @@ export function requestChannelJoinV2(token: string, channelId: number) {
 
 function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
+}
+
+export function requestMessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/share/v1`,
+    {
+      json: {
+        ogMessageId, message, channelId, dmId
+      },
+
+      headers: {
+        token
+      },
+    }
+  );
+
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
 }
 
 // -------------------------------------------------------------------------//
@@ -381,3 +399,100 @@ describe('messages capabilities', () => {
 });
 
 export { requestAuthRegister, requestChannelsCreate, requestMessageSend };
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// TESTING MESSAGE/SHARE/V1
+// takes in a message and channel/dm
+// put in messages array in given channel/dm
+
+// Test data
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+const authSam = ['samuelSchreyer@gmail.com', 'password', 'Samuel', 'Schreyer'];
+
+test('Invalid channelId and invalid dmId', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'First message').messageId;
+  requestMessageSend(danielToken, channelId, 'Second message');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [samId]).bodyObj.dmId;
+  requestSendDm(danielToken, dmId, 'First message');
+  requestSendDm(danielToken, dmId, 'Second message');
+
+  expect(requestMessageShareV1(danielToken, messageId1, 'have a look at this: ', -1, dmId + 20).res.statusCode).toBe(400);
+});
+
+test('Neither channelId nor dmId are -1', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [samId]).bodyObj.dmId;
+  requestSendDm(danielToken, dmId, 'First message');
+  requestSendDm(danielToken, dmId, 'Second message');
+
+  expect(requestMessageShareV1(danielToken, messageId1, 'have a look at this: ', channelId, dmId + 20).res.statusCode).toBe(400);
+});
+
+test('Invalid messageId', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [samId]).bodyObj.dmId;
+
+  expect(requestMessageShareV1(danielToken, messageId1 + 20, 'have a look at this bro: ', -1, dmId).res.statusCode).toBe(400);
+});
+
+test('Message is > 1000 characters', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'First message').messageId;
+  requestMessageSend(danielToken, channelId, 'Second message');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [samId]).bodyObj.dmId;
+
+  const longAssMessage = 'i saw my dino crush today :))'.repeat(60);
+  expect(requestMessageShareV1(danielToken, messageId1, longAssMessage, -1, dmId).res.statusCode).toBe(400);
+});
+
+test('Unauthorised access to channel/DM', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+
+  const samToken = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.token;
+  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
+  const samMaiyaDM = requestDMCreate(samToken, [maiyaId]).bodyObj.dmId;
+
+  expect(requestMessageShareV1(danielToken, messageId1, 'i want to be part of this :((', -1, samMaiyaDM).res.statusCode).toBe(403);
+});
+
+test('Default case', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+  const messageId1 = requestMessageSend(danielToken, channelId, 'I like talking to myself').messageId;
+  requestMessageSend(danielToken, channelId, 'Its so fun');
+
+  const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
+  const dmId = requestDMCreate(danielToken, [samId]).bodyObj.dmId;
+  requestSendDm(danielToken, dmId, 'Hey whats up homie');
+  requestSendDm(danielToken, dmId, 'Why you ghosting me sammy g :((');
+  requestMessageShareV1(danielToken, messageId1, 'this isnt true anymore: ', -1, dmId);
+
+  expect(requestDMMessages(danielToken, dmId, 2).bodyObj.messages[0].message).toBe('this isnt true anymore: I like talking to myself');
+});

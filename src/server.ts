@@ -8,7 +8,7 @@ import errorHandler from 'middleware-http-errors';
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
-import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
+import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
@@ -17,6 +17,7 @@ import {notificationsGetV1} from './notifications';
 import { searchV1 } from './search';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 import { adminUserRemoveV1 } from './admin';
+import { messageSendLaterV1 } from './message';
 
 
 // Set up web app, use JSON
@@ -42,9 +43,21 @@ app.get('/echo', (req, res, next) => {
 app.use(morgan('dev'));
 
 
+
 app.get('/notifications/get/v1', (req, res, next) => {
   const token = req.header('token');
   return res.json(notificationsGetV1(token));
+});
+app.post('/message/sendlaterdm/v1', (req, res) => {
+  const token = req.header('token');
+  const { dmId, message, timeSent } = req.body;
+  return res.json(MessageSendLaterDMV1(token, dmId, message, timeSent));
+});
+
+app.post('/message/sendlater/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, message, timeSent } = req.body;
+  return res.json(messageSendLaterV1(token, channelId, message, timeSent));
 });
 
 app.get('/search/v1', (req, res, next) => {
@@ -289,6 +302,16 @@ app.post('/message/senddm/v2', (req, res) => {
   const token = req.header('token');
   const { dmId, message } = req.body;
   res.json(messageSendDmV2(token, dmId, message));
+});
+
+app.post('/message/share/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { ogMessageId, message, channelId, dmId } = req.body;
+    return res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/dm/create/v2', (req, res, next) => {

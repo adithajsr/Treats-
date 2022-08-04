@@ -4,6 +4,7 @@ import {requestClear} from './users.test';
 import {requestAuthRegister} from './auth.test';
 import {requestChannelsCreate} from './channels.test';
 import {requestChannelInvite} from './other.test';
+import { requestMessageSend } from './message.test'
 
 const OK = 200;
 const url = config.url;
@@ -111,7 +112,7 @@ test("User being added to multiple channels and dms", () => {
     const danielDm = requestDMCreate(danielToken, [maiyaId]).bodyObj.dmId;
     const samDm = requestDMCreate(samToken, [maiyaId]).bodyObj.dmId;
 
-   
+  
     const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung added you to gamingChannel"};
     const expectedValue1 = {channelId: samChannel, dmId: -1, notificationMessage: "samuelschreyer added you to wallowingChannel"};
     const expectedValue2 = {channelId: -1, dmId: danielDm, notificationMessage: "danielyung added you to danielyung, maiyataylor"};
@@ -119,15 +120,15 @@ test("User being added to multiple channels and dms", () => {
     const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3];
     expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
 });
-/*
+
 test("User being tagged multiple times", () => {
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
     const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
     const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
 
     const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true);
-    requestChannelsInvite(danielToken, danielChannel, maiyaId);
-    requestChannelsInvite(danielToken, danielChannel, samId);
+    requestChannelInvite(danielToken, danielChannel, maiyaId);
+    requestChannelInvite(danielToken, danielChannel, samId);
 
     requestMessageSend(danielChannel, "@maiya get online to play sum fortnite");
     requestMessageSend(danielChannel, "@maiya @maiya wait how about in 5 mins"); //testing that double tag still only sends one notification
@@ -139,7 +140,7 @@ test("User being tagged multiple times", () => {
 
     const expectedValue = [expectedValue0, expectedValue1, expectedValue2];
 });
-
+/*
 test("User being added to channels, dms and getting tagged", () => {
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
     const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;

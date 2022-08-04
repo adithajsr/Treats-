@@ -124,6 +124,7 @@ export function messageSendV2 (token: string, channelId: number, message: string
   const messageId = Math.floor(Math.random() * 1000);
   const time = Math.floor((new Date()).getTime() / 1000);
 
+  
   data.channel[channelIndex].messages.push(
     {
       messageId: messageId,
@@ -134,7 +135,19 @@ export function messageSendV2 (token: string, channelId: number, message: string
       reacts: 0,
     }
   );
+//setting notification if tagged 
 
+  if (message.includes('@')) {
+    for (const element of data.channel[channelIndex].members) {
+      const uId = element.uId;
+      const userIndex = data.user.findIndex(a => a.uId = uId);
+      const userHandle = data.user[userIndex].handle;
+      if (message.includes('@' + userHandle)) {
+        const newNotification = {dmId: -1, channelId: channelId, notificationMessage: message.slice(0, 20)};
+        data.user[userIndex].notifications.push(newNotification);
+      }
+    }
+  }
   setData(data);
   return { messageId: messageId };
 }
@@ -328,5 +341,286 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
     }
   );
   setData(data);
+  return { messageId: messageId };
+}
+
+/*
+Pushes given data into a specified channel's messages array
+
+Arguments:
+  dmIndex (number)         - represents the index of the channel the message will get added to
+  messageId (number)       - represents the messageId of the message to get added
+  message (string)         - message to be added
+  timeSent (number)        - time the message was added
+
+Return Value:
+  N/A
+
+Errors:
+  N/A
+*/
+
+function pushMessage(channelIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
+  const data = getData();
+  data.channel[channelIndex].messages.push(
+    {
+      messageId: messageId,
+      uId: uId,
+      message: message,
+      timeSent: timeSent,
+      isPinned: 0,
+      reacts: 0,
+    }
+  );
+
+  setData(data);
+  return {};
+}
+/*
+Sends a message to a channel at a specified time in the future
+
+Arguments:
+  token (string)         - represents the session of the user who wishes to send a message
+  channelId (number)     - represents the id of the channe; they want to send the message to
+  message (string)       - message they want to share
+  timeSent (number)      - time in the future user want to send message
+
+Return Value:
+  Returns messageId if successful
+
+Throws a 400 error    - channeId does not refer to a valid Id
+                      - length of message is less than 1 or greater than 1000 characters
+                      - timeSent is a time in the past
+
+Throw a 403 error     - if token is invalid
+                      - if the user is not a part of the channe; they are trying to send a message to
+*/
+
+export function messageSendLaterV1(token: string, channelId: number, message: string, timeSent: number) {
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'invalid message length!');
+  }
+
+  if (timeSent < Math.floor(Date.now() / 1000)) {
+    throw HTTPError(400, 'Time must be in the future!');
+  }
+
+  const waitingTime = timeSent - Math.floor(Date.now() / 1000);
+
+  const data = getData();
+  checkToken(token, data);
+
+  const uId = tokenToUid(token, data);
+  // check for channel in database
+  if (data.channel.find(a => a.channelId === channelId) === undefined) {
+    throw HTTPError(400, 'invalid channelId!');
+    // check for user in channel
+  } else {
+    const i = data.channel.findIndex(data => data.channelId === channelId);
+    if (data.channel[i].members.find(a => a.uId === uId) === undefined) {
+      throw HTTPError(403, 'authorised user is not a member!');
+    }
+  }
+  const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
+  const messageId = Math.floor(Math.random() * 1000);
+
+  setTimeout(pushMessage, waitingTime * 1000, channelIndex, messageId, uId, message, timeSent); // THIS ISN'T WAITING
+  return { messageId: messageId };
+}
+/*
+Shares a message from a channel/DM to another channel/DM
+
+Arguments:
+  token (string)         - represents the session of the user who is creating the channel
+  ogMessageId (number)   - represents the messageId of the message to be shared
+  message (string)       - message they want concatenated on to the shared message
+  channelId (number)     - id of the channel they want the message shared to (-1 if sharing to DM)
+  dmID (number)          - id of the dm they want the message shared to (-1 if sharing to channel)
+
+Return Value:
+  Returns sharedMessageId (number) if successful
+
+Throws a 400 error    - length of message is over 1000 characters
+                      - ogMessageId does not refer to a valid message within channel/DM that user is a part of
+                      - channelId and dmId are both -1
+                      - both channelId and dmId do not refer to valid addresses
+Throw a 403 error     - if token is invalid
+                      - if they are not a part of the channel/dm they wish to share a message to
+*/
+
+export function MessageShareV1(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
+  if (channelId !== -1 && dmId !== -1) {
+    throw HTTPError(400, 'Specify channel/DM');
+  }
+
+  if (message.length > 1000) {
+    throw HTTPError(400, 'Message length must be below 1000 characters');
+  }
+  const data = getData();
+  const tokenIndex = data.token.findIndex(a => a.token === token);
+  const uId = data.token[tokenIndex].uId;
+
+  if (tokenIndex === -1) {
+    throw HTTPError(403, 'Invalid token');
+  }
+
+  // if sending to DM
+  if (channelId === -1) {
+    const sendIndex = data.dm.findIndex(a => a.dmId === dmId);
+    if (sendIndex === -1) {
+      throw HTTPError(400, 'invalid dmId!');
+    }
+    if (data.dm[sendIndex].members.findIndex(a => a.uId === uId) === -1) {
+      throw HTTPError(403, 'User not part of DM');
+    }
+    // searching for ogMessageId in the DMs and sending associated message to specified DM
+    for (const element of data.dm) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        // checking if member is a part of the dm they are trying to send a msg from
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access');
+        // Sharing to DM
+        const newMessage = message + element.messages[messageIndex].message;
+        const sharedMessageId = messageSendDmV2(token, dmId, newMessage);
+        return sharedMessageId;
+      }
+    }
+
+    // searching for ogMessageId in the channels and sending associated message to specified DM
+    for (const element of data.channel) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        // checking if member is a part of the channel they are trying to send a msg from
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access');
+        // Sharing to DM
+        const newMessage = message + element.messages[messageIndex].message;
+        const sharedMessageId = messageSendDmV2(token, dmId, newMessage);
+        return sharedMessageId;
+      }
+    }
+  } else { // if sending to channel
+    if (data.channel.find(a => a.channelId === channelId) === undefined) {
+      throw HTTPError(400, 'invalid channelId!');
+    }
+    const sendIndex = data.channel.findIndex(a => a.channelId === channelId);
+    if (sendIndex === -1) {
+      throw HTTPError(400, 'invalid dmId!');
+    }
+    if (data.channel[sendIndex].members.findIndex(a => a.uId === uId) === -1) {
+      throw HTTPError(403, 'User not part of DM');
+    }
+    // searching for ogMessageId in the DMs and sending associated message to specified channel
+    for (const element of data.dm) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        // checking if member is a part of the dm they are trying to send a msg from
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access');
+        // Sharing to DM
+        const newMessage = message + element.messages[messageIndex].message;
+        const sharedMessageId = messageSendV2(token, channelId, newMessage);
+        return sharedMessageId;
+      }
+    }
+
+    // searching for ogMessageId in the channels and sending associated message to specified channel
+    for (const element of data.channel) {
+      const messageIndex = element.messages.findIndex(a => a.messageId === ogMessageId);
+      if (messageIndex !== -1) {
+        // checking if member is a part of the channel they are trying to send a msg from
+        const memberIndex = element.members.findIndex(a => a.uId === uId);
+        if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access');
+        // Sharing to DM
+        const newMessage = message + element.messages[messageIndex].message;
+        const sharedMessageId = messageSendV2(token, channelId, newMessage);
+        return sharedMessageId;
+      }
+    }
+  }
+  throw HTTPError(400, 'Invalid messageId');
+}
+
+/*
+Pushes given data into a specified DM's messages array
+
+Arguments:
+  dmIndex (number)         - represents the index of the dm the message will get added to
+  messageId (number)       - represents the messageId of the message to get added
+  message (string)         - message to be added
+  timeSent (number)        - time the message was added
+
+Return Value:
+  N/A
+
+Errors:
+  N/A
+*/
+
+function pushMessageDM (dmIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
+  const data = getData();
+  data.dm[dmIndex].messages.push(
+    {
+      messageId: messageId,
+      uId: uId,
+      message: message,
+      timeSent: timeSent,
+      isPinned: 0,
+      reacts: 0,
+    }
+  );
+  setData(data);
+}
+
+/*
+Sends a message to a DM at a specified time in the future
+
+Arguments:
+  token (string)         - represents the session of the user who wishes to send a message
+  dmId (number)          - represents the id of the DM they want to send the message to
+  message (string)       - message they want to share
+  timeSent (number)      - time in the future user want to send message
+
+Return Value:
+  Returns messageId if successful
+
+Throws a 400 error    - dmId does not refer to a valid DM
+                      - length of message is less than 1 or greater than 1000 characters
+                      - timeSent is a time in the past
+
+Throw a 403 error     - if token is invalid
+                      - if the user is not a part of the dm they are trying to send a message to
+*/
+export function MessageSendLaterDMV1(token: string, dmId: number, message: string, timeSent: number) {
+  if (message.length < 1 || message === '' || message.length > 1000) {
+    throw HTTPError(400, 'invalid message length!');
+  }
+
+  if (timeSent < Math.floor(Date.now() / 1000)) {
+    throw HTTPError(400, 'Time must be in the future');
+  }
+
+  const waitingTime = timeSent - Math.floor(Date.now() / 1000);
+
+  const data = getData();
+  checkToken(token, data);
+
+  const uId = tokenToUid(token, data);
+
+  // check for dmId in data
+  if (data.dm.find(a => a.dmId === dmId) === undefined) {
+    throw HTTPError(400, 'invalid dmId!');
+  }
+  // dm valid, but auth user is not a member
+  const i = data.dm.findIndex(data => data.dmId === dmId);
+  if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
+    throw HTTPError(403, 'auth user is not a member!');
+  }
+
+  const messageId = Math.floor(Math.random() * 100);
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+
+  setTimeout(pushMessageDM, waitingTime * 1000, dmIndex, messageId, uId, message, timeSent);
   return { messageId: messageId };
 }

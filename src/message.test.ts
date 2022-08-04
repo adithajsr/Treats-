@@ -1,12 +1,10 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestClear } from './users.test';
-
 import { requestAuthRegister } from './auth.test';
-
 import { requestChannelsCreate } from './channels.test';
-
 import { requestDMCreate } from './dm.test';
+import { requestChannelMessages } from './channel.test'
 
 const port = config.port;
 const url = config.url;
@@ -20,6 +18,7 @@ export type payloadObj = {
   dmId?: number;
   uId?: number;
   message?: string;
+  timeSent?: number;
 };
 
 export function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
@@ -77,6 +76,10 @@ export function requestChannelJoinV2(token: string, channelId: number) {
 
 function requestChannelAddownerV1(token: string, channelId: number, uId: number) {
   return requestHelper('POST', '/channel/addowner/v1', { token, channelId, uId });
+}
+
+export function requestMessageSendLater(token: string, channelId: number, message: string, timeSent: number) {
+  return requestHelper('POST', '/message/sendlater/v1', {token, channelId, message, timeSent});
 }
 
 // -------------------------------------------------------------------------//
@@ -381,3 +384,60 @@ describe('messages capabilities', () => {
 });
 
 export { requestAuthRegister, requestChannelsCreate, requestMessageSend };
+
+// -------------------------------------- TESTING MESSAGESENDLATERV1 --------------------------------------
+
+//test data
+const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
+const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
+
+/*
+test('timeSent is a time in the past', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  const pastTime = Math.floor(Date.now()/1000) - 50;
+  expect(requestMessageSendLater(danielToken, channelId, 'does time travel work?', pastTime)).toBe(400);
+});
+
+
+
+test ('success case with one message', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  const futureTime = Math.floor(Date.now()/1000) + 50;
+
+  requestMessageSendLater(danielToken, channelId, 'Reminder: stop gaming and start assignment bitch. Also love yourself.', futureTime);
+  console.log(requestChannelMessages(danielToken, channelId, 0).bodyObj);
+  setTimeout(() => {
+    expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].toStrictEqual('Reminder: stop gaming and start assignment bitch. Also love yourself.'));
+    }, 6000 
+  );
+
+});
+
+*/
+test('success case', async() => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
+
+  requestMessageSend(danielToken, channelId, 'First message');
+  requestMessageSend(danielToken, channelId, 'Second message');
+  requestMessageSend(danielToken, channelId, 'Third message');
+  const returnObject = ['First message', 'Second message', 'Third message', 'Fourth message'];
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual(returnObject[0]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[1].message).toStrictEqual(returnObject[1]);
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[2].message).toStrictEqual(returnObject[2]);
+  requestMessageSendLater(danielToken, channelId, 'Fourth message', 2); 
+
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3]).toStrictEqual(undefined); 
+
+  await new Promise((r) => setTimeout(r, 2500));
+  
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].toStrictEqual(returnObject[3]));
+});

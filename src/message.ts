@@ -330,3 +330,51 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
   setData(data);
   return { messageId: messageId };
 }
+
+function pushMessage(channelIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
+  const data = getData();
+  data.channel[channelIndex].messages.push(
+    {
+      messageId: messageId,
+      uId: uId,
+      message: message,
+      timeSent: timeSent,
+      isPinned: 0,
+      reacts: 0,
+    }
+  );
+
+  setData(data);
+}
+
+export function messageSendLaterV1(token: string, channelId: number, message: string, timeSent: number) {
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'invalid message length!');
+  }
+
+  if (timeSent < Math.floor(Date.now()/1000)) {
+    throw HTTPError(400, 'Time must be in the future!');
+  }
+
+  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + timeSent;
+
+  const data = getData();
+  checkToken(token, data);
+
+  const uId = tokenToUid(token, data);
+  // check for channel in database
+  if (data.channel.find(a => a.channelId === channelId) === undefined) {
+    throw HTTPError(400, 'invalid channelId!');
+    // check for user in channel
+  } else {
+    const i = data.channel.findIndex(data => data.channelId === channelId);
+    if (data.channel[i].members.find(a => a.uId === uId) === undefined) {
+      throw HTTPError(403, 'authorised user is not a member!');
+    }
+  }
+  const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
+  const messageId = Math.floor(Math.random() * 1000);
+
+  setTimeout(pushMessage, timeSent * 1000, channelIndex, messageId, uId, message, timeFinish); //THIS ISN'T WAITING 
+  return { messageId: messageId };
+}

@@ -16,6 +16,7 @@ import { channelMessagesV2 } from './channel';
 import { searchV1 } from './search';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 import { adminUserRemoveV1 } from './admin';
+import { messageSendLaterV1 } from './message';
 
 // Set up web app, use JSON
 const app = express();
@@ -38,6 +39,12 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.post('/message/sendlater/v1', (req, res) => {
+  const token = req.header('token');
+  const {channelId, message, timeSent} = req.body;
+  return res.json(messageSendLaterV1(token, channelId, message, timeSent));
+});
 
 app.get('/search/v1', (req, res, next) => {
   const token = req.header('token');

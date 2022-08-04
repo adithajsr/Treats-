@@ -1,7 +1,85 @@
 {
-    "user": [],
-    "channel": [],
-    "token": [],
+    "user": [
+        {
+            "uId": 1,
+            "email": "danielYung@gmail.com",
+            "password": "password",
+            "nameFirst": "Daniel",
+            "nameLast": "Yung",
+            "handle": "danielyung",
+            "globalPerms": 1,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659588458
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659588458
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659588458
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        }
+    ],
+    "channel": [
+        {
+            "channelId": 1,
+            "channelName": "danielChannel",
+            "isPublic": true,
+            "isActive": false,
+            "isActiveUid": -1,
+            "standupFinish": null,
+            "queue": [],
+            "members": [
+                {
+                    "uId": 1,
+                    "channelPerms": 1
+                }
+            ],
+            "messages": [
+                {
+                    "messageId": 534,
+                    "uId": 1,
+                    "message": "First message",
+                    "timeSent": 1659588458,
+                    "isPinned": 0,
+                    "reacts": 0
+                },
+                {
+                    "messageId": 889,
+                    "uId": 1,
+                    "message": "Second message",
+                    "timeSent": 1659588458,
+                    "isPinned": 0,
+                    "reacts": 0
+                },
+                {
+                    "messageId": 271,
+                    "uId": 1,
+                    "message": "Third message",
+                    "timeSent": 1659588458,
+                    "isPinned": 0,
+                    "reacts": 0
+                }
+            ]
+        }
+    ],
+    "token": [
+        {
+            "token": "c80734d1-1e28-4fe3-819b-62e286811365",
+            "uId": 1
+        }
+    ],
     "dm": [],
     "workspaceStats": {
         "channelsExist": [],

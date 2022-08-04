@@ -138,7 +138,7 @@ test('default case', () => {
   const time3 = Math.floor((new Date()).getTime() / 1000);
 
   const retObject = requestSearch(danielToken, 'hEHe');
-  let react: any[] = [];
+  const react: any[] = [];
   const expectedObj1 = { messageId: messageId1, uId: danielId, message: 'omg hopefully he doesnt see this hehe', timeSent: time1, reacts: react, isPinned: 0 };
   const expectedObj2 = { messageId: messageId2, uId: danielId, message: 'hehe', timeSent: time2, reacts: react, isPinned: 0 };
   const expectedObj3 = { messageId: messageId3, uId: maiyaId, message: 'stfu bitch hehe', timeSent: time3, reacts: react, isPinned: 0 };

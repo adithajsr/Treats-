@@ -49,8 +49,6 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   const data = getData();
   const { channel } = data;
   let messageString = '';
-  console.log({a:"Channel index is", channelIndex: channelIndex});
-  if(channel[channelIndex].queue.length === undefined){console.log("UNDEFINED QUEUE PROBLEM")}
   for (let i = 0; i < channel[channelIndex].queue.length; i++) {
     if (i === channel[channelIndex].queue.length - 1) {
       messageString += channel[channelIndex].queue[i];
@@ -93,7 +91,7 @@ Return Value:
   Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
 */
 export function standupStartV1(token: string, channelId: number, length: number) {
-  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + 3;
+  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + length;
   if (length < 0) throw HTTPError(400, 'invalid length for stand up!');
   const data = getData();
   checkToken(token, data);

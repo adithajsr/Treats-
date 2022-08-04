@@ -39,13 +39,13 @@ function requestChannelsListAll(token: string) {
   };
 }
 
-export function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
+export function requestChannelInvite(token: string, channelId: number, uId: number) {
   const res = request(
     'POST',
     `${url}:${port}/channel/invite/v2`,
     {
-      json: { channelId, InviteeAUI },
-      headers: { InviterAUI },
+      json: { channelId, uId },
+      headers: { token },
     }
   );
   return {

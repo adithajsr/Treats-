@@ -189,29 +189,27 @@ Return Value:
 export function channelInviteV2(token: string, channelId: number, uId: number) {
   const authUserId = tokenConvert(token);
   const data = getData();
-  if (uIdExists(uId) === false) return {sex: 'sex'};
   if (channelExists(channelId) === false ||
     uIdExists(uId) === false ||
     memberExists(channelId, uId) === true ||
     memberExists(channelId, authUserId) === false) {
     return { error: 'error' };
   }
+
   addUser(channelId, uId);
   
   //Adding newNotification to user's notification array
   const channelIndex = data.channel.findIndex((data) => data.channelId === channelId); 
   const channelName = data.channel[channelIndex].channelName;
-  const authUserIndex = data.user.findIndex(a => a.uId = authUserId);
-  const notificationMessage = data.user[authUserIndex].handle + 'added you to ' + channelName;
+  const authUserIndex = data.user.findIndex(a => a.uId === authUserId);
+  const notificationMessage = data.user[authUserIndex].handle + ' added you to ' + channelName;
   const dmId = -1;
   const newNotification = { channelId, dmId, notificationMessage };
-
-  console.log(channelId, dmId, notificationMessage);
-  
-  const userIndex = data.user.findIndex(a => a.uId = uId);
+  const userIndex = data.user.findIndex(a => a.uId === uId);
   data.user[userIndex].notifications.push(newNotification);  
   setData(data);
   return {};
+  
 }
 
 /* Description: Removes a user from a channel.

@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore';
+import { getData, setData, message } from './dataStore';
 import { checkToken, tokenToUid } from './message';
 import HTTPError from 'http-errors';
 
@@ -9,6 +9,18 @@ interface Database {
   dm: any[];
 }
 
+/*
+Checks if channelId is valid and if a uId
+
+Arguments:
+  channelId (number)      - channelId in question
+  uId(number)             - uId of person to check if existing in channel
+  data (Database)         - database to inspect
+
+Return Value:
+  Throws a 400 error    - if channelId doesn't refer to a valid channel
+  Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
+*/
 export function checkChannelMemberExist(channelId: number, uId: number, data: Database) {
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     throw HTTPError(400, 'invalid channelId');
@@ -21,9 +33,31 @@ export function checkChannelMemberExist(channelId: number, uId: number, data: Da
   }
 }
 
+/*
+Packages messages received from standups and pushes it to the message queue to the channel
+
+Arguments:
+  channelIndex (number) - index of the channel the stand up is sent to
+  timeSent (number) - time the standup will be sent
+  uId (number) - uId of the person that started the standup
+
+Return Value:
+  Returns nothing
+*/
+
 function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
   const data = getData();
   const { channel } = data;
+
+  if (channel[channelIndex].queue.length === 0) {
+    channel[channelIndex].isActive = false;
+    channel[channelIndex].isActiveUid = -1;
+    channel[channelIndex].standupFinish = 0;
+    channel[channelIndex].queue = [];
+    setData(data);
+    return;
+  }
+
   let messageString = '';
   for (let i = 0; i < channel[channelIndex].queue.length; i++) {
     if (i === channel[channelIndex].queue.length - 1) {
@@ -33,13 +67,13 @@ function doStandupStart(channelIndex: number, timeSent: number, uId: number) {
     }
   }
 
-  const packageMessage = {
+  const packageMessage: message = {
     messageId: Math.floor(Math.random() * 1000),
     uId: uId,
     message: messageString,
     timeSent: timeSent,
     isPinned: 0,
-    reacts: 0
+    reacts: [],
   };
 
   channel[channelIndex].messages.push(packageMessage);
@@ -84,7 +118,7 @@ Return Value:
   Throw a 403 error     - channelId was valid but auth user wasn't a member of channel
 */
 export function standupStartV1(token: string, channelId: number, length: number) {
-  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + 3;
+  const timeFinish = (Math.floor((new Date()).getTime() / 1000)) + length;
   if (length < 0) throw HTTPError(400, 'invalid length for stand up!');
   const data = getData();
   checkToken(token, data);
@@ -149,14 +183,13 @@ Return Value:
 */
 let standupMessage: string;
 export function standupSendV1(token: string, channelId: number, message: string) {
-  if (message.length > 1000) throw HTTPError(403, 'length of standup message is over 1000!');
-
   const data = getData();
+  if (message.length > 1000) throw HTTPError(403, 'length of standup message is over 1000!');
+  // const data = getData();
   checkToken(token, data);
   const uId = tokenToUid(token, data);
   const { channel } = data;
   checkChannelMemberExist(channelId, uId, data);
-
   if (standupActiveV1(token, channelId).isActive === false) throw HTTPError(400, 'standup not active!');
 
   const i = channel.findIndex(channel => channel.channelId === channelId);
@@ -164,7 +197,6 @@ export function standupSendV1(token: string, channelId: number, message: string)
   // find handle
   const handleIndex = data.user.findIndex(user => user.uId === uId);
   const handle = data.user[handleIndex].handle;
-
   standupMessage = handle + ': ' + message;
   channel[i].queue.push(standupMessage);
   setData(data);

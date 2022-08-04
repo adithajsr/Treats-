@@ -149,7 +149,7 @@ export function messageSendV2 (token: string, channelId: number, message: string
       message: message,
       timeSent: time,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
 
@@ -369,7 +369,7 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
       message: message,
       timeSent: time,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
   setData(data);
@@ -401,7 +401,7 @@ function pushMessage(channelIndex: number, messageId: number, uId: number, messa
       message: message,
       timeSent: timeSent,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
 
@@ -602,7 +602,6 @@ Arguments:
 
 Return Value:
   N/A
-
 Errors:
   N/A
 */
@@ -616,7 +615,7 @@ function pushMessageDM (dmIndex: number, messageId: number, uId: number, message
       message: message,
       timeSent: timeSent,
       isPinned: 0,
-      reacts: 0,
+      reacts: [],
     }
   );
 

@@ -72,7 +72,12 @@ let data = {
           message: 'Hello world',
           timeSent: '001',
           pinned: 0,
-          react: 0,
+          react: [
+			{
+				reactId: 1
+				uIds: []
+			}
+		  ],
         },
       ],
     },

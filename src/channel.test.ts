@@ -1,7 +1,5 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-import { requestMessageSend } from './message.test';
-
 const OK = 200;
 const port = config.port;
 const url = config.url;
@@ -15,6 +13,11 @@ type payloadObj = {
   token?: string;
   channelId?: number;
 };
+
+type id = {
+  token: string,
+  authUserId: number,
+}
 
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {
   let qs = {};
@@ -233,142 +236,177 @@ describe('channel/details/v3 testing', () => {
 });
 
 // ======================================== Setup ========================================
-interface authRegUser {
-  token: string,
-  authUserId: number,
-}
-
-let channel1: number;
-let channel2: number;
-let channel3: number;
-let admin: authRegUser;
-let user1: authRegUser;
-let user2: authRegUser;
-let user3: authRegUser;
+let channel1:number;
+let channel2:number;
+let channel3:number;
+let globalAdmin:id;
+let admin:id;
+let user1:id;
+let user2:id;
+let user3:id;
+let dm1:number;
+let message1:number;
+let message2:number;
+let dmId:number;
 
 // ======================================== Helper functions ========================================
 
-function setupDatabase() {
-  admin = requestAuthRegisterNoRes('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Hancock');
-  user1 = requestAuthRegisterNoRes('who.is.zac@is.the.question.com', 'zaccool', 'Zac', 'Li');
-  user2 = requestAuthRegisterNoRes('who.is.nick@is.the.question.com', 'yeyyey', 'Nick', 'Smith');
-  user3 = requestAuthRegisterNoRes('who.is.yet@is.the.question.com', 'nicolea', 'Nicole', 'pi');
-  const c1 = requestChannelsCreateNoRes(admin.token, 'Channel1', true);
-  const c2 = requestChannelsCreateNoRes(admin.token, 'Channel2', true);
-  const c3 = requestChannelsCreateNoRes(admin.token, 'Channel3', false); // channel3 is private
+export function setupDatabase() {
+  let reg = { email: 'who.is.john@is.the.question.com', password: '12367dhd', nameFirst: 'Nathan', nameLast: 'Spencer' };
+  globalAdmin = sendPost('auth/register/v3', 'a', reg);
 
-  channel1 = c1.channelId;
-  channel2 = c2.channelId;
-  channel3 = c3.channelId;
+  reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
+  admin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.zac@is.the.question.com', password: 'zaccool', nameFirst: 'Zac', nameLast: 'Li' };
+  user1 = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.nick@is.the.question.com', password: 'yeyyey', nameFirst: 'Nick', nameLast: 'Smith' };
+  user2 = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.yet@is.the.question.com', password: 'nicolea', nameFirst: 'Nicole', nameLast: 'pi' };
+  user3 = sendPost('auth/register/v3', 'a', reg);
+
+  channel1 = sendPost('channels/create/v3', admin.token, { name: 'Channel1', isPublic: true }).channelId;
+  channel2 = sendPost('channels/create/v3', admin.token, { name: 'Channel2', isPublic: true }).channelId;
+  channel3 = sendPost('channels/create/v3', admin.token, { name: 'Channel3', isPublic: false }).channelId; // channel3 is private
 
   // Add users to respective channels having admin as the owner.
   let body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-  sendPost('channel/invite/v3', body);
+  sendPost('channel/invite/v3', admin.token, body);
 
   body = { token: admin.token, channelId: channel2, uId: user2.authUserId };
-  sendPost('channel/invite/v3', body);
+  sendPost('channel/invite/v3', admin.token, body);
 
   body = { token: admin.token, channelId: channel3, uId: user3.authUserId };
-  sendPost('channel/invite/v3', body);
+  sendPost('channel/invite/v3', admin.token, body);
+
+  // Add messages to channels
+  message1 = requestMessageSend(user1.token, channel1, 'A message is sent to channel1').messageId;
+  message2 = requestMessageSend(user2.token, channel2, 'A message is sent to channel2').messageId;
+
+  // Create a Dm channel.
+  const uIds = [user3.authUserId, user2.authUserId, admin.authUserId];
+  dmId = requestDMCreate(user1.token, uIds).dmId;
+  // Send a dm.
+  dm1 = requestSendDm(user2.token, dmId, 'A message is sent to the DM').messageId;
 }
 
-let headers = {};
-type sendPostObj = {
-  token?: string;
-  channelId?: number;
-  uId?: number;
-};
-
-function sendPost(path:string, body: sendPostObj) {
-  // Check if token key exists in body
-  if (body.token !== undefined) {
-    headers = { token: body.token };
-    delete body.token;
-  }
-
+export function sendPost(path:string, token:string, body: object) {
   const res = request(
     'POST',
       `${url}:${port}/${path}`,
       {
         json: body,
-        headers,
+        headers: { token: token }
       }
   );
-  return JSON.parse(res.body as string);
+
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
 }
 
-// Changed function name due to duplication errors
-function requestAuthRegisterNoRes(email: string, password: string, nameFirst: string, nameLast: string) {
+function requestMessageSend(token: string, channelId: number, message: string) {
   const res = request(
     'POST',
-      `${url}:${port}/auth/register/v3`,
-      {
-        json: {
-          email: email,
-          password: password,
-          nameFirst: nameFirst,
-          nameLast: nameLast,
-        }
-      }
-  );
-  return JSON.parse(res.body as string);
-}
-
-function requestChannelsCreateNoRes(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channels/create/v3`,
+    `${url}:${port}/message/send/v2`,
     {
-      json: { name, isPublic },
-      headers: { token },
+      json: { channelId, message },
+      headers: { token: token }
     }
   );
-  return JSON.parse(res.body as string);
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
 }
 
-// ======================================== channel/join/v3 ========================================
+function requestSendDm(token: string, dmId: number, message: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/senddm/v2`,
+    {
+      json: { dmId, message },
+      headers: { token: token }
+    }
+  );
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
+}
 
+function requestDMCreate(token: string, uIds: number[]) {
+  const res = request(
+    'POST',
+    `${url}:${port}/dm/create/v2`,
+    {
+      json: { uIds },
+      headers: { token: token }
+    }
+  );
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
+}
+
+// // ======================================== channel/join/v3 ========================================
 describe('Testing for channel/join/v3', () => {
-  test('channel/join/v2 channel does not exist error', () => {
+  test('channel/join/v3 channel does not exist error', () => {
     setupDatabase();
-    const body = { token: admin.token, channelId: 9999 };
-    expect(sendPost('channel/join/v3', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: 9999 };
+    expect(sendPost('channel/join/v3', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/join/v3 user already exists error', () => {
-    const body = { token: admin.token, channelId: channel1 };
-    expect(sendPost('channel/join/v3', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1 };
+    expect(sendPost('channel/join/v3', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/join/v3 private channel error', () => {
-    const body = { token: user1.token, channelId: channel3 };
-    expect(sendPost('channel/join/v3', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel3 };
+    expect(sendPost('channel/join/v3', user1.token, body)).toStrictEqual(403);
+  });
+
+  test('channel/join/v3 pass private channel but global user', () => {
+    const body = { channelId: channel3 };
+    expect(sendPost('channel/join/v3', globalAdmin.token, body)).toStrictEqual({});
   });
 
   test('channel/join/v3 pass', () => {
-    const body = { token: user1.token, channelId: channel2 };
-    expect(sendPost('channel/join/v3', body)).toStrictEqual({});
+    const body = { channelId: channel2 };
+    expect(sendPost('channel/join/v3', user1.token, body)).toStrictEqual({});
     requestClear();
   });
 });
-requestClear();
-
 // // ======================================== channel/invite/v3 ========================================
 describe('Testing for channel/invite/v3', () => {
   test('channel/invite/v3 channel does not exist error', () => {
     setupDatabase();
-    const body = { token: admin.token, channelId: 9999, uId: user1.authUserId };
-    expect(sendPost('channel/invite/v3', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: 9999, uId: user1.authUserId };
+    expect(sendPost('channel/invite/v3', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/invite/v3 user already exists error', () => {
-    const body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-    expect(sendPost('channel/invite/v3', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1, uId: user1.authUserId };
+    expect(sendPost('channel/invite/v3', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('channel/invite/v3 unauthorised user', () => {
+    const body = { channelId: channel2, uId: user1.authUserId };
+    expect(sendPost('channel/invite/v3', user3.token, body)).toStrictEqual(403);
   });
 
   test('channel/invite/v3 pass', () => {
-    const body = { token: admin.token, channelId: channel2, uId: user1.authUserId };
-    expect(sendPost('channel/invite/v3', body)).toStrictEqual({});
+    const body = { channelId: channel2, uId: user1.authUserId };
+    expect(sendPost('channel/invite/v3', admin.token, body)).toStrictEqual({});
     requestClear();
   });
 });
@@ -377,102 +415,240 @@ describe('Testing for channel/invite/v3', () => {
 describe('Testing for channel/leave/v2  ', () => {
   test('channel/leave/v2 channel does not exist error', () => {
     setupDatabase();
-    const body = { token: admin.token, channelId: 9999 };
-    expect(sendPost('channel/leave/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: 9999 };
+    expect(sendPost('channel/leave/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/leave/v2 user doesnt exists error', () => {
-    const body = { token: user1.token, channelId: channel2 };
-    expect(sendPost('channel/leave/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1 };
+    expect(sendPost('channel/leave/v2', user2.token, body)).toStrictEqual(403);
+  });
+
+  test('channel/leave/v2 fails as there is an active standup', () => {
+    const body = { channelId: channel1, length: 3000 };
+    sendPost('standup/start/v1', user1.token, body);
+    const body2 = { channelId: channel1 };
+    expect(sendPost('channel/leave/v2', user1.token, body2)).toStrictEqual(400);
+    requestClear();
   });
 
   test('channel/leave/v2 passing', () => {
-    const body = { token: user1.token, channelId: channel1 };
-    expect(sendPost('channel/leave/v2', body)).toStrictEqual({});
+    setupDatabase();
+    const body = { channelId: channel1 };
+    expect(sendPost('channel/leave/v2', user1.token, body)).toStrictEqual({});
     requestClear();
   });
 });
-requestClear();
 
-// // ======================================== channel/addowner/v2 ========================================
+// ======================================== channel/addowner/v2 ========================================
 describe('Testing for channel/addowner/v2  ', () => {
   test('channel/addowner/v2 channel does not exist error', () => {
     setupDatabase();
-    const body = { token: admin.token, channelId: 9999, uId: user1.authUserId };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: 9999, uId: user1.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/addowner/v2 user doesnt exists error', () => {
-    const body = { token: admin.token, channelId: channel1, uId: 99999 };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1, uId: 99999 };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/addowner/v2 user is not a member of the channel', () => {
-    const body = { token: admin.token, channelId: channel1, uId: user2.authUserId };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1, uId: user2.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual(400);
     requestClear();
   });
 
   test('channel/addowner/v2 user is already an owner', () => {
     setupDatabase();
     // make user1 an owner of channel1;
-    let body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({});
+    let body = { channelId: channel1, uId: user1.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual({});
     // try to make user1 an owner of channel1 again;
-    body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({ error: 'error' });
+    body = { channelId: channel1, uId: user1.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual(400);
     requestClear();
   });
 
-  test('channel/addowner/v2 authorised user doesnt have permissions', () => {
+  test('channel/addowner/v2 fail user doesnt have permissions', () => {
+    setupDatabase();
+    const body = { channelId: channel2, uId: user2.authUserId };
+    expect(sendPost('channel/addowner/v2', user1.token, body)).toStrictEqual(403);
+    requestClear();
+  });
+
+  test('channel/addowner/v2 authorised user works', () => {
     setupDatabase();
     // add user1 to channel 2
-    const body1 = { token: user1.token, channelId: channel2 };
-    expect(sendPost('channel/join/v3', body1)).toStrictEqual({});
-    const body = { token: user1.token, channelId: channel2, uId: user2.authUserId };
-    expect(sendPost('channel/addowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body1 = { channelId: channel2 };
+    sendPost('channel/join/v3', admin.token, body1);
+    const body = { channelId: channel2, uId: user2.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body)).toStrictEqual({});
     requestClear();
   });
 });
 
-// // ======================================== channel/removeowner/v2 ========================================
+// ======================================== channel/removeowner/v2 ========================================
 describe('Testing for channel/removeowner/v2', () => {
   test('channel/removeowner/v2 channel does not exist error', () => {
     setupDatabase();
-    const body = { token: admin.token, channelId: 9999, uId: user1.authUserId };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
-    requestClear();
+    const body = { channelId: 9999, uId: user1.authUserId };
+    expect(sendPost('channel/removeowner/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/removeowner/v2 user doesnt exists error', () => {
-    const body = { token: admin.token, channelId: channel1, uId: 99999 };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body = { channelId: channel1, uId: 99999 };
+    expect(sendPost('channel/removeowner/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/removeowner/v2 user is not a member of the channel', () => {
-    const body = { token: admin.token, channelId: channel1, uId: user2.authUserId };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
-  });
-
-  test('channel/removeowner/v2 user is not an owner', () => {
-    const body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
-  });
-
-  test('channel/removeowner/v2 there is only one admin', () => {
-    const body = { token: admin.token, channelId: channel1, uId: admin.authUserId };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
-    requestClear();
+    const body = { channelId: channel1, uId: user2.authUserId };
+    expect(sendPost('channel/removeowner/v2', admin.token, body)).toStrictEqual(400);
   });
 
   test('channel/removeowner/v2 authorised user doesnt have permissions', () => {
-    setupDatabase();
     // add user1 to channel 2
-    const body1 = { token: user1.token, channelId: channel2 };
-    sendPost('channel/join/v3', body1);
-    // have user1 try and revoke permissions.
-    const body = { token: user1.token, channelId: channel2, uId: user2.authUserId };
-    expect(sendPost('channel/removeowner/v2', body)).toStrictEqual({ error: 'error' });
+    const body1 = { channelId: channel2 };
+    expect(sendPost('channel/join/v3', user1.token, body1)).toStrictEqual({});
+
+    const body2 = { channelId: channel2, uId: user2.authUserId };
+    expect(sendPost('channel/addowner/v2', admin.token, body2)).toStrictEqual({});
+
+    const body = { channelId: channel2, uId: admin.authUserId };
+    expect(sendPost('channel/removeowner/v2', user1.token, body)).toStrictEqual(403);
+    requestClear();
+  });
+
+  test('channel/removeowner/v2 user is not an owner', () => {
+    setupDatabase();
+    const body = { channelId: channel1, uId: user1.authUserId };
+    expect(sendPost('channel/removeowner/v2', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('channel/removeowner/v2 there is only one admin', () => {
+    const body = { channelId: channel1, uId: admin.authUserId };
+    expect(sendPost('channel/removeowner/v2', admin.token, body)).toStrictEqual(400);
+    requestClear();
+  });
+});
+
+// ======================================== message/react/v1 ========================================
+describe('Testing for message/react/V1', () => {
+  test('messageId is not a valid message', () => {
+    setupDatabase();
+    const body = { messageId: 9999999, reactId: 1 };
+    expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual(400);
+  });
+
+  test('reactId is not a valid', () => {
+    const body = { messageId: message1, reactId: 99999 };
+    expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual(400);
+  });
+
+  test('react works channel', () => {
+    const body = { messageId: message1, reactId: 1 };
+    expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual({});
+  });
+
+  test('react works dm', () => {
+    const body = { messageId: dm1, reactId: 1 };
+    expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual({});
+    requestClear();
+  });
+});
+
+// // ======================================== message/unreact/v1 ========================================
+describe('Testing for message/unreact/V1', () => {
+  test('messageId is not a valid message', () => {
+    setupDatabase();
+    const body = { messageId: 9999999, reactId: 1 };
+    expect(sendPost('message/unreact/v1', user1.token, body)).toStrictEqual(400);
+  });
+
+  test('reactId is not a valid', () => {
+    const body = { messageId: message1, reactId: 99999 };
+    expect(sendPost('message/unreact/v1', user1.token, body)).toStrictEqual(400);
+  });
+
+  test('unreact works channel', () => {
+    const body1 = { token: user1.token, messageId: message1, reactId: 1 };
+    expect(sendPost('message/react/v1', user1.token, body1)).toStrictEqual({});
+    const body = { token: user1.token, messageId: message1, reactId: 1 };
+    expect(sendPost('message/unreact/v1', user1.token, body)).toStrictEqual({});
+    requestClear();
+  });
+
+  test('unreact works dm', () => {
+    setupDatabase();
+    const body1 = { token: user1.token, messageId: dm1, reactId: 1 };
+    sendPost('message/react/v1', user1.token, body1);
+    const body = { token: user1.token, messageId: dm1, reactId: 1 };
+    expect(sendPost('message/unreact/v1', user1.token, body)).toStrictEqual({});
+    requestClear();
+  });
+});
+
+// ======================================== message/pin/v1 ========================================
+describe('Testing for message/pin/v1', () => {
+  test('messageId is not a valid message', () => {
+    setupDatabase();
+    const body = { messageId: 9999999 };
+    expect(sendPost('message/pin/v1', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('pin failed, user doesnt have permissions', () => {
+    const body = { messageId: message1 };
+    expect(sendPost('message/pin/v1', user1.token, body)).toStrictEqual(403);
+  });
+
+  test('pin works channel', () => {
+    const body = { messageId: message1 };
+    expect(sendPost('message/pin/v1', admin.token, body)).toStrictEqual({});
+  });
+
+  test('pin already exists', () => {
+    const body = { messageId: message1 };
+    expect(sendPost('message/pin/v1', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('pin works dm', () => {
+    const body = { messageId: dm1 };
+    expect(sendPost('message/pin/v1', admin.token, body)).toStrictEqual({});
+    requestClear();
+  });
+});
+// // ======================================== message/unpin/v1 ========================================
+describe('Testing for message/unpin/v1', () => {
+  test('messageId is not a valid message', () => {
+    setupDatabase();
+    const body = { messageId: 9999999 };
+    expect(sendPost('message/unpin/v1', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('upin doesnt exist', () => {
+    const body = { messageId: message2 };
+    expect(sendPost('message/unpin/v1', admin.token, body)).toStrictEqual(400);
+  });
+
+  test('upin fails, user doesnt have permissions', () => {
+    const body1 = { messageId: message1 };
+    expect(sendPost('message/pin/v1', admin.token, body1)).toStrictEqual({});
+    const body = { messageId: message1 };
+    expect(sendPost('message/unpin/v1', user1.token, body)).toStrictEqual(403);
+  });
+
+  test('upin works channel', () => {
+    const body1 = { messageId: message1 };
+    sendPost('message/pin/v1', admin.token, body1);
+    const body = { messageId: message1 };
+    expect(sendPost('message/unpin/v1', admin.token, body)).toStrictEqual({});
+  });
+
+  test('unpin works dm', () => {
+    const body1 = { messageId: dm1 };
+    sendPost('message/pin/v1', admin.token, body1);
+    const body = { messageId: dm1 };
+    expect(sendPost('message/unpin/v1', admin.token, body)).toStrictEqual({});
     requestClear();
   });
 });

@@ -7,6 +7,8 @@ import errorHandler from 'middleware-http-errors';
 import HTTPError from 'http-errors';
 
 import { channelMessagesV2, channelDetailsV3, channelJoinV3, channelInviteV3, channelLeaveV2, channelAddownerV2, channelRemoveownerV2 } from './channel';
+import { pin, unPin, react, unReact } from './channel';
+import { userPermissionChange } from './admin';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
@@ -372,6 +374,47 @@ app.post('/standup/send/v1', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
   res.json(standupSendV1(token, channelId, message));
+});
+
+app.post('/message/pin/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId } = req.body;
+  return res.json(pin(token, messageId));
+});
+
+app.post('/message/unpin/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId } = req.body;
+  return res.json(unPin(token, messageId));
+});
+
+app.post('/message/react/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId, reactId } = req.body;
+  return res.json(react(token, messageId, reactId));
+});
+
+app.post('/message/unreact/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId, reactId } = req.body;
+  // JSON.stringify(req.headers
+  return res.json(unReact(token, messageId, reactId));
+});
+
+app.post('/admin/userpermission/change/v1', (req, res) => {
+  const token = req.header('token');
+  const { uId, permissionId } = req.body;
+  return res.json(userPermissionChange(token, uId, permissionId));
+});
+
+app.post('/message/share/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { ogMessageId, message, channelId, dmId } = req.body;
+    return res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/user/stats/v1', (req, res, next) => {

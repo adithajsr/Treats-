@@ -178,14 +178,31 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
 
   // PEFORM RETURN & UPDATE "dataStore"
   let globalPermissions: number;
+  const accountCreationTime = Math.floor((new Date()).getTime() / 1000);
+
   if (dataSet.user.length === 0) {
     globalPermissions = 1; // owner
+
+    // Create the first data points for workspace analytics metrics
+    dataSet.workspaceStats.channelsExist.push({
+      numChannelsExist: 0,
+      timeStamp: accountCreationTime,
+    });
+    dataSet.workspaceStats.dmsExist.push({
+      numDmsExist: 0,
+      timeStamp: accountCreationTime,
+    });
+    dataSet.workspaceStats.messagesExist.push({
+      numMessagesExist: 0,
+      timeStamp: accountCreationTime,
+    });
+    dataSet.workspaceStats.utilizationRate = 0;
+
   } else {
     globalPermissions = 2; // memeber
   }
 
-  // Create the first data points for all analytics metrics
-  const accountCreationTime = Math.floor((new Date()).getTime() / 1000);
+  // Create the first data points for user analytics metrics
   const firstChannelJoined = {
     numChannelsJoined: 0,
     timeStamp: accountCreationTime,

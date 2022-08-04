@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
+import { findTokenIndex } from './channels';
 import validator from 'validator';
 import HTTPError from 'http-errors';
 
@@ -195,14 +196,48 @@ export function usersAll() {
 
 // TODO: documentation
 export function userStatsV1(token: string) {
+  const data = getData();
+
+  // Check token is valid
+  const tokenIndex = findTokenIndex(token);
+
+  // Find the user corresponding to the given token
+  const userId = data.token[tokenIndex].uId;
+  const userIndex = data.user.findIndex(a => a.uId === userId);
+  const userObj = data.user[userIndex];
+
+  // The user's involvement:
+  // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
+  // sum(numChannels, numDms, numMsgs)
+
   return {
-    userStats: {},
+    userStats: {
+      channelsJoined: userObj.channelsJoined,
+      dmsJoined: userObj.dmsJoined,
+      messagesSent: userObj.messagesSent,
+      involvementRate: userObj.involvementRate,
+    },
   };
 }
 
 // TODO: documentation
 export function usersStatsV1(token: string) {
+  const data = getData();
+
+  // Check token is valid
+  const tokenIndex = findTokenIndex(token);
+
+  const workspaceObj = data.workspaceStats;
+
+  // The workspace's utilization:
+  // numUsersWhoAreInLeastOneChannelOrDm / numUsers
+
   return {
-    workspaceStats: {},
+    workspaceStats: {
+      channelsExist: workspaceObj.channelsExist,
+      dmsExist: workspaceObj.dmsExist,
+      messagesExist: workspaceObj.messagesExist,
+      utilizationRate: workspaceObj.utilizationRate,
+    },
   };
 }

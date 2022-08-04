@@ -536,6 +536,7 @@ describe('stats capabilities', () => {
       expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
     });
 
+    /*
     test('Test metrics, basic', () => {
       // Create a test channel and DM, and send a test message to the channel
       const testChannel = requestChannelsCreate(user1Token, 'channelName', true);
@@ -815,7 +816,7 @@ describe('stats capabilities', () => {
         timeStamp: standupFinish.bodyObj.timeFinish,
       });
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
-    });
+    }); */
   });
 
   describe('test /users/stats/v1 i.e. workspace stats', () => {
@@ -877,6 +878,7 @@ describe('stats capabilities', () => {
       expect(workspaceStatsObject.messagesExist[0].timeStamp).toStrictEqual(firstUserTime);
     });
 
+    /*
     test('Test metrics, basic', () => {
       // Create a test channel and DM, and send a test message to the channel
       const testChannel = requestChannelsCreate(user1Token, 'channelName', true);
@@ -1053,6 +1055,6 @@ describe('stats capabilities', () => {
       // TODO:
       // Messages which have not been sent yet with message/sendlater or
       // message/sendlaterdm are not included
-    });
+    }); */
   });
 });

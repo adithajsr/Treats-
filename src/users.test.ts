@@ -609,7 +609,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsB.bodyObj.userStats.channelsJoined.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.channelsJoined[2].numChannelsJoined).toStrictEqual(2);
-      expect(user1StatsB.bodyObj.userStats.channelsJoined[2].timeStamp).toBeGreaterThanOrEqual(channelJoinTime);
+      expect(user1StatsB.bodyObj.userStats.channelsJoined[2].timeStamp).toBeLessThanOrEqual(channelJoinTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1) / (2 + 1 + 1));
 
       // user1 leaves user2's channel, decreasing numChannelsJoined
@@ -620,7 +620,7 @@ describe('stats capabilities', () => {
       
       expect(user1StatsC.bodyObj.userStats.channelsJoined.length).toStrictEqual(4);
       expect(user1StatsC.bodyObj.userStats.channelsJoined[3].numChannelsJoined).toStrictEqual(1);
-      expect(user1StatsC.bodyObj.userStats.channelsJoined[3].timeStamp).toBeGreaterThanOrEqual(channelLeaveTime);
+      expect(user1StatsC.bodyObj.userStats.channelsJoined[3].timeStamp).toBeLessThanOrEqual(channelLeaveTime);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (2 + 1 + 1));
 
       // user2 invites user1 to their channel, increasing numChannelsJoined
@@ -631,7 +631,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsD.bodyObj.userStats.channelsJoined.length).toStrictEqual(5);
       expect(user1StatsD.bodyObj.userStats.channelsJoined[4].numChannelsJoined).toStrictEqual(2);
-      expect(user1StatsD.bodyObj.userStats.channelsJoined[4].timeStamp).toBeGreaterThanOrEqual(channelInviteTime);
+      expect(user1StatsD.bodyObj.userStats.channelsJoined[4].timeStamp).toBeLessThanOrEqual(channelInviteTime);
       expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1) / (2 + 1 + 1));
     });
 
@@ -656,7 +656,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsB.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numDmsJoined).toStrictEqual(2);
-      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeGreaterThanOrEqual(dmCreateTime);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dmCreateTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 2 + 1) / (1 + 3 + 1));
 
       // user1 leaves user2's DM, decreasing numDmsJoined
@@ -667,7 +667,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsC.bodyObj.userStats.dmsJoined.length).toStrictEqual(4);
       expect(user1StatsC.bodyObj.userStats.dmsJoined[3].numDmsJoined).toStrictEqual(1);
-      expect(user1StatsC.bodyObj.userStats.dmsJoined[3].timeStamp).toBeGreaterThanOrEqual(dmLeaveTime);
+      expect(user1StatsC.bodyObj.userStats.dmsJoined[3].timeStamp).toBeLessThanOrEqual(dmLeaveTime);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 3 + 1));
 
       // user2 removes the DM previously with user1, decreasing numDms
@@ -684,7 +684,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsE.bodyObj.userStats.dmsJoined.length).toStrictEqual(5);
       expect(user1StatsE.bodyObj.userStats.dmsJoined[4].numDmsJoined).toStrictEqual(0);
-      expect(user1StatsE.bodyObj.userStats.dmsJoined[4].timeStamp).toBeGreaterThanOrEqual(dm1RemoveTime);
+      expect(user1StatsE.bodyObj.userStats.dmsJoined[4].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
       expect(user1StatsE.bodyObj.userStats.involvementRate).toStrictEqual((1 + 0 + 1) / (1 + 1 + 1));
     });
 
@@ -710,7 +710,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.messagesSent[2].numMessagesSent).toStrictEqual(2);
-      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeGreaterThanOrEqual(msg1BSendTime);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeLessThanOrEqual(msg1BSendTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
 
       // user1 makes user2 a channel owner so that user2 can remove
@@ -754,7 +754,7 @@ describe('stats capabilities', () => {
 
       expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.messagesSent[2].numMessagesSent).toStrictEqual(2);
-      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeGreaterThanOrEqual(msg1BSendTime);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeLessThanOrEqual(msg1BSendTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
 
       // user1 removes their own message, decreasing numMsgs but
@@ -774,7 +774,7 @@ describe('stats capabilities', () => {
       expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsD.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
       expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numMessagesSent).toStrictEqual(0);
-      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeGreaterThanOrEqual(dm1RemoveTime);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
 
       // If the involvement is greater than 1, it should be capped at 1
       // (1 + 0 + 2) / (1 + 0 + 1) > 1
@@ -927,9 +927,6 @@ describe('stats capabilities', () => {
     });
 
     test('numUsers increase and decrease, numUsersWhoAreInLeastOneChannelOrDm increase and decrease', () => {
-      // ***********************************************
-      // FIXME: UPDATE STARTING HERE AND CONTINUE BELOW
-
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
@@ -960,9 +957,13 @@ describe('stats capabilities', () => {
       // user1 creates a DM directed to user2,
       // increasing numUsersWhoAreInLeastOneChannelOrDm (and numDmsExist)
       const DM1B = requestDMCreate(user1Token, [user2Id]);
+      const dmCreateTime = Math.floor((new Date()).getTime() / 1000);
       const workspaceStatsD = requestUsersStats(user1Token);
       expect(workspaceStatsD.res.statusCode).toBe(OK);
+
       expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(3);
+      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[2].numDmsExist).toStrictEqual(2);
+      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[2].timeStamp).toBeLessThanOrEqual(dmCreateTime);
       expect(workspaceStatsD.bodyObj.workspaceStats.utilizationRate).toStrictEqual(2 / 2);
 
       // user2 leaves user1's DM, decreasing numUsersWhoAreInLeastOneChannelOrDm
@@ -979,9 +980,13 @@ describe('stats capabilities', () => {
 
       // user1 removes their DM (they are still in a channel), decreasing numDmsExist
       requestDMRemove(user1Token, DM1A.bodyObj.dmId);
+      const dmRemoveTime = Math.floor((new Date()).getTime() / 1000);
       const workspaceStatsG = requestUsersStats(user1Token);
       expect(workspaceStatsG.res.statusCode).toBe(OK);
-      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(2);
+
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(4);
+      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[3].numDmsExist).toStrictEqual(1);
+      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[3].timeStamp).toBeLessThanOrEqual(dmRemoveTime);
       expect(workspaceStatsG.bodyObj.workspaceStats.involvementRate).toStrictEqual(1 / 1);
 
       // user1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
@@ -1006,49 +1011,44 @@ describe('stats capabilities', () => {
 
       // user1 sends a message to the DM, increasing messagesExist
       const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
+      const msg1BSendTime = Math.floor((new Date()).getTime() / 1000);
       const workspaceStatsA = requestUsersStats(user1Token);
       expect(workspaceStatsA.res.statusCode).toBe(OK);
+
       expect(workspaceStatsA.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(3);
+      expect(workspaceStatsA.bodyObj.workspaceStats.messagesExist[2].numMessagesExist).toStrictEqual(2);
+      expect(workspaceStatsA.bodyObj.workspaceStats.messagesExist[2].timeStamp).toBeLessThanOrEqual(msg1BSendTime);
 
       // user1 removes their message in the DM, decreasing messagesExist
       requestMessageRemove(user1Token, message1B.bodyObj.messageId);
+      const msg1BRemoveTime = Math.floor((new Date()).getTime() / 1000);
       const workspaceStatsB = requestUsersStats(user1Token);
       expect(workspaceStatsB.res.statusCode).toBe(OK);
-      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(2);
+
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(4);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[3].numMessagesExist).toStrictEqual(1);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[3].timeStamp).toBeLessThanOrEqual(msg1BRemoveTime);
 
       // user1 sends multiple messages to the DM, increasing messagesExist
       requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1C');
       requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1D');
       requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1E');
+
       const workspaceStatsC = requestUsersStats(user1Token);
       expect(workspaceStatsC.res.statusCode).toBe(OK);
-      expect(workspaceStatsC.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(5);
+      expect(workspaceStatsC.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(7);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[6].numMessagesExist).toStrictEqual(4);
 
-      // FIXME:
-      // Log removal of multiple messages from a DM as one
+      // user1 removes the DM, also removes the 3 messages that were in it
+      // and logs them as one change
+      requestDMRemove(user1Token, DM1.bodyObj.dmId);
+      const dm1RemoveTime = Math.floor((new Date()).getTime() / 1000);
+      const workspaceStatsD = requestUserStats(user1Token);
+      expect(workspaceStatsD.res.statusCode).toBe(OK);
 
-      // user2 sends a message to the DM, increasing numMsgs
-      requestMessageSendDM(user2Token, DM1.bodyObj.dmId, 'message 2');
-      const user1StatsA = requestUserStats(user1Token);
-      expect(user1StatsA.res.statusCode).toBe(OK);
-      expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
-
-      // user1 sends a message to DM, increasing numMsgsSent (and numMsgs)
-      const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
-      const user1StatsB = requestUserStats(user1Token);
-      expect(user1StatsB.res.statusCode).toBe(OK);
-      expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
-      expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
-
-      // user1 removes the DM, decreasing numMsgs again (and numDmsJoined and numDms)
-      requestDMRemove(user1Token, message1A.bodyObj.messageId);
-      const user1StatsD = requestUserStats(user1Token);
-      expect(user1StatsD.res.statusCode).toBe(OK);
-      expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
-      expect(user1StatsD.bodyObj.userStats.numDmsJoined.length).toStrictEqual(1);
-      // If the involvement is greater than 1, it should be capped at 1
-      // (1 + 0 + 2) / (1 + 0 + 1) > 1
-      expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual(1);
+      expect(workspaceStatsD.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(8);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[7].numMessagesExist).toStrictEqual(1);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[3].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
 
       // TODO:
       // Messages which have not been sent yet with message/sendlater or

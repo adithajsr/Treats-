@@ -1,6 +1,6 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-
+import { sendPost } from './channel.test';
 const port = config.port;
 const url = config.url;
 
@@ -195,6 +195,63 @@ describe('admin/user/remove/v1 test', () => {
     testUser = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
     const testRequest = requestAdminUserRemove(testUser.bodyObj.token, testUser.bodyObj.authUserId);
     expect(testRequest).toBe(400);
+    requestClear();
+  });
+});
+
+// ======================================== Setup ========================================
+type id = {
+  token: string,
+  authUserId: number,
+}
+
+let globalAdmin:id;
+let admin:id;
+let user1:id;
+let user2:id;
+
+// ======================================== Helper functions ========================================
+
+export function setupDatabase() {
+  let reg = { email: 'who.is.john@is.the.question.com', password: '12367dhd', nameFirst: 'Nathan', nameLast: 'Spencer' };
+  globalAdmin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
+  admin = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.zac@is.the.question.com', password: 'zaccool', nameFirst: 'Zac', nameLast: 'Li' };
+  user1 = sendPost('auth/register/v3', 'a', reg);
+
+  reg = { email: 'who.is.nick@is.the.question.com', password: 'yeyyey', nameFirst: 'Nick', nameLast: 'Smith' };
+  user2 = sendPost('auth/register/v3', 'a', reg);
+}
+
+// // ======================================== admin/userpermission/change/v1 ========================================
+describe('Testing for userpermission/change/v1', () => {
+  test('uId is not a valid id', () => {
+    setupDatabase();
+    const body = { uId: 999999, permissionId: 1 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('permissionId invalid', () => {
+    const body = { uId: user1.authUserId, permissionId: 10 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Setting same permission', () => {
+    const body = { uId: user1.authUserId, permissionId: 2 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Only One global owner being demoted.', () => {
+    const body = { uId: globalAdmin.authUserId, permissionId: 2 };
+    expect(sendPost('admin/userpermission/change/v1', globalAdmin.token, body)).toBe(400);
+  });
+
+  test('Authuser is not a globaladmin.', () => {
+    const body = { uId: user2.authUserId, permissionId: 1 };
+    expect(sendPost('admin/userpermission/change/v1', admin.token, body)).toBe(403);
     requestClear();
   });
 });

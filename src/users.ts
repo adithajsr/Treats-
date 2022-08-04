@@ -7,6 +7,7 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { v4 as generateV4uuid } from 'uuid';
 import sizeOf from 'image-size';
+import imageType from 'image-type';
 import config from './config.json';
 
 const url = config.url;
@@ -130,8 +131,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       return {};
     }
   }
-  // this below line cannot be accessed for coverage if uuid in token object is a valid uId, in other words, no way of running this line in working code
-  throw HTTPError(403, 'Invalid token');
+  // theoretically "throw HTTPError(403, 'Invalid token');" could be run after this
 }
 
 /* <Update the authorised user's first and last name>
@@ -217,15 +217,19 @@ token (string) - <uuidV4>
 Return Value:
 returns <empty object, after saving file root to profileUrlImg> on <success>
 throws HTTP Error on <invalid token, coordinates or error in downloading image> */
-export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
+export async function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
   // CHECK COORDINATES MAKE SENSE
   if (xEnd <= xStart || yEnd <= yStart) {
-    console.log('YEET')
-    throw HTTPError(400, 'cropping coordinates are invalid');
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
   }
-  console.log('Double YEET');
   if (xEnd < 0 || xStart < 0 || yEnd < 0 || yStart < 0) {
-    throw HTTPError(400, 'cropping coordinates are invalid');
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
   }
   const dataSet = getData();
   let uId = 0;
@@ -235,7 +239,10 @@ export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
     }
   }
   if (uId === 0) {
-    throw HTTPError(403, 'Invalid token');
+    return {
+      code: 403,
+      message: 'Invalid token'
+    };
   }
 
   // REQUEST URL FOR IMAGE DATA
@@ -243,11 +250,14 @@ export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
     'GET',
     imgUrl
   );
-  const body = res.getBody();
+  const body = res.getBody() as Buffer;
 
   // CHECK IMAGE MEETS REQUIREMENTS
-  if ((body.toString('utf8', 0, 20)).match(/^ÿØÿà/) !== null) {
-    throw HTTPError(400, 'image uploaded is not a JPG');
+  if ((await imageType(body)).ext !== 'jpg') {
+    return {
+      code: 400,
+      message: 'image uploaded is not a JPG'
+    };
   }
   const uuid = generateV4uuid();
   const preEditedImage = `${__dirname}/profilePics/pre-edit-${uuid}.jpg`;
@@ -255,13 +265,15 @@ export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
   const dimensions = sizeOf(preEditedImage);
   if (dimensions.width < xEnd || dimensions.height < yEnd) {
     fs.unlinkSync(preEditedImage);
-    console.log('THROWING!');
-    throw HTTPError(400, 'cropping coordinates are invalid');
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
   }
   // CROP PHOTO
   const width = xEnd - xStart;
   const height = yEnd - yStart;
-  sharp(preEditedImage).extract({ width: width, height: height, left: xStart, top: yStart }).toFile(`${__dirname}/profilePics/${uuid}.jpg`)
+  await sharp(preEditedImage).extract({ width: width, height: height, left: xStart, top: yStart }).toFile(`${__dirname}/profilePics/${uuid}.jpg`)
     .then(function(newFileInfo) {
       fs.unlinkSync(preEditedImage);
       for (const item of dataSet.user) {
@@ -274,7 +286,11 @@ export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
       return {};
     })
     .catch(function(err) {
+      // below code unable to get via coverage, will result in fatal error
       fs.unlinkSync(preEditedImage);
-      throw HTTPError(400, 'sharp failed to crop');
+      return {
+        code: 400,
+        message: 'sharp failed to crop'
+      };
     });
 }

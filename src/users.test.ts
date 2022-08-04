@@ -481,7 +481,6 @@ describe('stats capabilities', () => {
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       user1Token = testUser1.bodyObj.token;
       user1Id = testUser1.bodyObj.authUserId;
-      expectedAcc1CreatTime = Math.floor((new Date()).getTime() / 1000);
 
       // Create test user 2
       testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
@@ -525,13 +524,9 @@ describe('stats capabilities', () => {
         }
       });
 
-      // Account for 1 second delay between requests
+      // Check all data points were created at the same time
       const userStatsObject = testUserStats.bodyObj.userStats;
-
       const accountCreationTime = userStatsObject.channelsJoined[0].timeStamp;
-      expect(accountCreationTime).toBeGreaterThanOrEqual(expectedAcc1CreatTime);
-      expect(accountCreationTime).toBeLessThan(expectedAcc1CreatTime + 1);
-
       expect(userStatsObject.dmsJoined[0].timeStamp).toStrictEqual(accountCreationTime);
       expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
     });
@@ -648,7 +643,13 @@ describe('stats capabilities', () => {
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 2 + 1));
 
-      // user2 creates a DM directed to user1, increasing numDmsJoined (and numDms)
+      const user2StatsA = requestUserStats(user2Token);
+      expect(user2StatsA.res.statusCode).toBe(OK);
+      expect(user2StatsA.bodyObj.userStats.dmsJoined.length).toStrictEqual(2);
+      expect(user2StatsA.bodyObj.userStats.involvementRate).toStrictEqual((0 + 1 + 0) / (1 + 2 + 1));
+
+      // user2 creates a DM directed to user1
+      // numDmsJoined (and numDms) increases for both user1 and user2
       const DM2B = requestDMCreate(user2Token, [user1Id]);
       const dmCreateTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsB = requestUserStats(user1Token);
@@ -658,6 +659,13 @@ describe('stats capabilities', () => {
       expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numDmsJoined).toStrictEqual(2);
       expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dmCreateTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 2 + 1) / (1 + 3 + 1));
+
+      const user2StatsB = requestUserStats(user2Token);
+      expect(user2StatsB.res.statusCode).toBe(OK);
+      expect(user2StatsB.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
+      expect(user2StatsB.bodyObj.userStats.dmsJoined[2].numDmsJoined).toStrictEqual(2);
+      expect(user2StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeLessThanOrEqual(dmCreateTime);
+      expect(user2StatsB.bodyObj.userStats.involvementRate).toStrictEqual((0 + 2 + 0) / (1 + 3 + 1));
 
       // user1 leaves user2's DM, decreasing numDmsJoined
       requestDMLeave(user1Token, DM2B.bodyObj.dmId);
@@ -827,7 +835,6 @@ describe('stats capabilities', () => {
       // Create test user 1
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       user1Token = testUser1.bodyObj.token;
-      expectedFirstUserTime = Math.floor((new Date()).getTime() / 1000);
     });
 
     test('Fail fetch workspace\'s stats, invalid token', () => {
@@ -866,13 +873,9 @@ describe('stats capabilities', () => {
         }
       });
 
-      // Account for 1 second delay between requests
+      // Check all data points were created at the same time
       const workspaceStatsObject = testWorkspaceStats.bodyObj.workspaceStats;
-
       const firstUserTime = workspaceStatsObject.channelsExist[0].timeStamp;
-      expect(firstUserTime).toBeGreaterThanOrEqual(expectedFirstUserTime);
-      expect(firstUserTime).toBeLessThan(expectedFirstUserTime + 1);
-
       expect(workspaceStatsObject.dmsExist[0].timeStamp).toStrictEqual(firstUserTime);
       expect(workspaceStatsObject.messagesExist[0].timeStamp).toStrictEqual(firstUserTime);
     });
@@ -926,7 +929,6 @@ describe('stats capabilities', () => {
       });
     });
 
-    /*
     test('numUsers increase and decrease, numUsersWhoAreInLeastOneChannelOrDm increase and decrease', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
@@ -986,11 +988,12 @@ describe('stats capabilities', () => {
       expect(workspaceStatsG.res.statusCode).toBe(OK);
 
       expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(4);
-      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[3].numDmsExist).toStrictEqual(1);
-      expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist[3].timeStamp).toBeLessThanOrEqual(dmRemoveTime);
-      expect(workspaceStatsG.bodyObj.workspaceStats.involvementRate).toStrictEqual(1 / 1);
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[3].numDmsExist).toStrictEqual(1);
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[3].timeStamp).toBeLessThanOrEqual(dmRemoveTime);
+      expect(workspaceStatsG.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
 
       // user1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      // FIXME: potential bug??
       requestChannelLeave(user1Token, channel1.bodyObj.channelId);
       const workspaceStatsH = requestUsersStats(user1Token);
       expect(workspaceStatsH.res.statusCode).toBe(OK);
@@ -1003,6 +1006,7 @@ describe('stats capabilities', () => {
       expect(workspaceStatsI.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
     });
 
+    /*
     test('messagesExist increase and decrease, ', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
@@ -1054,10 +1058,6 @@ describe('stats capabilities', () => {
       // TODO:
       // Messages which have not been sent yet with message/sendlater or
       // message/sendlaterdm are not included
-
-      // TODO:
-      // not related to messages but check that all members of a DM
-      // have the new DM added to their dmsJoined array
     }); */
   });
 });

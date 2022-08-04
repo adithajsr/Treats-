@@ -237,8 +237,13 @@ app.post('/channel/removeowner/v2', (req, res, next) => {
   }
 });
 
-app.get('/users/all/v2', (req, res) => {
-  res.json(usersAll());
+app.get('/users/all/v2', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(usersAll(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/setname/v2', (req, res, next) => {

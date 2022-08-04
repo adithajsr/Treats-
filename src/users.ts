@@ -177,7 +177,7 @@ token (string) - <uuidV4>
 Return Value:
 returns <an array of users with their uId, email, full name and handle> on <success>
 throws HTTP Error on <invalid token> */
-export function usersAll() {
+export function usersAll(token: string) {
   const dataSet = getData();
   const returnObject = [];
   for (const item of dataSet.user) {
@@ -248,7 +248,7 @@ export function usersStatsV1(token: string) {
 
   // Calculate utilization rate
   const workspaceObj = data.workspaceStats;
-  const numUsers = data.user.length;
+  const numUsers = usersAll(token).users.length;
 
   let numUsersWhoAreInLeastOneChannelOrDm = 0;
   for (const userObj of data.user) {

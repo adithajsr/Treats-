@@ -39,7 +39,7 @@ app.use(morgan('dev'));
 app.use('/imgurl', express.static(`${__dirname}/profilePics`));
 
 app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
-  try {
+try {
     const token = req.header('token');
     const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
     return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token));

@@ -89,6 +89,8 @@ function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
       },
     }
   );
+  console.log(res.body);
+  //console.log((res.body).toString());
   return {
     res: res,
     bodyObj: JSON.parse(res.body as string),
@@ -425,6 +427,13 @@ describe('Testing for requestUsersAll', () => {
       }
     ]);
   });
+
+  test('Test 3 invalid token', () => {
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll('incorrecttonken');
+    expect(response.res.statusCode).toBe(403);
+    expect(response.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+  });
 });
 
 // ======================================== requestUploadPhoto Testing ========================================
@@ -438,6 +447,7 @@ describe('Testing for requestUploadPhoto', () => {
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
     const response = requestUploadPhoto(profileImgUrl, 15, 15, 1920, 1080, testToken);
+    console.log(response.bodyObj);
     expect(response.res.statusCode).toBe(OK);
     let testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
     while (testImgUrl === `${url}:${port}/imgurl/default.jpg`) {
@@ -447,6 +457,7 @@ describe('Testing for requestUploadPhoto', () => {
       'GET',
       testImgUrl
     );
+    expect(res.statusCode).toBe(OK);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
       uId: testUserId,
       email: 'who.is.joe@is.the.question.com',
@@ -455,12 +466,47 @@ describe('Testing for requestUploadPhoto', () => {
       handleStr: 'johnsmith',
       profileImgUrl: expect.any(String),
     });
-    const urlProfile = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl
+    const urlProfile = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
     let urlUuid = urlProfile.replace(`${url}:${port}/imgurl/`, '');
     urlUuid = urlUuid.replace(/jpg$/, '');
     urlUuid = urlUuid.replace('.', '');
     const deletionUrl = `${__dirname}/profilePics/${urlUuid}.jpg`;
     fs.unlinkSync(deletionUrl);
+    requestClear();
+  });
+
+  requestClear();
+  test('Test 2 coverge of errors', () => {
+    const profileImgUrl = 'https://images7.alphacoders.com/904/thumb-1920-904934.jpg';
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+
+    const response1 = requestUploadPhoto(profileImgUrl, 15, 15, 14, 14, testToken);
+    console.log(response1.bodyObj);
+    expect(response1.res.statusCode).toBe(400);
+    expect(response1.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
+
+    const response2 = requestUploadPhoto(profileImgUrl, -1, 15, 1920, 1080, testToken);
+    console.log(response2.bodyObj);
+    expect(response2.res.statusCode).toBe(400);
+    expect(response2.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
+
+    const profileImgUrlAlt = 'https://www.pikpng.com/pngl/b/494-4945081_wonder-woman-official-comic-png-wonder-woman-comic.png';
+    const response3 = requestUploadPhoto(profileImgUrlAlt, 15, 15, 600, 761, testToken);
+    console.log(response3.bodyObj);
+    expect(response3.res.statusCode).toBe(400);
+    expect(response3.bodyObj.error).toStrictEqual({ message: 'image uploaded is not a JPG' });
+
+    const response4 = requestUploadPhoto(profileImgUrl, 15, 15, 1920, 1080, 'invalidToken');
+    console.log(response4.bodyObj);
+    expect(response4.res.statusCode).toBe(403);
+    expect(response4.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+
+    const response5 = requestUploadPhoto(profileImgUrlAlt, 15, 15, 601, 762, testToken);
+    console.log(response5.bodyObj);
+    expect(response5.res.statusCode).toBe(400);
+    expect(response5.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
     requestClear();
   });
 });

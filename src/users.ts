@@ -6,6 +6,7 @@ import request from 'sync-request';
 import fs from 'fs';
 import sharp from 'sharp';
 import { v4 as generateV4uuid } from 'uuid';
+import sizeOf from 'image-size';
 import config from './config.json';
 
 const url = config.url;
@@ -47,6 +48,7 @@ export function userProfileV3(token: string, uId: number) {
         nameFirst: data.user[element].nameFirst,
         nameLast: data.user[element].nameLast,
         handleStr: data.user[element].handle,
+        profileImgUrl: data.user[element].profileImgUrl,
       };
     }
   }
@@ -62,7 +64,7 @@ token (string) - <uuidV4>
 Return Value:
 returns <true> on <existing token>
 returns <false> on <non-existant token> */
-function doesTokenExist(token: string) : boolean {
+export function doesTokenExist(token: string) : boolean {
   const dataSet = getData();
   for (const item of dataSet.token) {
     if (item.token === token) {
@@ -184,8 +186,11 @@ token (string) - <uuidV4>
 Return Value:
 returns <an array of users with their uId, email, full name and handle> on <success>
 throws HTTP Error on <invalid token> */
-export function usersAll() {
+export function usersAll(token: string) {
   const dataSet = getData();
+  if (!doesTokenExist(token)) {
+    throw HTTPError(403, 'Invalid token');
+  }
   const returnObject = [];
   for (const item of dataSet.user) {
     returnObject.push({
@@ -194,48 +199,78 @@ export function usersAll() {
       nameFirst: item.nameFirst,
       nameLast: item.nameLast,
       handleStr: item.handle,
+      profileImgUrl: item.profileImgUrl,
     });
   }
   return { users: returnObject };
 }
 
-export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number) {
+/* <Takes an image url and saves it to the server and imbeds the link into the user's data>
+
+Arguments:
+imgUrl (string) - <JPG URL>
+xStart (number) - <integer>
+yStart (number) - <integer>
+xEnd (number) - <integer>
+yEnd (number) - <integer>
+token (string) - <uuidV4>
+Return Value:
+returns <empty object, after saving file root to profileUrlImg> on <success>
+throws HTTP Error on <invalid token, coordinates or error in downloading image> */
+export function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
   // CHECK COORDINATES MAKE SENSE
   if (xEnd <= xStart || yEnd <= yStart) {
+    console.log('YEET')
     throw HTTPError(400, 'cropping coordinates are invalid');
   }
+  console.log('Double YEET');
   if (xEnd < 0 || xStart < 0 || yEnd < 0 || yStart < 0) {
     throw HTTPError(400, 'cropping coordinates are invalid');
   }
-    // DETERMINE NAME of PHOTO
-  // -> new key in user data
+  const dataSet = getData();
+  let uId = 0;
+  for (const item of dataSet.token) {
+    if (item.token === token) {
+      uId = item.uId;
+    }
+  }
+  if (uId === 0) {
+    throw HTTPError(403, 'Invalid token');
+  }
+
+  // REQUEST URL FOR IMAGE DATA
   const res = request(
     'GET',
-    imgUrl,
+    imgUrl
   );
-  let body = res.getBody();
+  const body = res.getBody();
+
   // CHECK IMAGE MEETS REQUIREMENTS
-  if (photoFile.match(/^ÿØÿà/) !== null) {
+  if ((body.toString('utf8', 0, 20)).match(/^ÿØÿà/) !== null) {
     throw HTTPError(400, 'image uploaded is not a JPG');
   }
   const uuid = generateV4uuid();
-  const preEditedImage = `profilePics/pre-edit-${uuid}.jpg`;
+  const preEditedImage = `${__dirname}/profilePics/pre-edit-${uuid}.jpg`;
   fs.writeFileSync(preEditedImage, body, { flag: 'w' });
-  if (sharp(preEditedImage).metadata().width < xEnd ||
-      sharp(preEditedImage).metadata().height < yEnd) {
-        fs.unlinkSync(preEditedImage);
-        throw HTTPError(400, 'cropping coordinates are invalid');
+  const dimensions = sizeOf(preEditedImage);
+  if (dimensions.width < xEnd || dimensions.height < yEnd) {
+    fs.unlinkSync(preEditedImage);
+    console.log('THROWING!');
+    throw HTTPError(400, 'cropping coordinates are invalid');
   }
   // CROP PHOTO
   const width = xEnd - xStart;
   const height = yEnd - yStart;
-  sharp(preEditedImage).extract({ width: width, height: heighy, left: xStart, top: yStart }).toFile(`profilePics/${uuid}.jpg`)
-    .then(function(new_file_info) {
+  sharp(preEditedImage).extract({ width: width, height: height, left: xStart, top: yStart }).toFile(`${__dirname}/profilePics/${uuid}.jpg`)
+    .then(function(newFileInfo) {
       fs.unlinkSync(preEditedImage);
-      const dataSet = getData();
-      // without user identification can't associate new image URL to user???
-      `${url}:${port}/imgurl/${uuid}.jpg`;
-      console.log("Image cropped and saved");
+      for (const item of dataSet.user) {
+        if (item.uId === uId) {
+          item.profileImgUrl = `${url}:${port}/imgurl/${uuid}.jpg`;
+        }
+      }
+      setData(dataSet);
+      console.log('Image cropped and saved');
       return {};
     })
     .catch(function(err) {

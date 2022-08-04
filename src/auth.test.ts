@@ -404,6 +404,10 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
     expect(returnValue2.res.statusCode).toBe(400);
     expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
 
+    const returnValue3 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve', 'incorrecttoken');
+    expect(returnValue3.res.statusCode).toBe(403);
+    expect(returnValue3.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+
     requestClear();
   });
 });

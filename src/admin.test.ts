@@ -91,6 +91,10 @@ describe('admin/user/remove/v1 test', () => {
       const m1 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'first message');
       const m2 = requestMessageSend(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 'second message');
       const m3 = requestMessageSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'third message');
+
+      // FIXME:
+      console.log(requestChannelMessages(byeUser.bodyObj.token, testChannel.bodyObj.channelId, 0).bodyObj.messages);
+
       // testUser creates a DM
       testDm = requestDMCreate(testUser.bodyObj.token, [byeUser.bodyObj.authUserId]);
       // byeUser sends two dms
@@ -150,6 +154,10 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve channel details - requestChannelMessages - message
       const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
+
+      // FIXME:
+      console.log(channelM.bodyObj.messages);
+
       expect(channelM.bodyObj.messages).toStrictEqual(
         [
           {

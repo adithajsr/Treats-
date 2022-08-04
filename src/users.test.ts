@@ -471,7 +471,6 @@ describe('stats capabilities', () => {
     let testUser1: wrapperOutput;
     let user1Token: string;
     let user1Id: number;
-    let expectedAcc1CreatTime: number;
     let testUser2: wrapperOutput;
     let user2Token: string;
     let user2Id: number;
@@ -829,7 +828,6 @@ describe('stats capabilities', () => {
   describe('test /users/stats/v1 i.e. workspace stats', () => {
     let testUser1: wrapperOutput;
     let user1Token: string;
-    let expectedFirstUserTime: number;
 
     beforeEach(() => {
       // Create test user 1
@@ -981,19 +979,19 @@ describe('stats capabilities', () => {
       expect(workspaceStatsF.res.statusCode).toBe(OK);
       expect(workspaceStatsF.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
 
-      // user1 removes their DM (they are still in a channel), decreasing numDmsExist
+      // user1 removes their DMs (they are still in a channel), decreasing numDmsExist
       requestDMRemove(user1Token, DM1A.bodyObj.dmId);
+      requestDMRemove(user1Token, DM1B.bodyObj.dmId);
       const dmRemoveTime = Math.floor((new Date()).getTime() / 1000);
       const workspaceStatsG = requestUsersStats(user1Token);
       expect(workspaceStatsG.res.statusCode).toBe(OK);
 
-      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(4);
-      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[3].numDmsExist).toStrictEqual(1);
-      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[3].timeStamp).toBeLessThanOrEqual(dmRemoveTime);
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(5);
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[4].numDmsExist).toStrictEqual(0);
+      expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist[4].timeStamp).toBeLessThanOrEqual(dmRemoveTime);
       expect(workspaceStatsG.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
 
       // user1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
-      // FIXME: potential bug??
       requestChannelLeave(user1Token, channel1.bodyObj.channelId);
       const workspaceStatsH = requestUsersStats(user1Token);
       expect(workspaceStatsH.res.statusCode).toBe(OK);
@@ -1053,7 +1051,7 @@ describe('stats capabilities', () => {
 
       expect(workspaceStatsD.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(8);
       expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[7].numMessagesExist).toStrictEqual(1);
-      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[3].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
+      expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist[7].timeStamp).toBeLessThanOrEqual(dm1RemoveTime);
 
       // TODO:
       // Messages which have not been sent yet with message/sendlater or

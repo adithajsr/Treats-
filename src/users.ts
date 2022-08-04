@@ -298,7 +298,18 @@ export async function uploadPhoto(imgUrl: string, xStart: number, yStart: number
     });
 }
 
-// TODO: documentation
+/*
+Fetch the required statistics about this user's use of UNSW Treats
+
+Arguments:
+    token (string)  - represents the session of the user fetching the stats
+
+Return Value:
+    Returns { userStats } if no error
+
+Errors:
+    Throws a 403 error on invalid token
+*/
 export function userStatsV1(token: string) {
   const data = getData();
 
@@ -308,9 +319,63 @@ export function userStatsV1(token: string) {
   // Find the user corresponding to the given token
   const userId = data.token[tokenIndex].uId;
   const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
+  const involvementRate = calculateInvolvement(userId);
+
+  return {
+    userStats: {
+      channelsJoined: userObj.channelsJoined,
+      dmsJoined: userObj.dmsJoined,
+      messagesSent: userObj.messagesSent,
+      involvementRate: involvementRate,
+    },
+  };
+}
+
+/*
+Fetch the required statistics about the workspace's use of UNSW Treats
+
+Arguments:
+    token (string)  - represents the session of the user fetching the stats
+
+Return Value:
+    Returns { workspaceStats } if no error
+
+Errors:
+    Throws a 403 error on invalid token
+*/
+export function usersStatsV1(token: string) {
+  const data = getData();
+
+  // Check token is valid
+  findTokenIndex(token);
+
+  const workspaceObj = data.workspaceStats;
+  const utilizationRate = calculateUtilization(token);
+
+  return {
+    workspaceStats: {
+      channelsExist: workspaceObj.channelsExist,
+      dmsExist: workspaceObj.dmsExist,
+      messagesExist: workspaceObj.messagesExist,
+      utilizationRate: utilizationRate,
+    },
+  };
+}
+
+/*
+Helper function: calculates the involvement rate of a user
+
+Arguments:
+    userId (number)     - uId of the user corresponding to the given token
+
+Return Value:
+    Returns involvementRate
+*/
+export const calculateInvolvement = (userId: number) => {
+  const data = getData();
+  const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
   const workspaceObj = data.workspaceStats;
 
-  // Calculate involvement rate
   const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
   const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
   const numMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
@@ -333,25 +398,20 @@ export function userStatsV1(token: string) {
     }
   }
 
-  return {
-    userStats: {
-      channelsJoined: userObj.channelsJoined,
-      dmsJoined: userObj.dmsJoined,
-      messagesSent: userObj.messagesSent,
-      involvementRate: involvementRate,
-    },
-  };
-}
+  return involvementRate;
+};
 
-// TODO: documentation
-export function usersStatsV1(token: string) {
+/*
+Helper function: calculates the utilization rate of a workspace
+
+Arguments:
+    token (string)      - represents the session of the user fetching the stats
+
+Return Value:
+    Returns involvementRate
+*/
+export const calculateUtilization = (token: string) => {
   const data = getData();
-
-  // Check token is valid
-  findTokenIndex(token);
-
-  // Calculate utilization rate
-  const workspaceObj = data.workspaceStats;
   const numUsers = usersAll(token).users.length;
 
   let numUsersWhoAreInLeastOneChannelOrDm = 0;
@@ -366,12 +426,5 @@ export function usersStatsV1(token: string) {
 
   const utilizationRate = numUsersWhoAreInLeastOneChannelOrDm / numUsers;
 
-  return {
-    workspaceStats: {
-      channelsExist: workspaceObj.channelsExist,
-      dmsExist: workspaceObj.dmsExist,
-      messagesExist: workspaceObj.messagesExist,
-      utilizationRate: utilizationRate,
-    },
-  };
-}
+  return utilizationRate;
+};

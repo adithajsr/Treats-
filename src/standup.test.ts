@@ -2,7 +2,7 @@ import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestChannelMessages } from './channel.test';
 import { requestClear } from './users.test';
-import { requestChannelJoinV3, generateString } from './message.test';
+import { generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
@@ -257,14 +257,6 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send multiple', async () => {
-      requestChannelJoinV3(badUser.bodyObj.token, testChannel.bodyObj.channelId);
-      requestStandupStart(testUser.bodyObj.token, testChannel.bodyObj.channelId, 2);
-      const testRequest = requestStandupSend(testUser.bodyObj.token, testChannel.bodyObj.channelId, 'testUser successful standup send');
-      expect(testRequest).toStrictEqual({});
-      const testRequest2 = requestStandupSend(badUser.bodyObj.token, testChannel.bodyObj.channelId, 'badUser successful standup send');
-      expect(testRequest2).toStrictEqual({});
-      await new Promise((r) => setTimeout(r, 4000));
-      const checkSent = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
       const ubody = { channelId: channel1 };
       sendPost('channel/join/v3', user2.token, ubody);
 

@@ -3,8 +3,6 @@ import HTTPError from 'http-errors';
 import { getData, setData } from './dataStore';
 import { checkToken } from './message';
 
-// COMP1531 middleware - must use AFTER declaring your routes
-
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
 
@@ -169,6 +167,7 @@ Return Value:
     Returns <403> on <authId does not have permissions>
     Returns <403> on <error>
 */
+
 export function channelJoinV3(token: string, channelId: number): object {
   const authUserId = tokenConvert(token);
   if (channelExists(channelId) === true && channelPublic(channelId) === false && globalPermissions(authUserId) !== OWNER) {
@@ -179,22 +178,20 @@ export function channelJoinV3(token: string, channelId: number): object {
     throw createHttpError(400, 'error');
   } else {
     addUser(channelId, authUserId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelJoinTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined + 1,
+      timeStamp: channelJoinTime,
+    });
+    setData(data);
+
     return {};
   }
-  addUser(channelId, authUserId);
-
-  // Update analytics metrics
-  const data = getData();
-  const channelJoinTime = Math.floor((new Date()).getTime() / 1000);
-  const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
-  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
-  userObj.channelsJoined.push({
-    numChannelsJoined: oldnumChJoined + 1,
-    timeStamp: channelJoinTime,
-  });
-  setData(data);
-
-  return {};
 }
 
 /* Description: Invites user to the channel
@@ -218,22 +215,20 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     throw createHttpError(400, 'error userPermission');
   } else {
     addUser(channelId, uId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined + 1,
+      timeStamp: channelInviteTime,
+    });
+    setData(data);
+
     return {};
   }
-  addUser(channelId, uId);
-
-  // Update analytics metrics
-  const data = getData();
-  const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
-  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
-  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
-  userObj.channelsJoined.push({
-    numChannelsJoined: oldnumChJoined + 1,
-    timeStamp: channelInviteTime,
-  });
-  setData(data);
-
-  return {};
 }
 
 /* Description: Removes a user from a channel.
@@ -254,22 +249,20 @@ export function channelLeaveV2(token: string, channelId: number): object {
     throw createHttpError(400, 'error');
   } else {
     leaveChannel(channelId, authUserId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined - 1,
+      timeStamp: channelLeaveTime,
+    });
+    setData(data);
+
     return {};
   }
-  leaveChannel(channelId, authUserId);
-
-  // Update analytics metrics
-  const data = getData();
-  const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
-  const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
-  const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
-  userObj.channelsJoined.push({
-    numChannelsJoined: oldnumChJoined - 1,
-    timeStamp: channelLeaveTime,
-  });
-  setData(data);
-
-  return {};
 }
 
 /* Description: Make a member an owner of a channel

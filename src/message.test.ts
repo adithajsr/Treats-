@@ -454,7 +454,6 @@ test('success case', async() => {
   await new Promise((r) => setTimeout(r, 2500));
 
   expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
-  console.log(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message);
 });
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

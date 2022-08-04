@@ -8,7 +8,7 @@ import { requestChannelJoinV2, generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
-//jest.setTimeout(10000);
+// jest.setTimeout(10000);
 
 // -------------------------------------------------------------------------//
 

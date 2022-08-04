@@ -335,7 +335,7 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
 Pushes given data into a specified channel's messages array
 
 Arguments:
-  dmIndex (number)         - represents the index of the channel the message will get added to 
+  dmIndex (number)         - represents the index of the channel the message will get added to
   messageId (number)       - represents the messageId of the message to get added
   message (string)         - message to be added
   timeSent (number)        - time the message was added
@@ -343,7 +343,7 @@ Arguments:
 Return Value:
   N/A
 
-Errors: 
+Errors:
   N/A
 */
 

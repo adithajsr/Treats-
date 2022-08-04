@@ -445,3 +445,70 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
   }
   throw HTTPError(400, 'Invalid messageId');
 }
+
+function pushMessageDM (dmIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
+  const data = getData();
+  data.dm[dmIndex].messages.push(
+    {
+      messageId: messageId,
+      uId: uId,
+      message: message,
+      timeSent: timeSent,
+      isPinned: 0,
+      reacts: 0,
+    }
+  );
+  setData(data);
+}
+
+/*
+Sends a message to a DM at a specified time in the future
+
+Arguments:
+  token (string)         - represents the session of the user who wishes to send a message
+  dmId (number)          - represents the id of the DM they want to send the message to
+  message (string)       - message they want to share
+  timeSent (number)      - time in the future user want to send message
+
+Return Value:
+  Returns messageId if successful
+
+Throws a 400 error    - dmId does not refer to a valid DM
+                      - length of message is less than 1 or greater than 1000 characters
+                      - timeSent is a time in the past
+
+Throw a 403 error     - if token is invalid
+                      - if the user is not a part of the dm they are trying to send a message to
+*/
+export function MessageSendLaterDMV1(token: string, dmId: number, message: string, timeSent: number) {
+  if (message.length < 1 || message === '' || message.length > 1000) {
+    throw HTTPError(400, 'invalid message length!');
+  }
+
+  if (timeSent < Math.floor(Date.now() / 1000)) {
+    throw HTTPError(400, 'Time must be in the future');
+  }
+
+  const waitingTime = timeSent - Math.floor(Date.now() / 1000);
+
+  const data = getData();
+  checkToken(token, data);
+
+  const uId = tokenToUid(token, data);
+
+  // check for dmId in data
+  if (data.dm.find(a => a.dmId === dmId) === undefined) {
+    throw HTTPError(400, 'invalid dmId!');
+  }
+  // dm valid, but auth user is not a member
+  const i = data.dm.findIndex(data => data.dmId === dmId);
+  if (data.dm[i].members.find(a => a.uId === uId) === undefined) {
+    throw HTTPError(403, 'auth user is not a member!');
+  }
+
+  const messageId = Math.floor(Math.random() * 100);
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+
+  setTimeout(pushMessageDM, waitingTime * 1000, dmIndex, messageId, uId, message, timeSent);
+  return { messageId: messageId };
+}

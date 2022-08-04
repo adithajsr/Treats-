@@ -46,7 +46,7 @@ export function requestDMMessages(token: string, dmId: number, start: number) {
   };
 }
 
-function requestMessageSendDM(token: string, dmId: number, message: string) {
+export function requestMessageSendDM(token: string, dmId: number, message: string) {
   const res = request(
     'POST',
     `${url}:${port}/message/senddm/v2`,
@@ -498,22 +498,4 @@ describe('dm capabilities', () => {
       expect(testRemove.bodyObj.error).toStrictEqual({ message: 'The authorised user is not the original DM creator' });
     });
   });
-});
-
-
-// ----------------------------- Testing message/sendlaterdm/v1 -----------------------------
-test('success case', () => {
-  requestClear();
-  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-  const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
-  const dmId = requestDMCreate(danielToken, maiyaId);
-
-  const futureTime = Math.floor(Date.now() /1000) + 2
-  requestMessageSendDMLater(daniielToken, dmId, 'maiya stop wearing crocs fool', futureTime);
-
-  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0]).toBe(null);
-
-  await new Promise ((r) => setTimeout(r, 2500));
-
-  expect(requestDMMessages(danielToken, dmId, 0).bodyObj.messages[0].message).toBe('maiya stop wearing crocs fool');
 });

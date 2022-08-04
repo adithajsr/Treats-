@@ -13,34 +13,23 @@ import config from './config.json';
 const url = config.url;
 const port = config.port;
 
-/* <checks if a uuid is in use and is of the correct structure>
-
-Arguments:
-uuid (string) - <any>
-Return Value:
-returns <true> on <valid uuid>
-returns <false> on <in-use or inccorectly structured uuid> */
-export function isUuidValid(uuid: string) : boolean {
-  const dataSet = getData();
-  for (const item of dataSet.token) {
-    if (item.token === uuid) {
-      // this function is only called after a random uuidv4 is generated so it is unlikely and random there is a match, hence it is virtually impossible to test
-      return false;
-    }
-  }
-  return true;
-}
-
 /* <cycles through making new uuid's until one is valid>
 
 Arguments:
 Return Value:
 returns <uid> on <finding a valid uuid> */
 function newUuid() {
+  const dataSet = getData();
   let uuid: string = generateV4uuid();
-  while (!isUuidValid(uuid)) {
-    // above condition is unliely to be met as described in line 21
-    uuid = generateV4uuid();
+  let oldUuid = 'invalidUuid';
+  while (oldUuid !== uuid) {
+    oldUuid = uuid;
+    for (const item of dataSet.token) {
+      if (item.token === uuid) {
+        // this function is only called after a random uuidv4 is generated so it is unlikely and random there is a match, hence it is virtually impossible to test
+        uuid = generateV4uuid();
+      }
+    }
   }
   return uuid;
 }

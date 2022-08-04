@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
+import HTTPError from 'http-errors';
 
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
@@ -38,11 +39,15 @@ app.use(morgan('dev'));
 
 app.use('/imgurl', express.static(`${__dirname}/profilePics`));
 
-app.post('/user/profile/uploadphoto/v1', (req, res, next) => {
-try {
+app.post('/user/profile/uploadphoto/v1', async (req, res, next) => {
+  try {
     const token = req.header('token');
     const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
-    return res.json(uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token));
+    const returnObject = await uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token);
+    if (returnObject !== undefined && 'code' in returnObject) {
+      throw HTTPError(returnObject.code, returnObject.message);
+    }
+    return res.json({});
   } catch (err) {
     next(err);
   }

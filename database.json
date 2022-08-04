@@ -2,5 +2,11 @@
     "user": [],
     "channel": [],
     "token": [],
-    "dm": []
+    "dm": [],
+    "workspaceStats": {
+        "channelsExist": [],
+        "dmsExist": [],
+        "messagesExist": [],
+        "utilizationRate": 0
+    }
 }

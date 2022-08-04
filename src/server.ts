@@ -9,11 +9,15 @@ import HTTPError from 'http-errors';
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
-import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2 } from './message';
+import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, uploadPhoto } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
+import { searchV1 } from './search';
+import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
+import { adminUserRemoveV1 } from './admin';
+import { messageSendLaterV1 } from './message';
 
 // Set up web app, use JSON
 const app = express();
@@ -53,9 +57,28 @@ app.post('/user/profile/uploadphoto/v1', async (req, res, next) => {
   }
 });
 
+app.post('/message/sendlaterdm/v1', (req, res) => {
+  const token = req.header('token');
+  const { dmId, message, timeSent } = req.body;
+  return res.json(MessageSendLaterDMV1(token, dmId, message, timeSent));
+});
+
+app.post('/message/sendlater/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, message, timeSent } = req.body;
+  return res.json(messageSendLaterV1(token, channelId, message, timeSent));
+});
+
+app.get('/search/v1', (req, res, next) => {
+  const token = req.header('token');
+  const queryStr = req.query.queryStr as string;
+
+  return res.json(searchV1(token, queryStr));
+});
+
 app.get('/channel/messages/v3', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     const channelId = Number(req.query.channelId) as number;
     const start = Number(req.query.start) as number;
     return res.json(channelMessagesV2(token, channelId, start));
@@ -72,7 +95,7 @@ app.get('/user/profile/v3', (req, res) => {
 
 app.get('/dm/messages/v2', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     const dmId = parseInt(req.query.dmId as string);
     const start = parseInt(req.query.start as string);
     return res.json(dmMessagesV2(token, dmId, start));
@@ -83,7 +106,7 @@ app.get('/dm/messages/v2', (req, res, next) => {
 
 app.get('/dm/details/v2', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     const dmId = parseInt(req.query.dmId as string);
     return res.json(dmDetailsV2(token, dmId));
   } catch (err) {
@@ -93,7 +116,8 @@ app.get('/dm/details/v2', (req, res, next) => {
 
 app.post('/dm/leave/v2', (req, res, next) => {
   try {
-    const { token, dmId } = req.body;
+    const token = req.header('token');
+    const { dmId } = req.body;
     return res.json(dmLeaveV2(token, dmId));
   } catch (err) {
     next(err);
@@ -105,9 +129,15 @@ app.delete('/clear/v1', (req, res) => {
 });
 
 app.get('/channel/details/v3', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const channelId = req.query.channelId as string;
-  res.json(channelDetailsV3(token as string, parseInt(channelId as string)));
+  res.json(channelDetailsV3(token, parseInt(channelId)));
+});
+
+app.delete('/admin/user/remove/v1', (req, res) => {
+  const token = req.header('token');
+  const uId = parseInt(req.query.uId as string);
+  res.json(adminUserRemoveV1(token, uId));
 });
 
 app.post('/auth/register/v3', (req, res, next) => {
@@ -154,7 +184,8 @@ app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
 
 app.post('/channels/create/v3', (req, res, next) => {
   try {
-    const { token, name, isPublic } = req.body;
+    const token = req.header('token');
+    const { name, isPublic } = req.body;
     return res.json(channelsCreateV3(token, name, isPublic));
   } catch (err) {
     next(err);
@@ -163,7 +194,7 @@ app.post('/channels/create/v3', (req, res, next) => {
 
 app.get('/channels/list/v3', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     return res.json(channelsListV3(token));
   } catch (err) {
     next(err);
@@ -171,13 +202,14 @@ app.get('/channels/list/v3', (req, res, next) => {
 });
 
 app.get('/channels/listall/v3', (req, res) => {
-  const token = req.query.token;
-  res.json(channelsListallV3(token as string));
+  const token = req.header('token');
+  res.json(channelsListallV3(token));
 });
 
 app.post('/channel/join/v2', (req, res, next) => {
   try {
-    const { token, channelId } = req.body;
+    const token = req.header('token');
+    const { channelId } = req.body;
     return res.json(channelJoinV2(token, channelId));
   } catch (err) {
     next(err);
@@ -186,7 +218,8 @@ app.post('/channel/join/v2', (req, res, next) => {
 
 app.post('/channel/invite/v2', (req, res, next) => {
   try {
-    const { token, channelId, uId } = req.body;
+    const token = req.header('token');
+    const { channelId, uId } = req.body;
     return res.json(channelInviteV2(token, channelId, uId));
   } catch (err) {
     next(err);
@@ -195,7 +228,8 @@ app.post('/channel/invite/v2', (req, res, next) => {
 
 app.post('/channel/leave/v1', (req, res, next) => {
   try {
-    const { token, channelId } = req.body;
+    const token = req.header('token');
+    const { channelId } = req.body;
     return res.json(channelLeaveV1(token, channelId));
   } catch (err) {
     next(err);
@@ -204,7 +238,8 @@ app.post('/channel/leave/v1', (req, res, next) => {
 
 app.post('/channel/addowner/v1', (req, res, next) => {
   try {
-    const { token, channelId, uId } = req.body;
+    const token = req.header('token');
+    const { channelId, uId } = req.body;
     return res.json(channelAddownerV1(token, channelId, uId));
   } catch (err) {
     next(err);
@@ -213,7 +248,8 @@ app.post('/channel/addowner/v1', (req, res, next) => {
 
 app.post('/channel/removeowner/v1', (req, res, next) => {
   try {
-    const { token, channelId, uId } = req.body;
+    const token = req.header('token');
+    const { channelId, uId } = req.body;
     return res.json(channelRemoveownerV1(token, channelId, uId));
   } catch (err) {
     next(err);
@@ -260,29 +296,43 @@ app.put('/user/profile/sethandle/v2', (req, res, next) => {
 });
 
 app.post('/message/send/v2', (req, res) => {
-  const { token, channelId, message } = req.body;
+  const token = req.header('token');
+  const { channelId, message } = req.body;
   res.json(messageSendV2(token, channelId, message));
 });
 
 app.put('/message/edit/v2', (req, res) => {
-  const { token, messageId, message } = req.body;
+  const token = req.header('token');
+  const { messageId, message } = req.body;
   res.json(messageEditV2(token, messageId, message));
 });
 
 app.delete('/message/remove/v2', (req, res) => {
-  const token = req.query.token as string;
+  const token = req.header('token');
   const messageId = parseInt(req.query.messageId as string);
   res.json(messageRemoveV2(token, messageId));
 });
 
 app.post('/message/senddm/v2', (req, res) => {
-  const { token, dmId, message } = req.body;
+  const token = req.header('token');
+  const { dmId, message } = req.body;
   res.json(messageSendDmV2(token, dmId, message));
+});
+
+app.post('/message/share/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { ogMessageId, message, channelId, dmId } = req.body;
+    return res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/dm/create/v2', (req, res, next) => {
   try {
-    const { token, uIds } = req.body;
+    const token = req.header('token');
+    const { uIds } = req.body;
     return res.json(dmCreateV2(token, uIds));
   } catch (err) {
     next(err);
@@ -291,7 +341,7 @@ app.post('/dm/create/v2', (req, res, next) => {
 
 app.get('/dm/list/v2', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     return res.json(dmListV2(token));
   } catch (err) {
     next(err);
@@ -300,12 +350,30 @@ app.get('/dm/list/v2', (req, res, next) => {
 
 app.delete('/dm/remove/v2', (req, res, next) => {
   try {
-    const token = req.query.token as string;
+    const token = req.header('token');
     const dmId = parseInt(req.query.dmId as string);
     return res.json(dmRemoveV2(token, dmId));
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/standup/start/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, length } = req.body;
+  res.json(standupStartV1(token, channelId, length));
+});
+
+app.get('/standup/active/v1', (req, res) => {
+  const token = req.header('token');
+  const channelId = parseInt(req.query.channelId as string);
+  res.json(standupActiveV1(token, channelId));
+});
+
+app.post('/standup/send/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, message } = req.body;
+  res.json(standupSendV1(token, channelId, message));
 });
 
 // handles errors nicely

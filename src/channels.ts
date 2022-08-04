@@ -115,6 +115,10 @@ export function channelsCreateV3(token: string, name: string, isPublic: boolean)
     channelId: newChannelId,
     channelName: name,
     isPublic: isPublic,
+    isActive: false,
+    isActiveUid: -1,
+    standupFinish: null,
+    queue: [],
     members: [channelOwner],
     messages: [],
   });

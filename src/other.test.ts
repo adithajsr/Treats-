@@ -15,7 +15,8 @@ function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
     'POST',
     `${url}:${port}/channels/create/v3`,
     {
-      json: { token, name, isPublic },
+      json: { name, isPublic },
+      headers: { token },
     }
   );
   return {
@@ -29,30 +30,33 @@ function requestChannelsListAll(token: string) {
     'GET',
     `${url}:${port}/channels/listall/v3`,
     {
-      qs: {
-        token,
-      }
+      headers: { token },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
-function requestChannelInvite(InviterAUI: number, channelId: number, InviteeAUI: number) {
+export function requestChannelInvite(InviterAUI: string, channelId: number, InviteeAUI: number) {
   const res = request(
     'POST',
     `${url}:${port}/channel/invite/v2`,
     {
-      json: { InviterAUI, channelId, InviteeAUI },
+      json: { channelId, InviteeAUI },
+      headers: { InviterAUI },
     }
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
+
+afterEach(() => {
+  requestClear();
+});
 
 test('Clearing users', () => {
   // Creating a user

@@ -95,7 +95,7 @@ function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd
   };
 }
 
-function requestUsersAll(token: string) {
+export function requestUsersAll(token: string) {
   const res = request(
     'GET',
     `${url}:${port}/users/all/v2`,
@@ -427,7 +427,7 @@ describe('Testing for requestUsersAll', () => {
   });
 
   test('Test 3 invalid token', () => {
-    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const response = requestUsersAll('incorrecttonken');
     expect(response.res.statusCode).toBe(403);
     expect(response.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
@@ -476,7 +476,6 @@ describe('Testing for requestUploadPhoto', () => {
     requestClear();
     const profileImgUrl = 'https://images7.alphacoders.com/904/thumb-1920-904934.jpg';
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
-    const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
 
     const response1 = requestUploadPhoto(profileImgUrl, 15, 15, 14, 14, testToken);

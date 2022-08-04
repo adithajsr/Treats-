@@ -21,7 +21,8 @@ export function requestDMCreate(token: string, uIds: number[]) {
     'POST',
     `${url}:${port}/dm/create/v2`,
     {
-      json: { token, uIds },
+      json: { uIds },
+      headers: { token },
     }
   );
   return {
@@ -30,12 +31,13 @@ export function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestDMMessages(token: string, dmId: number, start: number) {
+export function requestDMMessages(token: string, dmId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/messages/v2`,
     {
-      qs: { token, dmId, start }
+      qs: { dmId, start },
+      headers: { token },
     }
   );
   return {
@@ -44,12 +46,13 @@ function requestDMMessages(token: string, dmId: number, start: number) {
   };
 }
 
-function requestMessageSendDM(token: string, dmId: number, message: string) {
+export function requestMessageSendDM(token: string, dmId: number, message: string) {
   const res = request(
     'POST',
     `${url}:${port}/message/senddm/v2`,
     {
-      json: { token, dmId, message },
+      json: { dmId, message },
+      headers: { token },
     }
   );
   return {
@@ -63,7 +66,7 @@ function requestDMList(token: string) {
     'GET',
     `${url}:${port}/dm/list/v2`,
     {
-      qs: { token },
+      headers: { token },
     }
   );
   return {
@@ -77,7 +80,8 @@ function requestDMRemove(token: string, dmId: number) {
     'DELETE',
     `${url}:${port}/dm/remove/v2`,
     {
-      qs: { token, dmId },
+      qs: { dmId },
+      headers: { token },
     }
   );
   return {
@@ -86,12 +90,13 @@ function requestDMRemove(token: string, dmId: number) {
   };
 }
 
-function requestDMDetails(token: string, dmId: number) {
+export function requestDMDetails(token: string, dmId: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/details/v2`,
     {
-      qs: { token, dmId },
+      qs: { dmId },
+      headers: { token },
     }
   );
   return {
@@ -105,7 +110,8 @@ function requestDMLeave(token: string, dmId: number) {
     'POST',
     `${url}:${port}/dm/leave/v2`,
     {
-      json: { token, dmId },
+      json: { dmId },
+      headers: { token },
     }
   );
   return {
@@ -138,6 +144,7 @@ function requestClear() {
   );
   return JSON.parse(res.body as string);
 }
+
 test('Invalid dmId', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -441,7 +448,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
+      expect(testDetails.res.statusCode).toBe(INPUT_ERROR);
     });
 
     test('Success remove DM, more than two users in DM', () => {
@@ -456,7 +463,7 @@ describe('dm capabilities', () => {
 
       // dmId of testDM should now be invalid
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.res.statusCode).toBe(INVALID_AUTH);
+      expect(testDetails.res.statusCode).toBe(INPUT_ERROR);
     });
 
     test('Fail remove DM, invalid token', () => {

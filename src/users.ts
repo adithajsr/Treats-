@@ -193,14 +193,16 @@ export function usersAll(token: string) {
   }
   const returnObject = [];
   for (const item of dataSet.user) {
-    returnObject.push({
-      uId: item.uId,
-      email: item.email,
-      nameFirst: item.nameFirst,
-      nameLast: item.nameLast,
-      handleStr: item.handle,
-      profileImgUrl: item.profileImgUrl,
-    });
+    if (item.shouldRetrieve === true) {
+      returnObject.push({
+        uId: item.uId,
+        email: item.email,
+        nameFirst: item.nameFirst,
+        nameLast: item.nameLast,
+        handleStr: item.handle,
+        profileImgUrl: item.profileImgUrl,
+      });
+    }
   }
   return { users: returnObject };
 }

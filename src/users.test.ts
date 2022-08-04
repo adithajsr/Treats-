@@ -450,6 +450,14 @@ function requestMessageSendDM(token: string, dmId: number, message: string) {
   return requestHelper('POST', '/message/senddm/v2', token, { dmId, message });
 }
 
+function requestStandupStart(token: string, channelId: number, length: number) {
+  return requestHelper('POST', '/standup/start/v1', token, { channelId, length });
+}
+
+function requestStandupSend(token: string, channelId: number, message: string) {
+  return requestHelper('POST', '/standup/send/v1', token, { channelId, message });
+}
+
 describe('stats capabilities', () => {
   beforeEach(() => {
     requestClear();
@@ -579,13 +587,13 @@ describe('stats capabilities', () => {
     });
 
     test('numChannels increase, numChannelsJoined increase and decrease', () => {
-      // testUser1 creates a channel and DM, and sends a message to that channel
+      // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       requestDMCreate(user1Token, []);
       requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message1');
 
-      // testUser2 creates a channel, increasing numChannels
+      // user2 creates a channel, increasing numChannels
       // numChannels will only increase over time, it will never decrease
       // as there is no way to remove channels
       const channel2 = requestChannelsCreate(user2Token, 'channel2Name', true);
@@ -593,91 +601,119 @@ describe('stats capabilities', () => {
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (2 + 1 + 1));
 
-      // testUser1 joins testUser2's channel, increasing numChannelsJoined
+      // user1 joins user2's channel, increasing numChannelsJoined
       requestChannelJoin(user1Token, channel2.bodyObj.channelId);
+      const channelJoinTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsB = requestUserStats(user1Token);
       expect(user1StatsB.res.statusCode).toBe(OK);
+
       expect(user1StatsB.bodyObj.userStats.channelsJoined.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.channelsJoined[2].numChannelsJoined).toStrictEqual(2);
+      expect(user1StatsB.bodyObj.userStats.channelsJoined[2].timeStamp).toBeGreaterThanOrEqual(channelJoinTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1) / (2 + 1 + 1));
 
-      // testUser1 leaves testUser2's channel, decreasing numChannelsJoined
+      // user1 leaves user2's channel, decreasing numChannelsJoined
       requestChannelLeave(user1Token, channel2.bodyObj.channelId);
+      const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsC = requestUserStats(user1Token);
       expect(user1StatsC.res.statusCode).toBe(OK);
-      expect(user1StatsC.bodyObj.userStats.channelsJoined.length).toStrictEqual(2);
+      
+      expect(user1StatsC.bodyObj.userStats.channelsJoined.length).toStrictEqual(4);
+      expect(user1StatsC.bodyObj.userStats.channelsJoined[3].numChannelsJoined).toStrictEqual(1);
+      expect(user1StatsC.bodyObj.userStats.channelsJoined[3].timeStamp).toBeGreaterThanOrEqual(channelLeaveTime);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (2 + 1 + 1));
 
-      // testUser2 invites testUser1 to their channel, increasing numChannelsJoined
+      // user2 invites user1 to their channel, increasing numChannelsJoined
       requestChannelInvite(user2Token, channel2.bodyObj.channelId, user1Id);
+      const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsD = requestUserStats(user1Token);
       expect(user1StatsD.res.statusCode).toBe(OK);
-      expect(user1StatsD.bodyObj.userStats.channelsJoined.length).toStrictEqual(3);
+
+      expect(user1StatsD.bodyObj.userStats.channelsJoined.length).toStrictEqual(5);
+      expect(user1StatsD.bodyObj.userStats.channelsJoined[4].numChannelsJoined).toStrictEqual(2);
+      expect(user1StatsD.bodyObj.userStats.channelsJoined[4].timeStamp).toBeGreaterThanOrEqual(channelInviteTime);
       expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual((2 + 1 + 1) / (2 + 1 + 1));
     });
 
     test('numDms increase and decrease, numDmsJoined increase and decrease', () => {
-      // testUser1 creates a channel and DM, and sends a message to that channel
+      // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       const DM1 = requestDMCreate(user1Token, []);
       requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message1');
 
-      // testUser2 creates a testDM2A (not directed to testUser1), increasing numDms
+      // user2 creates a testDM2A (not directed to user1), increasing numDms
       requestDMCreate(user2Token, []);
       const user1StatsA = requestUserStats(user1Token);
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 2 + 1));
 
-      // testUser2 creates a DM directed to testUser1, increasing numDmsJoined (and numDms)
+      // user2 creates a DM directed to user1, increasing numDmsJoined (and numDms)
       const DM2B = requestDMCreate(user2Token, [user1Id]);
+      const dmCreateTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsB = requestUserStats(user1Token);
       expect(user1StatsB.res.statusCode).toBe(OK);
+
       expect(user1StatsB.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numDmsJoined).toStrictEqual(2);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeGreaterThanOrEqual(dmCreateTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 2 + 1) / (1 + 3 + 1));
 
-      // testUser1 leaves testUser2's DM, decreasing numDmsJoined
+      // user1 leaves user2's DM, decreasing numDmsJoined
       requestDMLeave(user1Token, DM2B.bodyObj.dmId);
+      const dmLeaveTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsC = requestUserStats(user1Token);
       expect(user1StatsC.res.statusCode).toBe(OK);
-      expect(user1StatsC.bodyObj.userStats.dmsJoined.length).toStrictEqual(2);
+
+      expect(user1StatsC.bodyObj.userStats.dmsJoined.length).toStrictEqual(4);
+      expect(user1StatsC.bodyObj.userStats.dmsJoined[3].numDmsJoined).toStrictEqual(1);
+      expect(user1StatsC.bodyObj.userStats.dmsJoined[3].timeStamp).toBeGreaterThanOrEqual(dmLeaveTime);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 3 + 1));
 
-      // testUser2 removes the DM previously with testUser1, decreasing numDms
+      // user2 removes the DM previously with user1, decreasing numDms
       requestDMRemove(user2Token, DM2B.bodyObj.dmId);
       const user1StatsD = requestUserStats(user1Token);
       expect(user1StatsD.res.statusCode).toBe(OK);
       expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 2 + 1));
 
-      // testUser1 removes their DM, decreasing numDmsJoined (and numDms)
+      // user1 removes their DM, decreasing numDmsJoined (and numDms)
       requestDMRemove(user1Token, DM1.bodyObj.dmId);
+      const dm1RemoveTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsE = requestUserStats(user1Token);
       expect(user1StatsE.res.statusCode).toBe(OK);
-      expect(user1StatsC.bodyObj.userStats.dmsJoined.length).toStrictEqual(1);
+
+      expect(user1StatsE.bodyObj.userStats.dmsJoined.length).toStrictEqual(5);
+      expect(user1StatsE.bodyObj.userStats.dmsJoined[4].numDmsJoined).toStrictEqual(0);
+      expect(user1StatsE.bodyObj.userStats.dmsJoined[4].timeStamp).toBeGreaterThanOrEqual(dm1RemoveTime);
       expect(user1StatsE.bodyObj.userStats.involvementRate).toStrictEqual((1 + 0 + 1) / (1 + 1 + 1));
     });
 
     test('channels: numMsgs increase and decrease, numMsgsSent increase', () => {
-      // testUser1 creates a channel and DM, and sends a message to that channel
+      // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       requestDMCreate(user1Token, []);
       requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
 
-      // testUser2 joins the channel and sends a message, increasing numMsgs
+      // user2 joins the channel and sends a message, increasing numMsgs
       requestChannelJoin(user2Token, channel1.bodyObj.channelId);
       const message2 = requestMessageSend(user2Token, channel1.bodyObj.channelId, 'message 2');
       const user1StatsA = requestUserStats(user1Token);
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
 
-      // testUser1 sends another message to channel, increasing numMsgsSent (and numMsgs)
+      // user1 sends another message to channel, increasing numMsgsSent (and numMsgs)
       const message1B = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1B');
+      const msg1BSendTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsB = requestUserStats(user1Token);
       expect(user1StatsB.res.statusCode).toBe(OK);
+
       expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].numMessagesSent).toStrictEqual(2);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeGreaterThanOrEqual(msg1BSendTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
 
-      // testUser1 makes testUser2 a channel owner so that testUser2 can remove
+      // user1 makes user2 a channel owner so that user2 can remove
       // their message, decreasing numMsgs
       requestChannelAddOwner(user1Token, channel1.bodyObj.channelId, user2Id);
       requestMessageRemove(user2Token, message2.bodyObj.messageId);
@@ -685,7 +721,7 @@ describe('stats capabilities', () => {
       expect(user1StatsC.res.statusCode).toBe(OK);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
 
-      // testUser1 removes their own message, decreasing numMsgs but
+      // user1 removes their own message, decreasing numMsgs but
       // not numMsgsSent since message removal does not affect numMsgsSent
       requestMessageRemove(user1Token, message1B.bodyObj.messageId);
       const user1StatsD = requestUserStats(user1Token);
@@ -697,27 +733,31 @@ describe('stats capabilities', () => {
     });
 
     test('DMs: numMsgs increase and decrease, numMsgsSent increase', () => {
-      // testUser1 creates a channel and DM (directed to testUser2),
+      // user1 creates a channel and DM (directed to user2),
       // and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       const DM1 = requestDMCreate(user1Token, [user2Id]);
       const message1A = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
 
-      // testUser2 sends a message to the DM, increasing numMsgs
+      // user2 sends a message to the DM, increasing numMsgs
       requestMessageSendDM(user2Token, DM1.bodyObj.dmId, 'message 2');
       const user1StatsA = requestUserStats(user1Token);
       expect(user1StatsA.res.statusCode).toBe(OK);
       expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
 
-      // testUser1 sends a message to DM, increasing numMsgsSent (and numMsgs)
+      // user1 sends a message to DM, increasing numMsgsSent (and numMsgs)
       const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
+      const msg1BSendTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsB = requestUserStats(user1Token);
       expect(user1StatsB.res.statusCode).toBe(OK);
+
       expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].numMessagesSent).toStrictEqual(2);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2].timeStamp).toBeGreaterThanOrEqual(msg1BSendTime);
       expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
 
-      // testUser1 removes their own message, decreasing numMsgs but
+      // user1 removes their own message, decreasing numMsgs but
       // not numMsgsSent since message removal does not affect numMsgsSent
       requestMessageRemove(user1Token, message1B.bodyObj.messageId);
       const user1StatsC = requestUserStats(user1Token);
@@ -725,32 +765,56 @@ describe('stats capabilities', () => {
       expect(user1StatsC.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
       expect(user1StatsC.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
 
-      // testUser1 removes the DM, decreasing numMsgs again (and numDmsJoined and numDms)
-      requestDMRemove(user1Token, message1A.bodyObj.messageId);
+      // user1 removes the DM, decreasing numMsgs again (and numDmsJoined and numDms)
+      requestDMRemove(user1Token, DM1.bodyObj.dmId);
+      const dm1RemoveTime = Math.floor((new Date()).getTime() / 1000);
       const user1StatsD = requestUserStats(user1Token);
       expect(user1StatsD.res.statusCode).toBe(OK);
+
       expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
-      expect(user1StatsD.bodyObj.userStats.numDmsJoined.length).toStrictEqual(1);
+      expect(user1StatsD.bodyObj.userStats.dmsJoined.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].numMessagesSent).toStrictEqual(0);
+      expect(user1StatsB.bodyObj.userStats.dmsJoined[2].timeStamp).toBeGreaterThanOrEqual(dm1RemoveTime);
+
       // If the involvement is greater than 1, it should be capped at 1
       // (1 + 0 + 2) / (1 + 0 + 1) > 1
       expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual(1);
     });
 
-    test('standups: numMsgs increase and decrease, numMsgsSent increase', () => {
-      // TODO:
-      // standup/send messages only count when the final packaged
-      // standup message from standup/start has been sent
-      // A standup should only count as single message in the channel,
+    test('standups: numMsgs increase and decrease, numMsgsSent increase', async () => {
+      // user1 creates a channel and DM, and sends a message to that channel
+      // Essentially equivalent to metrics, basic test at this point
+      const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
+      requestDMCreate(user1Token, []);
+      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
+
+      // user1 starts a standup in that channel and sends messages to the queue
+      const standupFinish = requestStandupStart(user1Token, channel1.bodyObj.channelId, 2);
+      const standupMessage1A = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1A');
+      const standupMessage1B = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1B');
+      const standupMessage1C = requestStandupSend(user1Token, channel1.bodyObj.channelId, 'standup message 1C');
+
+      // Standup messages only count when final packaged standup message is sent
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeLessThan(standupFinish.bodyObj.timeFinish);
+      const user1StatsA = requestUserStats(user1Token);
+      expect(user1StatsA.res.statusCode).toBe(OK);
+      expect(user1StatsA.bodyObj.userStats.messagesSent.length).toStrictEqual(2);
+      expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 1));
+
+      // A standup should only count as a single message in the channel,
       // timestamped at the moment the standup finished
-
-      // When a standup is sent, the number of messages sent by the user
-      // who started the standup should increase by 1
-
-      // STANDUPS MAY END UP BEING UNDER CHANNELS TEST
-
-      // The user's involvement:
-      // sum(numChannelsJoined, numDmsJoined, numMsgsSent) divided by
-      // sum(numChannels, numDms, numMsgs)
+      // The number of messages sent by the user who started the standup
+      // should increase by 1 also
+      await new Promise((r) => setTimeout(r, 4000));
+      expect(Math.floor((new Date()).getTime() / 1000)).toBeGreaterThanOrEqual(standupFinish.bodyObj.timeFinish);
+      const user1StatsB = requestUserStats(user1Token);
+      expect(user1StatsB.res.statusCode).toBe(OK);
+      expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.messagesSent[2]).toStrictEqual({
+        numMessagesSent: 2,
+        timeStamp: standupFinish.bodyObj.timeFinish,
+      });
+      expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 2));
     });
   });
 
@@ -863,13 +927,16 @@ describe('stats capabilities', () => {
     });
 
     test('numUsers increase and decrease, numUsersWhoAreInLeastOneChannelOrDm increase and decrease', () => {
-      // testUser1 creates a channel and DM, and sends a message to that channel
+      // ***********************************************
+      // FIXME: UPDATE STARTING HERE AND CONTINUE BELOW
+
+      // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
       const DM1A = requestDMCreate(user1Token, []);
       requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message1');
 
-      // testUser2 registers, increasing numUsers
+      // user2 registers, increasing numUsers
       const testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
       const user2Token = testUser2.bodyObj.token;
       const user2Id = testUser2.bodyObj.authUserId;
@@ -878,19 +945,19 @@ describe('stats capabilities', () => {
       expect(workspaceStatsA.res.statusCode).toBe(OK);
       expect(workspaceStatsA.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
 
-      // testUser1 invites testUser2 to their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
+      // user1 invites user2 to their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
       requestChannelInvite(user1Token, channel1.bodyObj.channelId, user2Id);
       const workspaceStatsB = requestUsersStats(user1Token);
       expect(workspaceStatsB.res.statusCode).toBe(OK);
       expect(workspaceStatsB.bodyObj.workspaceStats.utilizationRate).toStrictEqual(2 / 2);
 
-      // testUser2 leaves testUser1's channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      // user2 leaves user1's channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
       requestChannelLeave(user2Token, channel1.bodyObj.channelId);
       const workspaceStatsC = requestUsersStats(user1Token);
       expect(workspaceStatsC.res.statusCode).toBe(OK);
       expect(workspaceStatsC.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
 
-      // testUser1 creates a DM directed to testUser2,
+      // user1 creates a DM directed to user2,
       // increasing numUsersWhoAreInLeastOneChannelOrDm (and numDmsExist)
       const DM1B = requestDMCreate(user1Token, [user2Id]);
       const workspaceStatsD = requestUsersStats(user1Token);
@@ -898,32 +965,32 @@ describe('stats capabilities', () => {
       expect(workspaceStatsD.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(3);
       expect(workspaceStatsD.bodyObj.workspaceStats.utilizationRate).toStrictEqual(2 / 2);
 
-      // testUser2 leaves testUser1's DM, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      // user2 leaves user1's DM, decreasing numUsersWhoAreInLeastOneChannelOrDm
       requestDMLeave(user2Token, DM1B.bodyObj.dmId);
       const workspaceStatsE = requestUsersStats(user1Token);
       expect(workspaceStatsE.res.statusCode).toBe(OK);
       expect(workspaceStatsE.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 2);
 
-      // testUser2 is removed from Treats, decreasing numUsers
+      // user2 is removed from Treats, decreasing numUsers
       requestAdminUserRemove(user1Token, user2Id);
       const workspaceStatsF = requestUsersStats(user1Token);
       expect(workspaceStatsF.res.statusCode).toBe(OK);
       expect(workspaceStatsF.bodyObj.workspaceStats.utilizationRate).toStrictEqual(1 / 1);
 
-      // testUser1 removes their DM (they are still in a channel), decreasing numDmsExist
+      // user1 removes their DM (they are still in a channel), decreasing numDmsExist
       requestDMRemove(user1Token, DM1A.bodyObj.dmId);
       const workspaceStatsG = requestUsersStats(user1Token);
       expect(workspaceStatsG.res.statusCode).toBe(OK);
       expect(workspaceStatsG.bodyObj.workspaceStats.dmsExist.length).toStrictEqual(2);
       expect(workspaceStatsG.bodyObj.workspaceStats.involvementRate).toStrictEqual(1 / 1);
 
-      // testUser1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
+      // user1 leaves their channel, decreasing numUsersWhoAreInLeastOneChannelOrDm
       requestChannelLeave(user1Token, channel1.bodyObj.channelId);
       const workspaceStatsH = requestUsersStats(user1Token);
       expect(workspaceStatsH.res.statusCode).toBe(OK);
       expect(workspaceStatsH.bodyObj.workspaceStats.utilizationRate).toStrictEqual(0 / 1);
 
-      // testUser1 joins their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
+      // user1 joins their channel, increasing numUsersWhoAreInLeastOneChannelOrDm
       requestChannelJoin(user1Token, channel1.bodyObj.channelId);
       const workspaceStatsI = requestUsersStats(user1Token);
       expect(workspaceStatsI.res.statusCode).toBe(OK);
@@ -931,23 +998,57 @@ describe('stats capabilities', () => {
     });
 
     test('messagesExist increase and decrease, ', () => {
-      // testUser1 creates a channel and DM, and sends a message to that channel
+      // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
       const channel1 = requestChannelsCreate(user1Token, 'channel1Name', true);
-      requestDMCreate(user1Token, []);
-      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1A');
+      const DM1 = requestDMCreate(user1Token, []);
+      requestMessageSend(user1Token, channel1.bodyObj.channelId, 'channel message 1A');
 
-      // testUser1 sends another message to channel, increasing messagesExist
-      const message1B = requestMessageSend(user1Token, channel1.bodyObj.channelId, 'message 1B');
+      // user1 sends a message to the DM, increasing messagesExist
+      const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
       const workspaceStatsA = requestUsersStats(user1Token);
       expect(workspaceStatsA.res.statusCode).toBe(OK);
       expect(workspaceStatsA.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(3);
 
-      // testUser1 removes their own message, decreasing messagesExist
+      // user1 removes their message in the DM, decreasing messagesExist
       requestMessageRemove(user1Token, message1B.bodyObj.messageId);
       const workspaceStatsB = requestUsersStats(user1Token);
       expect(workspaceStatsB.res.statusCode).toBe(OK);
       expect(workspaceStatsB.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(2);
+
+      // user1 sends multiple messages to the DM, increasing messagesExist
+      requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1C');
+      requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1D');
+      requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1E');
+      const workspaceStatsC = requestUsersStats(user1Token);
+      expect(workspaceStatsC.res.statusCode).toBe(OK);
+      expect(workspaceStatsC.bodyObj.workspaceStats.messagesExist.length).toStrictEqual(5);
+
+      // FIXME:
+      // Log removal of multiple messages from a DM as one
+
+      // user2 sends a message to the DM, increasing numMsgs
+      requestMessageSendDM(user2Token, DM1.bodyObj.dmId, 'message 2');
+      const user1StatsA = requestUserStats(user1Token);
+      expect(user1StatsA.res.statusCode).toBe(OK);
+      expect(user1StatsA.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 1) / (1 + 1 + 2));
+
+      // user1 sends a message to DM, increasing numMsgsSent (and numMsgs)
+      const message1B = requestMessageSendDM(user1Token, DM1.bodyObj.dmId, 'message 1B');
+      const user1StatsB = requestUserStats(user1Token);
+      expect(user1StatsB.res.statusCode).toBe(OK);
+      expect(user1StatsB.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsB.bodyObj.userStats.involvementRate).toStrictEqual((1 + 1 + 2) / (1 + 1 + 3));
+
+      // user1 removes the DM, decreasing numMsgs again (and numDmsJoined and numDms)
+      requestDMRemove(user1Token, message1A.bodyObj.messageId);
+      const user1StatsD = requestUserStats(user1Token);
+      expect(user1StatsD.res.statusCode).toBe(OK);
+      expect(user1StatsD.bodyObj.userStats.messagesSent.length).toStrictEqual(3);
+      expect(user1StatsD.bodyObj.userStats.numDmsJoined.length).toStrictEqual(1);
+      // If the involvement is greater than 1, it should be capped at 1
+      // (1 + 0 + 2) / (1 + 0 + 1) > 1
+      expect(user1StatsD.bodyObj.userStats.involvementRate).toStrictEqual(1);
 
       // TODO:
       // Messages which have not been sent yet with message/sendlater or

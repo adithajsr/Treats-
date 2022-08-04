@@ -371,7 +371,7 @@ Arguments:
 Return Value:
     Returns involvementRate
 */
-export const calculateInvolvement = (userId: number) => {
+const calculateInvolvement = (userId: number) => {
   const data = getData();
   const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
   const workspaceObj = data.workspaceStats;
@@ -410,7 +410,7 @@ Arguments:
 Return Value:
     Returns involvementRate
 */
-export const calculateUtilization = (token: string) => {
+const calculateUtilization = (token: string) => {
   const data = getData();
   const numUsers = usersAll(token).users.length;
 

@@ -105,10 +105,29 @@ export function channelsCreateV3(token: string, name: string, isPublic: boolean)
   const newChannelId = data.channel.length + 1;
 
   // The user who created it automatically joins the channel
+  const ownerId = data.token[tokenIndex].uId;
   const channelOwner = {
-    uId: data.token[tokenIndex].uId,
+    uId: ownerId,
     channelPerms: 1,
   };
+
+  // Update analytics metrics
+  const channelCreationTime = Math.floor((new Date()).getTime() / 1000);
+  const ownerObj = data.user[data.user.findIndex(a => a.uId === ownerId)];
+  const oldnumChJoined = ownerObj.channelsJoined[ownerObj.channelsJoined.length - 1].numChannelsJoined;
+
+  ownerObj.channelsJoined.push({
+    numChannelsJoined: oldnumChJoined + 1,
+    timeStamp: channelCreationTime,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumChExist = workspaceObj.channelsExist[workspaceObj.channelsExist.length - 1].numChannelsExist;
+
+  workspaceObj.channelsExist.push({
+    numChannelsExist: oldnumChExist + 1,
+    timeStamp: channelCreationTime,
+  });
 
   // Create a new channel
   data.channel.push({

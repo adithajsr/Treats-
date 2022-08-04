@@ -289,6 +289,27 @@ export function dmCreateV2(token: string, uIds: number[]) {
   const dmMembers = createMembersListDMCreate(uIds, creatoruId);
   const dmName = createNameDMCreate(dmMembers);
 
+  // Update analytics metrics
+  const dmCreationTime = Math.floor((new Date()).getTime() / 1000);
+
+  for (const member of dmMembers) {
+    const userObj = data.user[data.user.findIndex(a => a.uId === member.uId)];
+    const oldnumDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+
+    userObj.dmsJoined.push({
+      numDmsJoined: oldnumDmsJoined + 1,
+      timeStamp: dmCreationTime,
+    });
+  }
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumDmsExist = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
+
+  workspaceObj.dmsExist.push({
+    numDmsExist: oldnumDmsExist + 1,
+    timeStamp: dmCreationTime,
+  });
+
   // Create a new DM
   data.dm.push({
     dmId: newDMId,

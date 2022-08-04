@@ -252,8 +252,7 @@ export function usersStatsV1(token: string) {
   const numUsers = data.user.length;
 
   let numUsersWhoAreInLeastOneChannelOrDm = 0;
-  for (let i = 0; i < numUsers; i++) {
-    const userObj = data.user[i];
+  for (const userObj of data.user) {
     const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
     const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
 

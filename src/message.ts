@@ -124,6 +124,24 @@ export function messageSendV2 (token: string, channelId: number, message: string
   const messageId = Math.floor(Math.random() * 1000);
   const time = Math.floor((new Date()).getTime() / 1000);
 
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: time,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: time,
+  });
+
+  // Create a new message
   data.channel[channelIndex].messages.push(
     {
       messageId: messageId,

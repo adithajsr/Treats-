@@ -536,7 +536,6 @@ describe('stats capabilities', () => {
       expect(userStatsObject.messagesSent[0].timeStamp).toStrictEqual(accountCreationTime);
     });
 
-    /*
     test('Test metrics, basic', () => {
       // Create a test channel and DM, and send a test message to the channel
       const testChannel = requestChannelsCreate(user1Token, 'channelName', true);
@@ -587,6 +586,7 @@ describe('stats capabilities', () => {
       });
     });
 
+    /*
     test('numChannels increase, numChannelsJoined increase and decrease', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point
@@ -878,7 +878,6 @@ describe('stats capabilities', () => {
       expect(workspaceStatsObject.messagesExist[0].timeStamp).toStrictEqual(firstUserTime);
     });
 
-    /*
     test('Test metrics, basic', () => {
       // Create a test channel and DM, and send a test message to the channel
       const testChannel = requestChannelsCreate(user1Token, 'channelName', true);
@@ -928,6 +927,7 @@ describe('stats capabilities', () => {
       });
     });
 
+    /*
     test('numUsers increase and decrease, numUsersWhoAreInLeastOneChannelOrDm increase and decrease', () => {
       // user1 creates a channel and DM, and sends a message to that channel
       // Essentially equivalent to metrics, basic test at this point

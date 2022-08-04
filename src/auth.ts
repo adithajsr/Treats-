@@ -14,27 +14,6 @@ const url = config.url;
 const port = config.port;
 const SECRET = 'AERO';
 
-/* <cycles through making new uuid's until one is valid>
-
-Arguments:
-Return Value:
-returns <uid> on <finding a valid uuid> */
-function newUuid() {
-  const dataSet = getData();
-  let uuid: string = generateV4uuid();
-  let oldUuid = 'invalidUuid';
-  while (oldUuid !== uuid) {
-    oldUuid = uuid;
-    for (const item of dataSet.token) {
-      if (item.token === uuid) {
-        // this function is only called after a random uuidv4 is generated so it is unlikely and random there is a match, hence it is virtually impossible to test
-        uuid = generateV4uuid();
-      }
-    }
-  }
-  return uuid;
-}
-
 /* <Checks if a email is already used by another user>
 
 Arguments:
@@ -125,7 +104,7 @@ export function authLoginV1(email: string, password: string) : { authUserId: num
     if (item.email === email) {
       if (item.password === crypto.createHash('sha256', SECRET + password)) {
         // If both arguments match an account
-        const uuid: string = newUuid();
+        const uuid: string = crypto.createHash('sha256', SECRET + generateV4uuid());
         dataSet.token.push({
           token: uuid,
           uId: item.uId,
@@ -211,7 +190,7 @@ export function authRegisterV1(email: string, password: string, nameFirst: strin
     shouldRetrieve: true
   });
 
-  const uuid: string = newUuid();
+  const uuid: string = crypto.createHash('sha256', SECRET + generateV4uuid());
   dataSet.token.push({
     token: uuid,
     uId: newUserId,

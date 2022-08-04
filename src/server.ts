@@ -174,9 +174,8 @@ app.post('/auth/passwordreset/request/v1', (req, res) => {
 
 app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
   try {
-    const token = req.header('token');
     const { resetCode, newPassword } = req.body;
-    return res.json(passwordReset(resetCode, newPassword, token));
+    return res.json(passwordReset(resetCode, newPassword));
   } catch (err) {
     next(err);
   }

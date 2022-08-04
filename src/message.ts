@@ -331,6 +331,22 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
   return { messageId: messageId };
 }
 
+/*
+Pushes given data into a specified channel's messages array
+
+Arguments:
+  dmIndex (number)         - represents the index of the channel the message will get added to 
+  messageId (number)       - represents the messageId of the message to get added
+  message (string)         - message to be added
+  timeSent (number)        - time the message was added
+
+Return Value:
+  N/A
+
+Errors: 
+  N/A
+*/
+
 function pushMessage(channelIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
   const data = getData();
   data.channel[channelIndex].messages.push(
@@ -347,6 +363,25 @@ function pushMessage(channelIndex: number, messageId: number, uId: number, messa
   setData(data);
   return {};
 }
+/*
+Sends a message to a channel at a specified time in the future
+
+Arguments:
+  token (string)         - represents the session of the user who wishes to send a message
+  channelId (number)     - represents the id of the channe; they want to send the message to
+  message (string)       - message they want to share
+  timeSent (number)      - time in the future user want to send message
+
+Return Value:
+  Returns messageId if successful
+
+Throws a 400 error    - channeId does not refer to a valid Id
+                      - length of message is less than 1 or greater than 1000 characters
+                      - timeSent is a time in the past
+
+Throw a 403 error     - if token is invalid
+                      - if the user is not a part of the channe; they are trying to send a message to
+*/
 
 export function messageSendLaterV1(token: string, channelId: number, message: string, timeSent: number) {
   if (message.length < 1 || message.length > 1000) {

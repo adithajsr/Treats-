@@ -13,6 +13,9 @@ import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetH
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
+import { searchV1 } from './search';
+import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
+import { adminUserRemoveV1 } from './admin';
 
 // Set up web app, use JSON
 const app = express();
@@ -35,6 +38,13 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.get('/search/v1', (req, res, next) => {
+  const token = req.header('token');
+  const queryStr = req.query.queryStr as string;
+
+  return res.json(searchV1(token, queryStr));
+});
 
 app.get('/channel/messages/v3', (req, res, next) => {
   try {
@@ -92,6 +102,12 @@ app.get('/channel/details/v3', (req, res) => {
   const token = req.header('token');
   const channelId = req.query.channelId as string;
   res.json(channelDetailsV3(token, parseInt(channelId)));
+});
+
+app.delete('/admin/user/remove/v1', (req, res) => {
+  const token = req.header('token');
+  const uId = parseInt(req.query.uId as string);
+  res.json(adminUserRemoveV1(token, uId));
 });
 
 app.post('/auth/register/v3', (req, res, next) => {
@@ -294,6 +310,24 @@ app.delete('/dm/remove/v2', (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/standup/start/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, length } = req.body;
+  res.json(standupStartV1(token, channelId, length));
+});
+
+app.get('/standup/active/v1', (req, res) => {
+  const token = req.header('token');
+  const channelId = parseInt(req.query.channelId as string);
+  res.json(standupActiveV1(token, channelId));
+});
+
+app.post('/standup/send/v1', (req, res) => {
+  const token = req.header('token');
+  const { channelId, message } = req.body;
+  res.json(standupSendV1(token, channelId, message));
 });
 
 // handles errors nicely

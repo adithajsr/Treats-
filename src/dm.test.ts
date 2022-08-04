@@ -31,7 +31,7 @@ export function requestDMCreate(token: string, uIds: number[]) {
   };
 }
 
-function requestDMMessages(token: string, dmId: number, start: number) {
+export function requestDMMessages(token: string, dmId: number, start: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/messages/v2`,
@@ -90,7 +90,7 @@ export function requestDMRemove(token: string, dmId: number) {
   };
 }
 
-function requestDMDetails(token: string, dmId: number) {
+export function requestDMDetails(token: string, dmId: number) {
   const res = request(
     'GET',
     `${url}:${port}/dm/details/v2`,

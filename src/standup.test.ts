@@ -8,7 +8,6 @@ import { generateString } from './message.test';
 
 const port = config.port;
 const url = config.url;
-jest.setTimeout(5000);
 
 // -------------------------------------------------------------------------//
 

@@ -440,11 +440,11 @@ describe('Testing for requestUploadPhoto', () => {
   requestClear();
   test('Test 1 affirmitive', () => {
     // all should be well
-    const profileImgUrl = 'https://images7.alphacoders.com/904/thumb-1920-904934.jpg';
+    const profileImgUrl = 'http://vignette1.wikia.nocookie.net/comicdc/images/a/a6/Superman-wallpapers_3097_1600.jpg/revision/latest?cb=20110827193320&path-prefix=es';
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
     const testUserId = returnObject.authUserId;
     const testToken = returnObject.token;
-    const response = requestUploadPhoto(profileImgUrl, 15, 15, 1920, 1080, testToken);
+    const response = requestUploadPhoto(profileImgUrl, 15, 15, 1600, 1080, testToken);
     expect(response.res.statusCode).toBe(OK);
     let testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
     while (testImgUrl === `${url}:${port}/imgurl/default.jpg`) {
@@ -474,7 +474,7 @@ describe('Testing for requestUploadPhoto', () => {
 
   test('Test 2 coverge of errors', () => {
     requestClear();
-    const profileImgUrl = 'https://images7.alphacoders.com/904/thumb-1920-904934.jpg';
+    const profileImgUrl = 'http://vignette1.wikia.nocookie.net/comicdc/images/a/a6/Superman-wallpapers_3097_1600.jpg/revision/latest?cb=20110827193320&path-prefix=es';
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
     const testToken = returnObject.token;
 
@@ -486,8 +486,8 @@ describe('Testing for requestUploadPhoto', () => {
     expect(response2.res.statusCode).toBe(400);
     expect(response2.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
 
-    const profileImgUrlAlt = 'https://www.pikpng.com/pngl/b/494-4945081_wonder-woman-official-comic-png-wonder-woman-comic.png';
-    const response3 = requestUploadPhoto(profileImgUrlAlt, 15, 15, 600, 761, testToken);
+    const profileImgUrlAlt = 'http://www.clipartbest.com/cliparts/4T9/6ne/4T96nenrc.png';
+    const response3 = requestUploadPhoto(profileImgUrlAlt, 15, 15, 1600, 1353, testToken);
     expect(response3.res.statusCode).toBe(400);
     expect(response3.bodyObj.error).toStrictEqual({ message: 'image uploaded is not a JPG' });
 

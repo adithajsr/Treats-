@@ -446,6 +446,22 @@ export function MessageShareV1(token: string, ogMessageId: number, message: stri
   throw HTTPError(400, 'Invalid messageId');
 }
 
+/*
+Pushes given data into a specified DM's messages array
+
+Arguments:
+  dmIndex (number)         - represents the index of the dm the message will get added to 
+  messageId (number)       - represents the messageId of the message to get added
+  message (string)         - message to be added
+  timeSent (number)        - time the message was added
+
+Return Value:
+  N/A
+
+Errors: 
+  N/A
+*/
+
 function pushMessageDM (dmIndex: number, messageId: number, uId: number, message: string, timeSent: number) {
   const data = getData();
   data.dm[dmIndex].messages.push(

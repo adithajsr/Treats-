@@ -2,6 +2,16 @@ import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import request from 'sync-request';
+import fs from 'fs';
+import sharp from 'sharp';
+import { v4 as generateV4uuid } from 'uuid';
+import sizeOf from 'image-size';
+import imageType from 'image-type';
+import config from './config.json';
+
+const url = config.url;
+const port = config.port;
 
 /* This function returns the important information about a user's profile.
 
@@ -39,6 +49,7 @@ export function userProfileV3(token: string, uId: number) {
         nameFirst: data.user[element].nameFirst,
         nameLast: data.user[element].nameLast,
         handleStr: data.user[element].handle,
+        profileImgUrl: data.user[element].profileImgUrl,
       };
     }
   }
@@ -54,7 +65,7 @@ token (string) - <uuidV4>
 Return Value:
 returns <true> on <existing token>
 returns <false> on <non-existant token> */
-function doesTokenExist(token: string) : boolean {
+export function doesTokenExist(token: string) : boolean {
   const dataSet = getData();
   for (const item of dataSet.token) {
     if (item.token === token) {
@@ -120,8 +131,7 @@ function findAndSet(var1: string, token: string, dataKey: string, var2?: string)
       return {};
     }
   }
-  // this below line cannot be accessed for coverage if uuid in token object is a valid uId, in other words, no way of running this line in working code
-  throw HTTPError(403, 'Invalid token');
+  // theoretically "throw HTTPError(403, 'Invalid token');" could be run after this
 }
 
 /* <Update the authorised user's first and last name>
@@ -176,8 +186,11 @@ token (string) - <uuidV4>
 Return Value:
 returns <an array of users with their uId, email, full name and handle> on <success>
 throws HTTP Error on <invalid token> */
-export function usersAll() {
+export function usersAll(token: string) {
   const dataSet = getData();
+  if (!doesTokenExist(token)) {
+    throw HTTPError(403, 'Invalid token');
+  }
   const returnObject = [];
   for (const item of dataSet.user) {
     if (item.shouldRetrieve === true) {
@@ -187,8 +200,99 @@ export function usersAll() {
         nameFirst: item.nameFirst,
         nameLast: item.nameLast,
         handleStr: item.handle,
+        profileImgUrl: item.profileImgUrl,
       });
     }
   }
   return { users: returnObject };
+}
+
+/* <Takes an image url and saves it to the server and imbeds the link into the user's data>
+
+Arguments:
+imgUrl (string) - <JPG URL>
+xStart (number) - <integer>
+yStart (number) - <integer>
+xEnd (number) - <integer>
+yEnd (number) - <integer>
+token (string) - <uuidV4>
+Return Value:
+returns <empty object, after saving file root to profileUrlImg> on <success>
+throws HTTP Error on <invalid token, coordinates or error in downloading image> */
+export async function uploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
+  // CHECK COORDINATES MAKE SENSE
+  if (xEnd <= xStart || yEnd <= yStart) {
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
+  }
+  if (xEnd < 0 || xStart < 0 || yEnd < 0 || yStart < 0) {
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
+  }
+  const dataSet = getData();
+  let uId = 0;
+  for (const item of dataSet.token) {
+    if (item.token === token) {
+      uId = item.uId;
+    }
+  }
+  if (uId === 0) {
+    return {
+      code: 403,
+      message: 'Invalid token'
+    };
+  }
+
+  // REQUEST URL FOR IMAGE DATA
+  const res = request(
+    'GET',
+    imgUrl
+  );
+  const body = res.getBody() as Buffer;
+
+  // CHECK IMAGE MEETS REQUIREMENTS
+  if ((await imageType(body)).ext !== 'jpg') {
+    return {
+      code: 400,
+      message: 'image uploaded is not a JPG'
+    };
+  }
+  const uuid = generateV4uuid();
+  const preEditedImage = `${__dirname}/profilePics/pre-edit-${uuid}.jpg`;
+  fs.writeFileSync(preEditedImage, body, { flag: 'w' });
+  const dimensions = sizeOf(preEditedImage);
+  if (dimensions.width < xEnd || dimensions.height < yEnd) {
+    fs.unlinkSync(preEditedImage);
+    return {
+      code: 400,
+      message: 'cropping coordinates are invalid'
+    };
+  }
+  // CROP PHOTO
+  const width = xEnd - xStart;
+  const height = yEnd - yStart;
+  await sharp(preEditedImage).extract({ width: width, height: height, left: xStart, top: yStart }).toFile(`${__dirname}/profilePics/${uuid}.jpg`)
+    .then(function(newFileInfo) {
+      fs.unlinkSync(preEditedImage);
+      for (const item of dataSet.user) {
+        if (item.uId === uId) {
+          item.profileImgUrl = `${url}:${port}/imgurl/${uuid}.jpg`;
+        }
+      }
+      setData(dataSet);
+      console.log('Image cropped and saved');
+      return {};
+    })
+    .catch(function(err) {
+      // below code unable to get via coverage, will result in fatal error
+      fs.unlinkSync(preEditedImage);
+      return {
+        code: 400,
+        message: 'sharp failed to crop'
+      };
+    });
 }

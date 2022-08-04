@@ -4,12 +4,13 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
+import HTTPError from 'http-errors';
 
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
-import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, uploadPhoto } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
@@ -39,6 +40,22 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.use('/imgurl', express.static(`${__dirname}/profilePics`));
+
+app.post('/user/profile/uploadphoto/v1', async (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
+    const returnObject = await uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token);
+    if (returnObject !== undefined && 'code' in returnObject) {
+      throw HTTPError(returnObject.code, returnObject.message);
+    }
+    return res.json({});
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.post('/message/sendlaterdm/v1', (req, res) => {
   const token = req.header('token');
@@ -238,8 +255,13 @@ app.post('/channel/removeowner/v1', (req, res, next) => {
   }
 });
 
-app.get('/users/all/v2', (req, res) => {
-  res.json(usersAll());
+app.get('/users/all/v2', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(usersAll(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/setname/v2', (req, res, next) => {
@@ -252,7 +274,7 @@ app.put('/user/profile/setname/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/email/v2', (req, res, next) => {
+app.put('/user/profile/setemail/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { email } = req.body;
@@ -262,7 +284,7 @@ app.put('/user/profile/email/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/handle/v2', (req, res, next) => {
+app.put('/user/profile/sethandle/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { handleStr } = req.body;

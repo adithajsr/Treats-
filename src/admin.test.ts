@@ -154,7 +154,6 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve channel details - requestChannelMessages - message
       const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-      console.log(channelM.bodyObj);
       expect(channelM.bodyObj.messages).toStrictEqual(
         [
           {

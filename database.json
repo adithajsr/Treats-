@@ -1,7 +1,61 @@
 {
-    "user": [],
-    "channel": [],
-    "token": [],
+    "user": [
+        {
+            "uId": 1,
+            "email": "danielYung@gmail.com",
+            "password": "2c7cbaac3a296b9f59a6f03de6283f4fbc0bb17dd41e657e980e5a3a9187571b",
+            "nameFirst": "Daniel",
+            "nameLast": "Yung",
+            "handle": "danielyung",
+            "profileImgUrl": "http://127.0.0.1:23224/imgurl/default.jpg",
+            "globalPerms": 1,
+            "notifications": [],
+            "channelsJoined": [
+                {
+                    "numChannelsJoined": 0,
+                    "timeStamp": 1659640623
+                }
+            ],
+            "dmsJoined": [
+                {
+                    "numDmsJoined": 0,
+                    "timeStamp": 1659640623
+                }
+            ],
+            "messagesSent": [
+                {
+                    "numMessagesSent": 0,
+                    "timeStamp": 1659640623
+                }
+            ],
+            "involvementRate": 0,
+            "shouldRetrieve": true
+        }
+    ],
+    "channel": [
+        {
+            "channelId": 1,
+            "channelName": "danielChannel",
+            "isPublic": true,
+            "isActive": false,
+            "isActiveUid": -1,
+            "standupFinish": null,
+            "queue": [],
+            "members": [
+                {
+                    "uId": 1,
+                    "channelPerms": 1
+                }
+            ],
+            "messages": []
+        }
+    ],
+    "token": [
+        {
+            "token": "ca71076687ce256094cd9280535c842e39b9f581813ee7918bed55077c5ee1f1",
+            "uId": 1
+        }
+    ],
     "dm": [],
     "workspaceStats": {
         "channelsExist": [],

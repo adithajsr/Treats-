@@ -7,7 +7,7 @@ const url = config.url;
 import { requestClear } from './users.test';
 import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
-import { requestMessageSend, requestSendDm, payloadObj, requestChannelJoinV2 } from './message.test';
+import { requestMessageSend, requestSendDm, payloadObj } from './message.test';
 import { requestDMCreate } from './dm.test';
 import { requestUsersAll, requestUserProfile } from './users.test';
 import { requestChannelDetailsHelper, requestChannelMessages } from './channel.test';
@@ -112,7 +112,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: config.url + ':' + config.port +'/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
         }
       ]);
       // retrieve user details user/profile
@@ -123,7 +123,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'Removed',
           nameLast: 'user',
           handleStr: '',
-          profileImgUrl: config.url + ':' + config.port +'/imgurl/default.jpg'
+          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
@@ -154,7 +154,7 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve channel details - requestChannelMessages - message
       const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
-      console.log(channelM.bodyObj)
+      console.log(channelM.bodyObj);
       expect(channelM.bodyObj.messages).toStrictEqual(
         [
           {

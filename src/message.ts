@@ -375,6 +375,6 @@ export function messageSendLaterV1(token: string, channelId: number, message: st
   const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
   const messageId = Math.floor(Math.random() * 1000);
 
-  setTimeout(pushMessage, timeSent * 1000, channelIndex, messageId, uId, message, timeFinish); //THIS ISN'T WAITING 
+  setTimeout(pushMessage, 2 * 1000, channelIndex, messageId, uId, message, timeSent); //THIS ISN'T WAITING 
   return { messageId: messageId };
 }

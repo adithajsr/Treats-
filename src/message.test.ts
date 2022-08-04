@@ -391,7 +391,7 @@ export { requestAuthRegister, requestChannelsCreate, requestMessageSend };
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
 
-/*
+
 test('timeSent is a time in the past', () => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -403,23 +403,19 @@ test('timeSent is a time in the past', () => {
 
 
 
-test ('success case with one message', () => {
+test ('success case with one message', async() => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
   const channelId = requestChannelsCreate(danielToken, 'danielChannel', true).bodyObj.channelId;
 
-  const futureTime = Math.floor(Date.now()/1000) + 50;
-
+  const futureTime = Math.floor(Date.now()/1000) + 2;
   requestMessageSendLater(danielToken, channelId, 'Reminder: stop gaming and start assignment bitch. Also love yourself.', futureTime);
-  console.log(requestChannelMessages(danielToken, channelId, 0).bodyObj);
-  setTimeout(() => {
-    expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].toStrictEqual('Reminder: stop gaming and start assignment bitch. Also love yourself.'));
-    }, 6000 
-  );
+  await new Promise((r) => setTimeout(r, 2500));
 
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual('Reminder: stop gaming and start assignment bitch. Also love yourself.');
 });
 
-*/
+
 test('success case', async() => {
   requestClear();
   const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -433,11 +429,12 @@ test('success case', async() => {
   expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[0].message).toStrictEqual(returnObject[0]);
   expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[1].message).toStrictEqual(returnObject[1]);
   expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[2].message).toStrictEqual(returnObject[2]);
-  requestMessageSendLater(danielToken, channelId, 'Fourth message', 2); 
+  requestMessageSendLater(danielToken, channelId, 'Fourth message', Math.floor(Date.now() / 1000) + 2); 
 
   expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3]).toStrictEqual(undefined); 
 
   await new Promise((r) => setTimeout(r, 2500));
   
-  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].toStrictEqual(returnObject[3]));
+  expect(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message).toStrictEqual(returnObject[3]);
+  console.log(requestChannelMessages(danielToken, channelId, 0).bodyObj.messages[3].message);
 });

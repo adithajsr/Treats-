@@ -8,7 +8,7 @@ import errorHandler from 'middleware-http-errors';
 import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
-import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1 } from './message';
+import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
@@ -39,6 +39,12 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.post('/message/sendlaterdm/v1', (req, res) => {
+  const token = req.header('token');
+  const { dmId, message, timeSent } = req.body;
+  return res.json(MessageSendLaterDMV1(token, dmId, message, timeSent));
+});
 
 app.post('/message/sendlater/v1', (req, res) => {
   const token = req.header('token');

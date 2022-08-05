@@ -1,5 +1,5 @@
 import validator from 'validator';
-import { requestUserProfile } from './users.test';
+import { requestUserProfile, requestClear, requestAuthRegister, requestAuthLogin, requestAuthLogout, requestPasswordRequest, requestPasswordReset} from './test.helpers';
 import { getData } from './dataStore';
 import request from 'sync-request';
 import config from './config.json';
@@ -12,103 +12,6 @@ const OK = 200;
 const INVALID_TOKEN = 403;
 const port = config.port;
 const url = config.url;
-
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v3`,
-    {
-      json: {
-        email: email,
-        password: password,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestAuthLogin(email: string, password: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/login/v3`,
-    {
-      json: {
-        email: email,
-        password: password,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestAuthLogout(token: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/logout/v2`,
-    {
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestPasswordRequest(email: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/passwordreset/request/v1`,
-    {
-      json: {
-        email: email,
-      },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
-function requestPasswordReset(resetCode: string, newPassword: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/passwordreset/reset/v1`,
-    {
-      json: {
-        resetCode: resetCode,
-        newPassword: newPassword,
-      },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
 
 /* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
 

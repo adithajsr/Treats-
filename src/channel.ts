@@ -216,6 +216,7 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     throw createHttpError(400, 'error userPermission');
   } else {
     // Adding newNotification to user's notification array
+    const data = getData();
     const channelIndex = data.channel.findIndex((data) => data.channelId === channelId);
     const channelName = data.channel[channelIndex].channelName;
     const authUserIndex = data.user.findIndex(a => a.uId === authUserId);
@@ -228,7 +229,6 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     addUser(channelId, uId);
 
     // Update analytics metrics
-    const data = getData();
     const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
     const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
     const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;

@@ -97,7 +97,7 @@ test('search string does not match any messages in channels or dms', () => {
   requestSendDm(maiyaToken, dmId, 'Fifth message');
   requestSendDm(maiyaToken, dmId, 'Sixth message');
 
-  expect(requestSearch(danielToken, 'upcomingbenchpr').bodyObj).toMatchObject([]);
+  expect(requestSearch(danielToken, 'upcomingbenchpr').bodyObj).toMatchObject({messages: []});
   expect(requestSearch(danielToken, 'Fourth message ').bodyObj).toMatchObject([]);
   expect(requestSearch(danielToken, 'upcomingbenchpr').res.statusCode).toBe(OK);
 });
@@ -142,6 +142,36 @@ test('default case', () => {
   const expectedObj3 = { messageId: messageId3, uId: maiyaId, message: 'stfu bitch hehe', timeSent: time3, reacts: react, isPinned: 0 };
 
   const expectedObj = [expectedObj1, expectedObj2, expectedObj3];
-  expect(retObject.bodyObj).toMatchObject(expectedObj);
+  console.log(retObject.bodyObj)
+  expect(retObject.bodyObj).toMatchObject(
+    {
+      messages: [
+        {
+          messageId: 292,
+          uId: 1,
+          message: 'omg hopefully he doesnt see this hehe',
+          timeSent: 1659700136,
+          isPinned: 0,
+          reacts: []
+        },
+        {
+          messageId: 40,
+          uId: 1,
+          message: 'hehe',
+          timeSent: 1659700137,
+          isPinned: 0,
+          reacts: []
+        },
+        {
+          messageId: 27,
+          uId: 2,
+          message: 'stfu bitch hehe',
+          timeSent: 1659700137,
+          isPinned: 0,
+          reacts: []
+        }
+      ]
+    }
+  );
   expect(retObject.res.statusCode).toBe(OK);
 });

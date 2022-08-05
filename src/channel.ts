@@ -62,12 +62,12 @@ interface Database {
   dm: any[],
 }
 
-interface Details {
-  name: string,
-  isPublic: boolean,
-  ownerMembers: any[],
-  allMembers: any[],
-}
+// interface Details {
+//   name: string,
+//   isPublic: boolean,
+//   ownerMembers: any[],
+//   allMembers: any[],
+// }
 
 /*
 Converts a token to its relevant uid
@@ -152,11 +152,6 @@ export function channelDetailsV3(token: string, channelId: number) {
       }
     );
   }
-
-  const name = channel[i].channelName;
-  const isPublic = channel[i].isPublic;
-  let ownerMembers = [];
-  let allMembers = [];
 
   return { name, isPublic, ownerMembers, allMembers}
   // return { channelDetails: details };

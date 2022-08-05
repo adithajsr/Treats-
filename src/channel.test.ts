@@ -210,6 +210,7 @@ describe('channel/details/v3 testing', () => {
 
   test('successful channel details return', () => {
     const testRequest = requestChannelDetailsHelper(testUser.bodyObj.token, testChannel.bodyObj.channelId);
+    console.log(testRequest)
     expect(testRequest.channelDetails).toStrictEqual({
       name: 'channelName',
       isPublic: true,

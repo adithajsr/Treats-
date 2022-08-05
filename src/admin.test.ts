@@ -184,10 +184,16 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve dm details - requestDMDetails - members
       const dmD = requestDMDetails(testUser.bodyObj.token, testDm.bodyObj.dmId);
-      expect(dmD.bodyObj.members).toStrictEqual([{
-        dmPerms: 1,
-        uId: testUser.bodyObj.authUserId
-      }]);
+      expect(dmD.bodyObj.members).toStrictEqual([
+        {
+          uId: 1,
+          email: 'validemail@gmail.com',
+          nameFirst: 'John',
+          nameLast: 'Doe',
+          handleStr: 'johndoe',
+          profileImgUrl: 'johndoe'
+        }
+      ]);
       // retrieve dm details - requestDMMessages - messages
       const dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
       expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed user');

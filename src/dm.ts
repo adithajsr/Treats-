@@ -429,6 +429,8 @@ Return:
     Returns the name and members of the specified DM if successful
 */
 
+let memberArray: any;
+
 export function dmDetailsV2(token: string, dmId: number) {
   const data = getData();
   // checking if dmId is valid
@@ -446,7 +448,26 @@ export function dmDetailsV2(token: string, dmId: number) {
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
   if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
 
-  return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
+  const { user } = data;
+  const { dm } = data;
+
+  memberArray = [];
+
+  for (const i in dm[dmIndex].members) {
+    // find the uid in user[], grab details
+    const index = user.findIndex(a => a.uId === dm[dmIndex].members[i].uId);
+    memberArray.push({
+      uId: user[index].uId,
+      email: user[index].email,
+      nameFirst: user[index].nameFirst,
+      nameLast: user[index].nameLast,
+      handleStr: user[index].handle,
+      profileImgUrl: user[index].handle,
+    });
+  }
+
+  return { name: data.dm[dmIndex].name, members: memberArray };
+  // return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }
 
 /*

@@ -263,7 +263,26 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
+
       expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
+      expect(testDetails.bodyObj.members).toStrictEqual([
+        {
+          uId: 1,
+          email: 'validemail@gmail.com',
+          nameFirst: 'John',
+          nameLast: 'Doe',
+          handleStr: 'johndoe',
+          profileImgUrl: 'johndoe'
+        },
+        {
+          uId: 2,
+          email: 'student@unsw.com',
+          nameFirst: 'Alice',
+          nameLast: 'Schmoe',
+          handleStr: 'aliceschmoe',
+          profileImgUrl: 'aliceschmoe'
+        }
+      ]);
     });
 
     test('Success create new DM, more than two users in DM', () => {
@@ -273,7 +292,44 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe, johndoe0, tomsmith');
+
+      expect(testDetails.bodyObj).toStrictEqual({
+        name: 'aliceschmoe, johndoe, johndoe0, tomsmith',
+        members: [
+          {
+            uId: 1,
+            email: 'validemail@gmail.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handleStr: 'johndoe',
+            profileImgUrl: 'johndoe'
+          },
+          {
+            uId: 2,
+            email: 'student@unsw.com',
+            nameFirst: 'Alice',
+            nameLast: 'Schmoe',
+            handleStr: 'aliceschmoe',
+            profileImgUrl: 'aliceschmoe'
+          },
+          {
+            uId: 3,
+            email: 'tsmith@yahoo.com',
+            nameFirst: 'Tom',
+            nameLast: 'Smith',
+            handleStr: 'tomsmith',
+            profileImgUrl: 'tomsmith'
+          },
+          {
+            uId: 4,
+            email: 'jdoe@proton.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handleStr: 'johndoe0',
+            profileImgUrl: 'johndoe0'
+          }
+        ]
+      });
     });
 
     test('Fail create new DM, invalid token', () => {

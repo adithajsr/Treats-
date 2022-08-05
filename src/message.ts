@@ -109,6 +109,8 @@ export function messageSendV2 (token: string, channelId: number, message: string
   checkToken(token, data);
 
   const uId = tokenToUid(token, data);
+  const sendUserIndex = data.user.findIndex(a => a.uId === uId);
+  const sendUserHandle = data.user[sendUserIndex].handle;
   // check for channel in database
   if (data.channel.find(a => a.channelId === channelId) === undefined) {
     throw HTTPError(400, 'invalid channelId!');
@@ -121,6 +123,7 @@ export function messageSendV2 (token: string, channelId: number, message: string
   }
 
   const channelIndex = data.channel.findIndex(a => a.channelId === channelId);
+  const channelName = data.channel[channelIndex].channelName;
   const messageId = Math.floor(Math.random() * 1000);
   const time = Math.floor((new Date()).getTime() / 1000);
 
@@ -152,7 +155,18 @@ export function messageSendV2 (token: string, channelId: number, message: string
       reacts: [],
     }
   );
-
+  // setting notification if tagged
+  const length = data.channel[channelIndex].members.length;
+  for (let i = 0; i < length; i++) {
+    const uIdTemp = data.channel[channelIndex].members[i].uId;
+    const userIndex = data.user.findIndex(a => a.uId === uIdTemp);
+    const userHandle = data.user[userIndex].handle;
+    const messageArray = message.split(' ');
+    if (messageArray.includes('@' + userHandle)) {
+      const newNotification = { dmId: -1, channelId: channelId, notificationMessage: sendUserHandle + ' tagged you in ' + channelName + ': ' + message.slice(0, 20) };
+      data.user[userIndex].notifications.push(newNotification);
+    }
+  }
   setData(data);
   return { messageId: messageId };
 }
@@ -330,6 +344,8 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
   checkToken(token, data);
 
   const uId = tokenToUid(token, data);
+  const sendUserIndex = data.user.findIndex(a => a.uId === uId);
+  const sendUserHandle = data.user[sendUserIndex].handle;
 
   // check for dmId in data
   if (data.dm.find(a => a.dmId === dmId) === undefined) {
@@ -343,6 +359,20 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
 
   const messageId = Math.floor(Math.random() * 100);
   const time = Math.floor((new Date()).getTime() / 1000);
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+  const dmName = data.dm[dmIndex].name;
+
+  // setting notification if tagged
+  for (const element of data.dm[dmIndex].members) {
+    const uIdTemp = element.uId;
+    const userIndex = data.user.findIndex(a => a.uId === uIdTemp);
+    const userHandle = data.user[userIndex].handle;
+    const messageArray = message.split(' ');
+    if (messageArray.includes('@' + userHandle)) {
+      const newNotification = { dmId: dmId, channelId: -1, notificationMessage: sendUserHandle + ' tagged you in ' + dmName + ': ' + message.slice(0, 20) };
+      data.user[userIndex].notifications.push(newNotification);
+    }
+  }
 
   // Update analytics metrics
   const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
@@ -372,6 +402,7 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
       reacts: [],
     }
   );
+
   setData(data);
   return { messageId: messageId };
 }

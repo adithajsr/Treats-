@@ -15,6 +15,7 @@ import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, Message
 import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, uploadPhoto, userStatsV1, usersStatsV1 } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
+import { notificationsGetV1 } from './notifications';
 import { searchV1 } from './search';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 import { adminUserRemoveV1 } from './admin';
@@ -41,6 +42,11 @@ app.get('/echo', (req, res, next) => {
 
 // for logging errors
 app.use(morgan('dev'));
+
+app.get('/notifications/get/v1', (req, res, next) => {
+  const token = req.header('token');
+  return res.json(notificationsGetV1(token));
+});
 
 app.use('/imgurl', express.static(`${__dirname}/profilePics`));
 

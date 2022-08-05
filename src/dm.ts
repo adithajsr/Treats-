@@ -318,6 +318,20 @@ export function dmCreateV2(token: string, uIds: number[]) {
     messages: [],
   });
 
+  // creating a notification
+  const creatorIndex = data.user.findIndex(a => a.uId === creatoruId);
+  const creatorHandle = data.user[creatorIndex].handle;
+  const notificationMessage = creatorHandle + ' added you to ' + dmName;
+  const channelId = -1;
+
+  const newNotification = { dmId: newDMId, channelId, notificationMessage };
+  const addedAmount = uIds.length;
+
+  for (let i = 0; i < addedAmount; i++) {
+    const userIndex = data.user.findIndex(a => a.uId === uIds[i]);
+    data.user[userIndex].notifications.push(newNotification);
+  }
+
   setData(data);
 
   return {

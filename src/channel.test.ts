@@ -550,9 +550,25 @@ describe('Testing for message/react/V1', () => {
     expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual({});
   });
 
+  test('Multiple users react works - Channel', () => {
+    const body1 = { channelId: channel1 };
+    expect(sendPost('channel/join/v3', user2.token, body1)).toStrictEqual({});
+    const body = { messageId: message1, reactId: 1 };
+    expect(sendPost('message/react/v1', user2.token, body)).toStrictEqual({});
+    requestClear();
+  });
+
   test('react works dm', () => {
+    setupDatabase();
     const body = { messageId: dm1, reactId: 1 };
     expect(sendPost('message/react/v1', user1.token, body)).toStrictEqual({});
+  });
+
+  test('Multiple users react works - DM', () => {
+    const body1 = { channelId: channel1 };
+    expect(sendPost('channel/join/v3', user2.token, body1)).toStrictEqual({});
+    const body = { messageId: dm1, reactId: 1 };
+    expect(sendPost('message/react/v1', user2.token, body)).toStrictEqual({});
     requestClear();
   });
 });

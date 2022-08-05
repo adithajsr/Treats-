@@ -139,7 +139,6 @@ export function messageSendV2 (token: string, channelId: number, message: string
   );
   // setting notification if tagged
   const length = data.channel[channelIndex].members.length;
-  console.log(data.channel[channelIndex].members);
   for (let i = 0; i < length; i++) {
     const uIdTemp = data.channel[channelIndex].members[i].uId;
     const userIndex = data.user.findIndex(a => a.uId === uIdTemp);

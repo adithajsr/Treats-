@@ -197,6 +197,7 @@ Return Value:
 */
 export function channelInviteV3(token: string, channelId: number, uId: number): object {
   const authUserId = tokenConvert(token);
+  const data = getData();
   if (channelExists(channelId) === true && memberExists(channelId, authUserId) === false) {
     throw createHttpError(403, 'error');
   } else if (channelExists(channelId) === false ||
@@ -204,6 +205,16 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     memberExists(channelId, uId) === true) {
     throw createHttpError(400, 'error userPermission');
   } else {
+    // Adding newNotification to user's notification array
+    const channelIndex = data.channel.findIndex((data) => data.channelId === channelId);
+    const channelName = data.channel[channelIndex].channelName;
+    const authUserIndex = data.user.findIndex(a => a.uId === authUserId);
+    const notificationMessage = data.user[authUserIndex].handle + ' added you to ' + channelName;
+    const dmId = -1;
+    const newNotification = { channelId, dmId, notificationMessage };
+    const userIndex = data.user.findIndex(a => a.uId === uId);
+    data.user[userIndex].notifications.push(newNotification);
+    setData(data);
     addUser(channelId, uId);
     return {};
   }
@@ -301,6 +312,34 @@ reactId !== 1 ||
 reactStatus(authUserId, messageId, reactId) === true) {
     throw createHttpError(400, 'error');
   } else {
+    // user's handle
+    // channel/dm name
+    const data = getData();
+    const userIndex = data.user.findIndex(a => a.uId === authUserId);
+    const userHandle = data.user[userIndex].handle;
+
+    const messageIndex = messageLocation(messageId).j;
+    const locationId = messageLocation(messageId).channelId;
+
+    let locationName = '';
+    let uId = 0;
+    let newNotification = { channelId: 0, dmId: 0, notificationMessage: '' };
+
+    if (messageLocation(messageId).location === 'channel') {
+      const channelIndex = data.channel.findIndex(a => a.channelId === locationId);
+      locationName = data.channel[channelIndex].channelName;
+      uId = data.channel[channelIndex].messages[messageIndex].uId;
+      newNotification = { channelId: locationId, dmId: -1, notificationMessage: userHandle + ' reacted to your message in ' + locationName };
+    } else {
+      const dmIndex = data.dm.findIndex(a => a.dmId === locationId);
+      locationName = data.dm[dmIndex].name;
+      uId = data.dm[dmIndex].messages[messageIndex].uId;
+      newNotification = { channelId: -1, dmId: locationId, notificationMessage: userHandle + ' reacted to your message in ' + locationName };
+    }
+
+    const userIndexReceiving = data.user.findIndex(a => a.uId === uId);
+    data.user[userIndexReceiving].notifications.push(newNotification);
+    setData(data);
     changeReact(authUserId, messageId, 1);
     return {};
   }

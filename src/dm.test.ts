@@ -1,6 +1,11 @@
 import { requestDMCreate, requestDMMessages, requestMessageSendDM, requestDMList, requestDMLeave, requestDMDetails, requestDMRemove } from './test.helpers';
 import { requestClear, requestAuthRegister } from './test.helpers';
 
+import config from './config.json';
+
+const url = config.url;
+const port = config.port;
+
 const OK = 200;
 const INPUT_ERROR = 400;
 const INVALID_AUTH = 403;
@@ -133,6 +138,24 @@ describe('dm capabilities', () => {
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
       expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
+      expect(testDetails.bodyObj.members).toStrictEqual([
+        {
+          uId: 1,
+          email: 'validemail@gmail.com',
+          nameFirst: 'John',
+          nameLast: 'Doe',
+          handleStr: 'johndoe',
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+        },
+        {
+          uId: 2,
+          email: 'student@unsw.com',
+          nameFirst: 'Alice',
+          nameLast: 'Schmoe',
+          handleStr: 'aliceschmoe',
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+        }
+      ]);
     });
 
     test('Success create new DM, more than two users in DM', () => {
@@ -142,7 +165,43 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe, johndoe0, tomsmith');
+      expect(testDetails.bodyObj).toStrictEqual({
+        name: 'aliceschmoe, johndoe, johndoe0, tomsmith',
+        members: [
+          {
+            uId: 1,
+            email: 'validemail@gmail.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handleStr: 'johndoe',
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+          },
+          {
+            uId: 2,
+            email: 'student@unsw.com',
+            nameFirst: 'Alice',
+            nameLast: 'Schmoe',
+            handleStr: 'aliceschmoe',
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+          },
+          {
+            uId: 3,
+            email: 'tsmith@yahoo.com',
+            nameFirst: 'Tom',
+            nameLast: 'Smith',
+            handleStr: 'tomsmith',
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+          },
+          {
+            uId: 4,
+            email: 'jdoe@proton.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handleStr: 'johndoe0',
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
+          }
+        ]
+      });
     });
 
     test('Fail create new DM, invalid token', () => {

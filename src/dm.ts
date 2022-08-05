@@ -46,10 +46,10 @@ export function dmMessagesV2(token: string, dmId: number, start: number) {
     messages.push(data.dm[dmIndex].messages[i]);
   }
 
-  let endIndex = start + 50;
-  if (messageAmount < endIndex) endIndex = -1;
+  let end = start + 50;
+  if (messageAmount < end) end = -1;
 
-  return { messages, start, endIndex };
+  return { messages, start, end };
 }
 
 interface dmMember {
@@ -421,13 +421,17 @@ export function dmRemoveV2(token: string, dmId: number) {
 This function returns the name and members of a specified DM
 
 Arguments:
-    token (string): To ensure the caller is an authorised user
-    dmId (number): To specify which DM it is
+  token (string): To ensure the caller is an authorised user
+  dmId (number): To specify which DM it is
 
 Return:
-    Returns {error: 'error'} if the token is unauthorised or the dmId is invalid
-    Returns the name and members of the specified DM if successful
+  Returns {name, members}  of the dm
+
+  Throws 400 error if dmId doesn't refer to a valid DM
+  Throws 403 error if dmId valid but auth user is not a member of the DM
 */
+
+let memberArray: any;
 
 export function dmDetailsV2(token: string, dmId: number) {
   const data = getData();
@@ -446,18 +450,35 @@ export function dmDetailsV2(token: string, dmId: number) {
   const memberIndex = data.dm[dmIndex].members.findIndex(a => a.uId === uId);
   if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
 
-  return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
+  const { user } = data;
+  const { dm } = data;
+
+  memberArray = [];
+
+  for (const i in dm[dmIndex].members) {
+    // find the uid in user[], grab details
+    const index = user.findIndex(a => a.uId === dm[dmIndex].members[i].uId);
+    memberArray.push({
+      uId: user[index].uId,
+      email: user[index].email,
+      nameFirst: user[index].nameFirst,
+      nameLast: user[index].nameLast,
+      handleStr: user[index].handle,
+      profileImgUrl: user[index].profileImgUrl,
+    });
+  }
+
+  return { name: data.dm[dmIndex].name, members: memberArray };
 }
 
 /*
 This function allows someone to leave a DM channel
 Arguments:
-    token (string): this argument is used to identify the member wanting to leave
-    dmId (number): this argument is used to identify the DM channel
+  token (string): this argument is used to identify the member wanting to leave
+  dmId (number): this argument is used to identify the DM channel
 
 Reurns:
-    {error: 'error'} if the token or dmId are invalid
-    {} if successful
+  {} if successful
 */
 export function dmLeaveV2(token: string, dmId: number) {
   const data = getData();

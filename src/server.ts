@@ -26,6 +26,7 @@ const app = express();
 app.use(express.json());
 // Use middleware that allows for access from other domains
 app.use(cors());
+app.disable('etag');
 
 const PORT: number = parseInt(process.env.PORT || config.port);
 const HOST: string = process.env.IP || 'localhost';

@@ -107,45 +107,47 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
         }
       ]);
       // retrieve user details user/profile
-      expect(requestUserProfile(testUser.bodyObj.token, byeUser.bodyObj.authUserId).bodyObj).toStrictEqual(
-        {
+      expect(requestUserProfile(testUser.bodyObj.token, byeUser.bodyObj.authUserId).bodyObj).toStrictEqual({
+        user: {
           uId: byeUser.bodyObj.authUserId,
           email: '',
           nameFirst: 'Removed',
           nameLast: 'user',
           handleStr: '',
-          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
         }
+      }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
       const cD = requestChannelDetailsHelper(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-      expect(cD.channelDetails).toStrictEqual(
+      expect(cD).toStrictEqual(
         {
           name: 'channelName',
           isPublic: true,
           ownerMembers: [
             {
+              uId: 1,
               email: 'validemail@gmail.com',
-              handle: 'johndoe',
               nameFirst: 'John',
               nameLast: 'Doe',
-              uId: 1,
-            },
+              handle: 'johndoe'
+            }
           ],
           allMembers: [
             {
+              uId: 1,
               email: 'validemail@gmail.com',
-              handle: 'johndoe',
               nameFirst: 'John',
               nameLast: 'Doe',
-              uId: 1,
-            },
-          ],
+              handle: 'johndoe'
+            }
+          ]
         }
+
       );
       // retrieve channel details - requestChannelMessages - message
       const channelM = requestChannelMessages(testUser.bodyObj.token, testChannel.bodyObj.channelId, 0);
@@ -179,10 +181,16 @@ describe('admin/user/remove/v1 test', () => {
       );
       // retrieve dm details - requestDMDetails - members
       const dmD = requestDMDetails(testUser.bodyObj.token, testDm.bodyObj.dmId);
-      expect(dmD.bodyObj.members).toStrictEqual([{
-        dmPerms: 1,
-        uId: testUser.bodyObj.authUserId
-      }]);
+      expect(dmD.bodyObj.members).toStrictEqual([
+        {
+          uId: 1,
+          email: 'validemail@gmail.com',
+          nameFirst: 'John',
+          nameLast: 'Doe',
+          handleStr: 'johndoe',
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+        }
+      ]);
       // retrieve dm details - requestDMMessages - messages
       const dmM = requestDMMessages(testUser.bodyObj.token, testDm.bodyObj.dmId, 0);
       expect(dmM.bodyObj.messages[0].message).toStrictEqual('Removed user');

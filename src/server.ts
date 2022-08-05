@@ -16,12 +16,11 @@ import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetH
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
-import {notificationsGetV1} from './notifications';
+import { notificationsGetV1 } from './notifications';
 import { searchV1 } from './search';
 import { standupStartV1, standupActiveV1, standupSendV1 } from './standup';
 import { adminUserRemoveV1 } from './admin';
 import { messageSendLaterV1 } from './message';
-
 
 // Set up web app, use JSON
 const app = express();
@@ -45,9 +44,6 @@ app.get('/echo', (req, res, next) => {
 // for logging errors
 app.use(morgan('dev'));
 
-
-
-
 app.get('/notifications/get/v1', (req, res, next) => {
   const token = req.header('token');
   return res.json(notificationsGetV1(token));
@@ -68,7 +64,6 @@ app.post('/user/profile/uploadphoto/v1', async (req, res, next) => {
     next(err);
   }
 });
-
 
 app.post('/message/sendlaterdm/v1', (req, res) => {
   const token = req.header('token');

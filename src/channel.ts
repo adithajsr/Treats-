@@ -205,17 +205,17 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     memberExists(channelId, uId) === true) {
     throw createHttpError(400, 'error userPermission');
   } else {
-        //Adding newNotification to user's notification array
-  const channelIndex = data.channel.findIndex((data) => data.channelId === channelId); 
-  const channelName = data.channel[channelIndex].channelName;
-  const authUserIndex = data.user.findIndex(a => a.uId === authUserId);
-  const notificationMessage = data.user[authUserIndex].handle + ' added you to ' + channelName;
-  const dmId = -1;
-  const newNotification = { channelId, dmId, notificationMessage };
-  const userIndex = data.user.findIndex(a => a.uId === uId);
-  data.user[userIndex].notifications.push(newNotification);  
-  setData(data);
-  addUser(channelId, uId);
+    // Adding newNotification to user's notification array
+    const channelIndex = data.channel.findIndex((data) => data.channelId === channelId);
+    const channelName = data.channel[channelIndex].channelName;
+    const authUserIndex = data.user.findIndex(a => a.uId === authUserId);
+    const notificationMessage = data.user[authUserIndex].handle + ' added you to ' + channelName;
+    const dmId = -1;
+    const newNotification = { channelId, dmId, notificationMessage };
+    const userIndex = data.user.findIndex(a => a.uId === uId);
+    data.user[userIndex].notifications.push(newNotification);
+    setData(data);
+    addUser(channelId, uId);
     return {};
   }
 }

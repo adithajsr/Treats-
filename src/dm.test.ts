@@ -1,11 +1,9 @@
-import request from 'sync-request';
-import config from './config.json';
+import { requestDMCreate, requestDMMessages, requestMessageSendDM, requestDMList, requestDMLeave, requestDMDetails, requestDMRemove } from './test.helpers';
+import { requestClear, requestAuthRegister } from './test.helpers';
 
 const OK = 200;
 const INPUT_ERROR = 400;
 const INVALID_AUTH = 403;
-const port = config.port;
-const url = config.url;
 
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
@@ -15,135 +13,6 @@ type wrapperOutput = {
   res: any,
   bodyObj: any,
 };
-
-export function requestDMCreate(token: string, uIds: number[]) {
-  const res = request(
-    'POST',
-    `${url}:${port}/dm/create/v2`,
-    {
-      json: { uIds },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestDMMessages(token: string, dmId: number, start: number) {
-  const res = request(
-    'GET',
-    `${url}:${port}/dm/messages/v2`,
-    {
-      qs: { dmId, start },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
-export function requestMessageSendDM(token: string, dmId: number, message: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/message/senddm/v2`,
-    {
-      json: { dmId, message },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestDMList(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/dm/list/v2`,
-    {
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestDMRemove(token: string, dmId: number) {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/dm/remove/v2`,
-    {
-      qs: { dmId },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestDMDetails(token: string, dmId: number) {
-  const res = request(
-    'GET',
-    `${url}:${port}/dm/details/v2`,
-    {
-      qs: { dmId },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
-export function requestDMLeave(token: string, dmId: number) {
-  const res = request(
-    'POST',
-    `${url}:${port}/dm/leave/v2`,
-    {
-      json: { dmId },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
-function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v3`,
-    {
-      json: { email, password, nameFirst, nameLast },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return JSON.parse(res.body as string);
-}
 
 test('Invalid dmId', () => {
   requestClear();

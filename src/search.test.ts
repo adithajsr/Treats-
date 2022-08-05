@@ -1,9 +1,7 @@
 import request from 'sync-request';
 import config from './config.json';
-import { requestClear } from './users.test';
-import { requestAuthRegister } from './auth.test';
-import { requestChannelsCreate } from './channels.test';
-import { requestDMCreate } from './dm.test';
+import { requestChannelsCreate, requestDMCreate } from './test.helpers';
+import { requestClear, requestAuthRegister } from './test.helpers';
 import { requestMessageSend, requestSendDm } from './message.test';
 
 const OK = 200;

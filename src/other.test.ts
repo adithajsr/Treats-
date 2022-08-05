@@ -1,58 +1,10 @@
-import request from 'sync-request';
-import config from './config.json';
-import { requestAuthRegister } from './auth.test';
-import { requestClear, requestUserProfile } from './users.test';
+import { requestClear, requestAuthRegister, requestUserProfile, requestChannelsCreate } from './test.helpers';
+import { requestChannelsListAll, requestChannelInvite } from './test.helpers';
 
 const OK = 200;
-const url = config.url;
-const port = config.port;
 
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
-
-function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channels/create/v3`,
-    {
-      json: { name, isPublic },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestChannelsListAll(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channels/listall/v3`,
-    {
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestChannelInvite(token: string, channelId: number, uId: number) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channel/invite/v3`,
-    {
-      json: { channelId, uId },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
 
 test('Clearing users', () => {
   requestClear();

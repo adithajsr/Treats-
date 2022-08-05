@@ -1,62 +1,13 @@
 import request from 'sync-request';
 import config from './config.json';
-import { requestClear } from './users.test';
-import { requestAuthRegister } from './auth.test';
-// import {requestChannelsCreate} from './channel.test';
-import { requestChannelInvite } from './other.test';
+import { requestClear, requestAuthRegister, requestChannelsCreate } from './test.helpers';
+import { requestChannelInvite, requestMessageSendDM, requestDMCreate } from './test.helpers';
+import { requestNotificationsGet } from './test.helpers';
 import { requestMessageSend } from './message.test';
-import { requestMessageSendDM } from './dm.test';
 
 const OK = 200;
 const url = config.url;
 const port = config.port;
-
-export function requestNotificationsGet(token: string) {
-  const res = request(
-    'GET',
-      `${url}:${port}/notifications/get/v1`,
-      {
-        headers:
-        {
-          token,
-        }
-      }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestDMCreate(token: string, uIds: number[]) {
-  const res = request(
-    'POST',
-      `${url}:${port}/dm/create/v2`,
-      {
-        json: { uIds },
-        headers: { token },
-      }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-      `${url}:${port}/channels/create/v3`,
-      {
-        json: { name, isPublic },
-        headers: { token },
-      }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
 
 export function sendPost(path:string, token:string, body: object) {
   const res = request(

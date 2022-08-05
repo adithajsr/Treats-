@@ -4,15 +4,10 @@ import { sendPost } from './channel.test';
 const port = config.port;
 const url = config.url;
 
-import { requestClear } from './users.test';
-import { requestAuthRegister } from './auth.test';
-import { requestChannelsCreate } from './channels.test';
+import { requestChannelsCreate, requestDMCreate, requestDMMessages, requestDMDetails } from './test.helpers';
+import { requestUserProfile, requestClear, requestAuthRegister, requestUsersAll } from './test.helpers';
 import { requestMessageSend, requestSendDm, payloadObj } from './message.test';
-import { requestDMCreate } from './dm.test';
-import { requestUsersAll, requestUserProfile } from './users.test';
 import { requestChannelDetailsHelper, requestChannelMessages } from './channel.test';
-import { requestDMMessages, requestDMDetails } from './dm.test';
-
 // -------------------------------------------------------------------------//
 
 function requestHelper(method: HttpVerb, path: string, payload: payloadObj) {

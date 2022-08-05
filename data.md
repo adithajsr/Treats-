@@ -71,8 +71,8 @@ let data = {
           uId: -999,
           message: 'Hello world',
           timeSent: '001',
-          pinned: 0,
-          react: [
+          isPinned: 0,
+          reacts: [
 			{
 				reactId: 1
 				uIds: []

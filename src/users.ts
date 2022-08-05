@@ -45,12 +45,14 @@ export function userProfileV3(token: string, uId: number) {
   for (const element in data.user) {
     if (uId === data.user[element].uId) {
       return {
-        uId: data.user[element].uId,
-        email: data.user[element].email,
-        nameFirst: data.user[element].nameFirst,
-        nameLast: data.user[element].nameLast,
-        handleStr: data.user[element].handle,
-        profileImgUrl: data.user[element].profileImgUrl,
+        user: {        
+          uId: data.user[element].uId,
+          email: data.user[element].email,
+          nameFirst: data.user[element].nameFirst,
+          nameLast: data.user[element].nameLast,
+          handleStr: data.user[element].handle,
+          profileImgUrl: data.user[element].profileImgUrl
+        }
       };
     }
   }

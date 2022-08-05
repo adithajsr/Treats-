@@ -464,12 +464,11 @@ export function dmDetailsV2(token: string, dmId: number) {
       nameFirst: user[index].nameFirst,
       nameLast: user[index].nameLast,
       handleStr: user[index].handle,
-      profileImgUrl: user[index].handle,
+      profileImgUrl: user[index].profileImgUrl,
     });
   }
 
   return { name: data.dm[dmIndex].name, members: memberArray };
-  // return { name: data.dm[dmIndex].name, members: data.dm[dmIndex].members };
 }
 
 /*

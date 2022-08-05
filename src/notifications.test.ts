@@ -58,6 +58,23 @@ export function requestChannelsCreate(token: string, name: string, isPublic: boo
   };
 }
 
+export function sendPost(path:string, token:string, body: object) {
+  const res = request(
+    'POST',
+      `${url}:${port}/${path}`,
+      {
+        json: body,
+        headers: { token: token }
+      }
+  );
+
+  if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
+    return res.statusCode;
+  } else {
+    return JSON.parse(res.getBody() as string);
+  }
+}
+
 // Test data
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
 const authMaiya = ['maiyaTaylor@gmail.com', 'password', 'Maiya', 'Taylor'];
@@ -185,4 +202,21 @@ test('User being added to channels, dms and getting tagged', () => {
   const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3, expectedValue4, expectedValue5];
   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+});
+
+test('testing reacts', () => {
+  requestClear();
+  const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
+  const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+  const maiyaId = maiyaUser.authUserId;
+  const maiyaToken = maiyaUser.token;
+  const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true).bodyObj.channelId;
+  requestChannelInvite(danielToken, danielChannel, maiyaId);
+
+  const messageId = requestMessageSend(danielToken, danielChannel, '@maiyataylor get online to play sum fortnite').messageId;
+  const body = { messageId: messageId, reactId: 1 };
+  sendPost('message/react/v1', maiyaToken, body);
+  expect(requestNotificationsGet(danielToken).bodyObj[0].notificationMessage).toBe('maiyataylor reacted to your message in gamingChannel');
+  expect(requestNotificationsGet(danielToken).res.statusCode).toBe(OK);
+  requestClear();
 });

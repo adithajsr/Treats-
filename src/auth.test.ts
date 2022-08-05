@@ -1,6 +1,5 @@
 import validator from 'validator';
 import { requestUserProfile } from './users.test';
-import { validate as validateV4uuid } from 'uuid';
 import request from 'sync-request';
 import config from './config.json';
 // eslint-disable-next-line
@@ -144,10 +143,10 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
-    expect(validateV4uuid(testToken)).toBe(true);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 
@@ -219,6 +218,7 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: testUserFN,
       nameLast: testUserLN,
       handleStr: 'sebastianfitzagamemn',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -241,10 +241,10 @@ describe('Testing for requestAuthRegister', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith4',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
-    expect(validateV4uuid(testToken)).toBe(true);
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
   });
 });
@@ -270,6 +270,7 @@ describe('Testing for requestAuthLogin', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: 'invalid input details' });
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
@@ -383,6 +384,8 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
 
     // has logged out
     requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
+    // logging in again
+    requestAuthLogin('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#');
 
     const returnValue1 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'this5');
     expect(returnValue1.res.statusCode).toBe(400);

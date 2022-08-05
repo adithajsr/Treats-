@@ -42,7 +42,7 @@ function requestChannelsListAll(token: string) {
 export function requestChannelInvite(token: string, channelId: number, uId: number) {
   const res = request(
     'POST',
-    `${url}:${port}/channel/invite/v2`,
+    `${url}:${port}/channel/invite/v3`,
     {
       json: { channelId, uId },
       headers: { token },

@@ -1,6 +1,7 @@
 import { requestAuthRegister } from './auth.test';
 import request from 'sync-request';
 import config from './config.json';
+import fs from 'fs';
 
 const OK = 200;
 const url = config.url;
@@ -20,24 +21,12 @@ export function requestUserProfileSetName(token: string, nameFirst: string, name
         nameFirst: nameFirst,
         nameLast: nameLast,
       },
-      headers: { token },
+      headers: {
+        token: token,
+      },
     }
   );
 
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
   return {
     res: res,
     bodyObj: JSON.parse(res.body as string),
@@ -47,12 +36,15 @@ export function requestClear() {
 export function requestUserProfileSetEmail(token: string, email: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/email/v2`,
+    `${url}:${port}/user/profile/setemail/v2`,
     {
       json: {
         email: email,
       },
-      headers: { token },
+      headers: {
+        token: token,
+      },
+
     }
   );
   return {
@@ -64,12 +56,14 @@ export function requestUserProfileSetEmail(token: string, email: string) {
 export function requestUserProfileSetHandle(token: string, handleStr: string) {
   const res = request(
     'PUT',
-    `${url}:${port}/user/profile/handle/v2`,
+    `${url}:${port}/user/profile/sethandle/v2`,
     {
       json: {
         handleStr: handleStr,
       },
-      headers: { token },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -78,14 +72,40 @@ export function requestUserProfileSetHandle(token: string, handleStr: string) {
   };
 }
 
-export function requestUsersAll() {
+function requestUploadPhoto(imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number, token: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/user/profile/uploadphoto/v1`,
+    {
+      json: {
+        imgUrl: imgUrl,
+        xStart: xStart,
+        yStart: yStart,
+        xEnd: xEnd,
+        yEnd: yEnd,
+      },
+      headers: {
+        token: token,
+      },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse((res.body).toString() as string),
+  };
+}
+
+export function requestUsersAll(token: string) {
   const res = request(
     'GET',
     `${url}:${port}/users/all/v2`,
     {
       qs: {
 
-      }
+      },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
@@ -102,12 +122,28 @@ export function requestUserProfile(token: string, uId: number) {
       qs: {
         uId: uId
       },
-      headers: { token },
+      headers: {
+        token: token,
+      },
     }
   );
   return {
     res: res,
     bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestClear() {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/clear/v1`,
+    {
+      qs: {},
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.getBody() as string),
   };
 }
 
@@ -136,6 +172,7 @@ test('Testing default case', () => {
     nameFirst: 'Maiya',
     nameLast: 'Taylor',
     handleStr: 'maiyataylor',
+    profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
   };
 
   const danielInfo = {
@@ -144,6 +181,7 @@ test('Testing default case', () => {
     nameFirst: 'Daniel',
     nameLast: 'Yung',
     handleStr: 'danielyung',
+    profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
   };
 
   expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject(danielInfo);
@@ -171,7 +209,8 @@ describe('Testing for requestUserProfileSetName', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'Jonathan',
       nameLast: 'Schmidt',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -190,6 +229,7 @@ describe('Testing for requestUserProfileSetName', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -207,6 +247,7 @@ describe('Testing for requestUserProfileSetName', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 });
@@ -228,7 +269,8 @@ describe('Testing for requestUserProfileSetEmail', () => {
       email: 'something@gmail.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -247,6 +289,7 @@ describe('Testing for requestUserProfileSetEmail', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 });
@@ -268,7 +311,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'BigChungas2000'
+      handleStr: 'BigChungas2000',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -287,6 +331,7 @@ describe('Testing for requestUserProfileSetHandle', () => {
       nameFirst: 'John',
       nameLast: 'Smith',
       handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     });
   });
 
@@ -303,7 +348,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -319,7 +365,8 @@ describe('Testing for requestUserProfileSetHandle', () => {
       email: 'who.is.joe@is.the.question.com',
       nameFirst: 'John',
       nameLast: 'Smith',
-      handleStr: 'johnsmith'
+      handleStr: 'johnsmith',
+      profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
     };
     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
   });
@@ -336,27 +383,30 @@ describe('Testing for requestUsersAll', () => {
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
     const uId2 = requestAuthRegister('z5420895@ad.unsw.edu.au', 'myrealpassword', 'Jonathan', 'Schmidt').bodyObj.authUserId;
     const uId3 = requestAuthRegister('validemail@gmail.com', '123abc123', 'John', 'Doe').bodyObj.authUserId;
-    const response = requestUsersAll();
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll().bodyObj.users).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
         nameFirst: 'John',
         nameLast: 'Smith',
         handleStr: 'johnsmith',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }, {
         uId: uId2,
         email: 'z5420895@ad.unsw.edu.au',
         nameFirst: 'Jonathan',
         nameLast: 'Schmidt',
         handleStr: 'jonathanschmidt',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }, {
         uId: uId3,
         email: 'validemail@gmail.com',
         nameFirst: 'John',
         nameLast: 'Doe',
         handleStr: 'johndoe',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }
     ]);
   });
@@ -364,16 +414,92 @@ describe('Testing for requestUsersAll', () => {
   test('Test 2 affirmitive one user', () => {
     // all should be well
     const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
-    const response = requestUsersAll();
+    const response = requestUsersAll(returnObject.bodyObj.token);
     expect(response.res.statusCode).toBe(OK);
-    expect(requestUsersAll().bodyObj.users).toStrictEqual([
+    expect(requestUsersAll(returnObject.bodyObj.token).bodyObj.users).toStrictEqual([
       {
         uId: returnObject.bodyObj.authUserId,
         email: 'who.is.joe@is.the.question.com',
         nameFirst: 'John',
         nameLast: 'Smith',
         handleStr: 'johnsmith',
+        profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
       }
     ]);
+  });
+
+  test('Test 3 invalid token', () => {
+    requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith');
+    const response = requestUsersAll('incorrecttonken');
+    expect(response.res.statusCode).toBe(403);
+    expect(response.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+  });
+});
+
+// ======================================== requestUploadPhoto Testing ========================================
+
+describe('Testing for requestUploadPhoto', () => {
+  requestClear();
+  test('Test 1 affirmitive', () => {
+    // all should be well
+    const profileImgUrl = 'http://vignette1.wikia.nocookie.net/comicdc/images/a/a6/Superman-wallpapers_3097_1600.jpg/revision/latest?cb=20110827193320&path-prefix=es';
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testUserId = returnObject.authUserId;
+    const testToken = returnObject.token;
+    const response = requestUploadPhoto(profileImgUrl, 15, 15, 1600, 1080, testToken);
+    expect(response.res.statusCode).toBe(OK);
+    let testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+    while (testImgUrl === `${url}:${port}/imgurl/default.jpg`) {
+      testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+    }
+    const res = request(
+      'GET',
+      testImgUrl
+    );
+    expect(res.statusCode).toBe(OK);
+    expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+      uId: testUserId,
+      email: 'who.is.joe@is.the.question.com',
+      nameFirst: 'John',
+      nameLast: 'Smith',
+      handleStr: 'johnsmith',
+      profileImgUrl: expect.any(String),
+    });
+    const urlProfile = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+    let urlUuid = urlProfile.replace(`${url}:${port}/imgurl/`, '');
+    urlUuid = urlUuid.replace(/jpg$/, '');
+    urlUuid = urlUuid.replace('.', '');
+    const deletionUrl = `${__dirname}/profilePics/${urlUuid}.jpg`;
+    fs.unlinkSync(deletionUrl);
+    requestClear();
+  });
+
+  test('Test 2 coverge of errors', () => {
+    requestClear();
+    const profileImgUrl = 'http://vignette1.wikia.nocookie.net/comicdc/images/a/a6/Superman-wallpapers_3097_1600.jpg/revision/latest?cb=20110827193320&path-prefix=es';
+    const returnObject = requestAuthRegister('who.is.joe@is.the.question.com', 'yourmumma', 'John', 'Smith').bodyObj;
+    const testToken = returnObject.token;
+
+    const response1 = requestUploadPhoto(profileImgUrl, 15, 15, 14, 14, testToken);
+    expect(response1.res.statusCode).toBe(400);
+    expect(response1.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
+
+    const response2 = requestUploadPhoto(profileImgUrl, -1, 15, 1920, 1080, testToken);
+    expect(response2.res.statusCode).toBe(400);
+    expect(response2.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
+
+    const profileImgUrlAlt = 'http://www.clipartbest.com/cliparts/4T9/6ne/4T96nenrc.png';
+    const response3 = requestUploadPhoto(profileImgUrlAlt, 15, 15, 1600, 1353, testToken);
+    expect(response3.res.statusCode).toBe(400);
+    expect(response3.bodyObj.error).toStrictEqual({ message: 'image uploaded is not a JPG' });
+
+    const response4 = requestUploadPhoto(profileImgUrl, 15, 15, 1920, 1080, 'invalidToken');
+    expect(response4.res.statusCode).toBe(403);
+    expect(response4.bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+
+    const response5 = requestUploadPhoto(profileImgUrl, 15, 15, 1921, 1081, testToken);
+    expect(response5.res.statusCode).toBe(400);
+    expect(response5.bodyObj.error).toStrictEqual({ message: 'cropping coordinates are invalid' });
+    requestClear();
   });
 });

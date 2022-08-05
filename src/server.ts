@@ -4,12 +4,15 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
+import HTTPError from 'http-errors';
 
-import { channelDetailsV3, channelJoinV2, channelInviteV2, channelLeaveV1, channelAddownerV1, channelRemoveownerV1 } from './channel';
+import { channelDetailsV3, channelJoinV3, channelInviteV3, channelLeaveV2, channelAddownerV2, channelRemoveownerV2 } from './channel';
+import { pin, unPin, react, unReact } from './channel';
+import { userPermissionChange } from './admin';
 import { authRegisterV1, authLoginV1, authLogoutV2, passwordRequest, passwordReset } from './auth';
 import { channelsListallV3, channelsCreateV3, channelsListV3 } from './channels';
 import { messageSendV2, messageEditV2, messageRemoveV2, messageSendDmV2, MessageShareV1, MessageSendLaterDMV1 } from './message';
-import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll } from './users';
+import { userProfileV3, userProfileSetName, userProfileSetEmail, userProfileSetHandle, usersAll, uploadPhoto } from './users';
 import { dmMessagesV2, dmCreateV2, dmListV2, dmRemoveV2, dmDetailsV2, dmLeaveV2 } from './dm';
 import { clearV1 } from './other';
 import { channelMessagesV2 } from './channel';
@@ -44,10 +47,29 @@ app.use(morgan('dev'));
 
 
 
+
 app.get('/notifications/get/v1', (req, res, next) => {
   const token = req.header('token');
   return res.json(notificationsGetV1(token));
 });
+
+app.use('/imgurl', express.static(`${__dirname}/profilePics`));
+
+app.post('/user/profile/uploadphoto/v1', async (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body;
+    const returnObject = await uploadPhoto(imgUrl, xStart, yStart, xEnd, yEnd, token);
+    if (returnObject !== undefined && 'code' in returnObject) {
+      throw HTTPError(returnObject.code, returnObject.message);
+    }
+    return res.json({});
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 app.post('/message/sendlaterdm/v1', (req, res) => {
   const token = req.header('token');
   const { dmId, message, timeSent } = req.body;
@@ -196,58 +218,63 @@ app.get('/channels/listall/v3', (req, res) => {
   res.json(channelsListallV3(token));
 });
 
-app.post('/channel/join/v2', (req, res, next) => {
+app.post('/channel/join/v3', (req, res, next) => {
   try {
     const token = req.header('token');
     const { channelId } = req.body;
-    return res.json(channelJoinV2(token, channelId));
+    return res.json(channelJoinV3(token, channelId));
   } catch (err) {
     next(err);
   }
 });
 
-app.post('/channel/invite/v2', (req, res, next) => {
+app.post('/channel/invite/v3', (req, res, next) => {
   try {
     const token = req.header('token');
     const { channelId, uId } = req.body;
-    return res.json(channelInviteV2(token, channelId, uId));
+    return res.json(channelInviteV3(token, channelId, uId));
   } catch (err) {
     next(err);
   }
 });
 
-app.post('/channel/leave/v1', (req, res, next) => {
+app.post('/channel/leave/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { channelId } = req.body;
-    return res.json(channelLeaveV1(token, channelId));
+    return res.json(channelLeaveV2(token, channelId));
   } catch (err) {
     next(err);
   }
 });
 
-app.post('/channel/addowner/v1', (req, res, next) => {
+app.post('/channel/addowner/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { channelId, uId } = req.body;
-    return res.json(channelAddownerV1(token, channelId, uId));
+    return res.json(channelAddownerV2(token, channelId, uId));
   } catch (err) {
     next(err);
   }
 });
 
-app.post('/channel/removeowner/v1', (req, res, next) => {
+app.post('/channel/removeowner/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { channelId, uId } = req.body;
-    return res.json(channelRemoveownerV1(token, channelId, uId));
+    return res.json(channelRemoveownerV2(token, channelId, uId));
   } catch (err) {
     next(err);
   }
 });
 
-app.get('/users/all/v2', (req, res) => {
-  res.json(usersAll());
+app.get('/users/all/v2', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    return res.json(usersAll(token));
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/setname/v2', (req, res, next) => {
@@ -260,7 +287,7 @@ app.put('/user/profile/setname/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/email/v2', (req, res, next) => {
+app.put('/user/profile/setemail/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { email } = req.body;
@@ -270,7 +297,7 @@ app.put('/user/profile/email/v2', (req, res, next) => {
   }
 });
 
-app.put('/user/profile/handle/v2', (req, res, next) => {
+app.put('/user/profile/sethandle/v2', (req, res, next) => {
   try {
     const token = req.header('token');
     const { handleStr } = req.body;
@@ -359,6 +386,47 @@ app.post('/standup/send/v1', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
   res.json(standupSendV1(token, channelId, message));
+});
+
+app.post('/message/pin/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId } = req.body;
+  return res.json(pin(token, messageId));
+});
+
+app.post('/message/unpin/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId } = req.body;
+  return res.json(unPin(token, messageId));
+});
+
+app.post('/message/react/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId, reactId } = req.body;
+  return res.json(react(token, messageId, reactId));
+});
+
+app.post('/message/unreact/v1', (req, res) => {
+  const token = req.header('token');
+  const { messageId, reactId } = req.body;
+  // JSON.stringify(req.headers
+  return res.json(unReact(token, messageId, reactId));
+});
+
+app.post('/admin/userpermission/change/v1', (req, res) => {
+  const token = req.header('token');
+  const { uId, permissionId } = req.body;
+  return res.json(userPermissionChange(token, uId, permissionId));
+});
+
+app.post('/message/share/v1', (req, res, next) => {
+  try {
+    const token = req.header('token');
+    const { ogMessageId, message, channelId, dmId } = req.body;
+    return res.json(MessageShareV1(token, ogMessageId, message, channelId, dmId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 // handles errors nicely

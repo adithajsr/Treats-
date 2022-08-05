@@ -2,9 +2,10 @@ import request from 'sync-request';
 import config from './config.json';
 import {requestClear} from './users.test';
 import {requestAuthRegister} from './auth.test';
-import {requestChannelsCreate} from './channels.test';
+//import {requestChannelsCreate} from './channel.test';
 import {requestChannelInvite} from './other.test';
 import { requestMessageSend } from './message.test'
+import {getData } from './dataStore'
 
 const OK = 200;
 const url = config.url;
@@ -41,6 +42,22 @@ export function requestNotificationsGet(token: string) {
       bodyObj: JSON.parse(res.body as string),
     };
   }
+
+  export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+    const res = request(
+      'POST',
+      `${url}:${port}/channels/create/v3`,
+      {
+        json: { name, isPublic },
+        headers: { token },
+      }
+    );
+    return {
+      res: res,
+      bodyObj: JSON.parse(res.body as string),
+    };
+  }
+  
 
 //Test data 
 const authDaniel = ['danielYung@gmail.com', 'password', 'Daniel', 'Yung'];
@@ -94,8 +111,6 @@ test("User being added to multiple dms - thirst trap boi", () => {
     expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
 });
 
-
-
 test("User being added to multiple channels and dms", () => {
     requestClear()
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
@@ -122,23 +137,30 @@ test("User being added to multiple channels and dms", () => {
 });
 
 test("User being tagged multiple times", () => {
+    requestClear();
     const danielToken = requestAuthRegister(authDaniel[0], authDaniel[1], authDaniel[2], authDaniel[3]).bodyObj.token;
-    const maiyaId = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj.authUserId;
-    const samId = requestAuthRegister(authSam[0], authSam[1], authSam[2], authSam[3]).bodyObj.authUserId;
-
-    const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true);
+    const maiyaUser = requestAuthRegister(authMaiya[0], authMaiya[1], authMaiya[2], authMaiya[3]).bodyObj;
+    const maiyaId = maiyaUser.authUserId;
+    const maiyaToken = maiyaUser.token;
+    const danielChannel = requestChannelsCreate(danielToken, 'gamingChannel', true).bodyObj.channelId;
     requestChannelInvite(danielToken, danielChannel, maiyaId);
-    requestChannelInvite(danielToken, danielChannel, samId);
+    const data = getData();
+    
+    const channelIndex = data.channel.findIndex( a => a.channelId === danielChannel);
+    console.log(data.channel[channelIndex].members);
 
-    requestMessageSend(danielChannel, "@maiya get online to play sum fortnite");
-    requestMessageSend(danielChannel, "@maiya @maiya wait how about in 5 mins"); //testing that double tag still only sends one notification
-    requestMessageSend(danielChannel, "@maiya ok come online now");
+    requestMessageSend(danielToken, danielChannel, "@maiyataylor get online to play sum fortnite");
+    requestMessageSend(danielToken, danielChannel, "@maiyataylor @maiyataylor wait how about in 5 mins"); //testing that double tag still only sends one notification
+    requestMessageSend(danielToken, danielChannel, "@maiyataylor ok come online now");
+    requestMessageSend(danielToken, danielChannel, "@idiot hurry tf up");
 
-    const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: get online to play s"};
-    const expectedValue1 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: wait how about in 5 "};
-    const expectedValue2 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: ok come online now"};
-
-    const expectedValue = [expectedValue0, expectedValue1, expectedValue2];
+    const expectedValue0 = {channelId: danielChannel, dmId: -1, notificationMessage: 'danielyung added you to gamingChannel'};  
+    const expectedValue1 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: get online to play s"};
+    const expectedValue2 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: wait how about in 5 "};
+    const expectedValue3 = {channelId: danielChannel, dmId: -1, notificationMessage: "danielyung tagged you in gamingChannel: ok come online now"};
+ 
+    const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3];
+    expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
 });
 /*
 test("User being added to channels, dms and getting tagged", () => {
@@ -165,6 +187,7 @@ test("User being added to channels, dms and getting tagged", () => {
     const expectedValue5 = {channelId: -1, dmId: samDm, notificationMessage: "samuelschreyer tagged you in wallowingChannel: ignore daniel come h"};
 
     const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3, expectedValue4, expectedValue5];
+    expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
 });
 */
 

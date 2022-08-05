@@ -1,6 +1,6 @@
 import validator from 'validator';
-import { requestUserProfile } from './users.test';
-import request from 'sync-request';
+import { requestUserProfile, requestClear, requestAuthRegister, requestAuthLogin, requestAuthLogout, requestPasswordRequest, requestPasswordReset } from './test.helpers';
+import { getData } from './dataStore';
 import config from './config.json';
 // eslint-disable-next-line
 // @ts-ignore
@@ -11,103 +11,6 @@ const OK = 200;
 const INVALID_TOKEN = 403;
 const port = config.port;
 const url = config.url;
-
-export function requestClear() {
-  const res = request(
-    'DELETE',
-    `${url}:${port}/clear/v1`,
-    {
-      qs: {},
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
-  };
-}
-
-export function requestAuthRegister(email: string, password: string, nameFirst: string, nameLast: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/register/v3`,
-    {
-      json: {
-        email: email,
-        password: password,
-        nameFirst: nameFirst,
-        nameLast: nameLast,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-export function requestAuthLogin(email: string, password: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/login/v3`,
-    {
-      json: {
-        email: email,
-        password: password,
-      }
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestAuthLogout(token: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/logout/v2`,
-    {
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestPasswordRequest(email: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/passwordreset/request/v1`,
-    {
-      json: {
-        email: email,
-      },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
-
-function requestPasswordReset(resetCode: string, newPassword: string) {
-  const res = request(
-    'POST',
-    `${url}:${port}/auth/passwordreset/reset/v1`,
-    {
-      json: {
-        resetCode: resetCode,
-        newPassword: newPassword,
-      },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(String(res.body)),
-  };
-}
 
 /* <Checks if a handle complies to the rules laid out in 6.2.2 of Iteration 1>
 
@@ -374,6 +277,7 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
   requestClear();
   test('Success user log out', () => {
     const testUser = requestAuthRegister('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#', 'John', 'Doe');
+    const testUid = testUser.bodyObj.authUserId;
 
     // has not logged out
     requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
@@ -394,6 +298,19 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
     const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve');
     expect(returnValue2.res.statusCode).toBe(400);
     expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
+
+    // find token and uuid
+    const dataSet = getData();
+    let workingResetCode;
+    for (const item of dataSet.token) {
+      if (item.uId === Number(`-${testUid}`)) {
+        workingResetCode = codec.encoder(String(item.token + String(item.uId)), 'base64');
+      }
+    }
+
+    const returnValue3 = requestPasswordReset(workingResetCode, 'therestwelve');
+    expect(returnValue3.res.statusCode).toBe(OK);
+    expect(returnValue3.bodyObj).toStrictEqual({});
 
     requestClear();
   });

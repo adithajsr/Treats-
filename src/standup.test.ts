@@ -1,8 +1,8 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import { requestChannelMessages } from './channel.test';
-import { requestClear } from './users.test';
 import { generateString } from './message.test';
+import { requestClear } from './test.helpers';
 
 const port = config.port;
 const url = config.url;

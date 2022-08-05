@@ -1,6 +1,6 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
-import { requestClear, requestAuthRegister } from './test.helpers';
+import { requestClear, requestAuthRegister, requestChannelsCreate, requestChannelsList } from './test.helpers';
 
 const OK = 200;
 const INPUT_ERROR = 400;
@@ -214,34 +214,6 @@ describe('channels capabilities', () => {
   });
 });
 
-export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
-  const res = request(
-    'POST',
-    `${url}:${port}/channels/create/v3`,
-    {
-      json: { name, isPublic },
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
-
-function requestChannelsList(token: string) {
-  const res = request(
-    'GET',
-    `${url}:${port}/channels/list/v3`,
-    {
-      headers: { token },
-    }
-  );
-  return {
-    res: res,
-    bodyObj: JSON.parse(res.body as string),
-  };
-}
 // -------------------------------------------------------------------------//
 
 type payloadObj = {

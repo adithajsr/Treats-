@@ -1,8 +1,7 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import fs from 'fs';
-import { requestChannelsCreate } from './channels.test';
-import { requestDMCreate, requestDMLeave, requestDMRemove } from './dm.test';
+import { requestChannelsCreate, requestDMCreate, requestDMLeave, requestDMRemove } from './test.helpers';
 import { requestUserProfileSetName, requestUserProfileSetEmail, requestUserProfileSetHandle, requestUploadPhoto, requestUsersAll, requestUserProfile, requestClear, requestAuthRegister } from './test.helpers';
 
 const OK = 200;

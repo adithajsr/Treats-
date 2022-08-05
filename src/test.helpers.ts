@@ -134,7 +134,7 @@ export function requestClear() {
   );
   return {
     res: res,
-    bodyObj: JSON.parse(res.getBody() as string),
+    bodyObj: JSON.parse(res.body as string),
   };
 }
 
@@ -218,5 +218,184 @@ export function requestPasswordReset(resetCode: string, newPassword: string) {
   return {
     res: res,
     bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+export function requestChannelsCreate(token: string, name: string, isPublic: boolean) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channels/create/v3`,
+    {
+      json: { name, isPublic },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestChannelsList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/list/v3`,
+    {
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestChannelsListAll(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/channels/listall/v3`,
+    {
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestChannelInvite(token: string, channelId: number, uId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/channel/invite/v3`,
+    {
+      json: { channelId, uId },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestDMCreate(token: string, uIds: number[]) {
+  const res = request(
+    'POST',
+    `${url}:${port}/dm/create/v2`,
+    {
+      json: { uIds },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestDMMessages(token: string, dmId: number, start: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/dm/messages/v2`,
+    {
+      qs: { dmId, start },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+export function requestMessageSendDM(token: string, dmId: number, message: string) {
+  const res = request(
+    'POST',
+    `${url}:${port}/message/senddm/v2`,
+    {
+      json: { dmId, message },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestDMList(token: string) {
+  const res = request(
+    'GET',
+    `${url}:${port}/dm/list/v2`,
+    {
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestDMRemove(token: string, dmId: number) {
+  const res = request(
+    'DELETE',
+    `${url}:${port}/dm/remove/v2`,
+    {
+      qs: { dmId },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
+  };
+}
+
+export function requestDMDetails(token: string, dmId: number) {
+  const res = request(
+    'GET',
+    `${url}:${port}/dm/details/v2`,
+    {
+      qs: { dmId },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+export function requestDMLeave(token: string, dmId: number) {
+  const res = request(
+    'POST',
+    `${url}:${port}/dm/leave/v2`,
+    {
+      json: { dmId },
+      headers: { token },
+    }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(String(res.body)),
+  };
+}
+
+export function requestNotificationsGet(token: string) {
+  const res = request(
+    'GET',
+      `${url}:${port}/notifications/get/v1`,
+      {
+        headers:
+        {
+          token,
+        }
+      }
+  );
+  return {
+    res: res,
+    bodyObj: JSON.parse(res.body as string),
   };
 }

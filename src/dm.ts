@@ -46,10 +46,10 @@ export function dmMessagesV2(token: string, dmId: number, start: number) {
     messages.push(data.dm[dmIndex].messages[i]);
   }
 
-  let endIndex = start + 50;
-  if (messageAmount < endIndex) endIndex = -1;
+  let end = start + 50;
+  if (messageAmount < end) end = -1;
 
-  return { messages, start, endIndex };
+  return { messages, start, end };
 }
 
 interface dmMember {

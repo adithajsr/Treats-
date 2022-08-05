@@ -9,13 +9,6 @@ const url = config.url;
 
 // -------------------------------------------------------------------------//
 
-type payloadObj = {
-  token?: string;
-  channelId?: number;
-  length?: number;
-  message?: string;
-};
-
 type id = {
   token: string,
   authUserId: number,
@@ -35,46 +28,68 @@ export function setupDatabase() {
   let reg = { email: 'who.is.john@is.the.question.com', password: '12367dhd', nameFirst: 'Nathan', nameLast: 'Spencer' };
 
   reg = { email: 'who.is.joe@is.the.question.com', password: 'yourmumma', nameFirst: 'John', nameLast: 'Hancock' };
-  admin = sendPost('auth/register/v3', 'a', reg);
+  admin = sendPost('auth/register/v3', reg);
 
   reg = { email: 'who.is.zac@is.the.question.com', password: 'zaccool', nameFirst: 'Zac', nameLast: 'Li' };
-  user1 = sendPost('auth/register/v3', 'a', reg);
+  user1 = sendPost('auth/register/v3', reg);
 
   reg = { email: 'who.is.nick@is.the.question.com', password: 'yeyyey', nameFirst: 'Nick', nameLast: 'Smith' };
-  user2 = sendPost('auth/register/v3', 'a', reg);
+  user2 = sendPost('auth/register/v3', reg);
 
   reg = { email: 'who.is.yet@is.the.question.com', password: 'nicolea', nameFirst: 'Nicole', nameLast: 'pi' };
-  user3 = sendPost('auth/register/v3', 'a', reg);
+  user3 = sendPost('auth/register/v3', reg);
 
-  channel1 = sendPost('channels/create/v3', admin.token, { name: 'Channel1', isPublic: true }).channelId;
-  channel2 = sendPost('channels/create/v3', admin.token, { name: 'Channel2', isPublic: true }).channelId;
-  channel3 = sendPost('channels/create/v3', admin.token, { name: 'Channel3', isPublic: false }).channelId; // channel3 is private
+  channel1 = sendPost('channels/create/v3', { token: admin.token, name: 'Channel1', isPublic: true }).channelId;
+  channel2 = sendPost('channels/create/v3', { token: admin.token, name: 'Channel2', isPublic: true }).channelId;
+  channel3 = sendPost('channels/create/v3', { token: admin.token, name: 'Channel3', isPublic: false }).channelId; // channel3 is private
 
   // Add users to respective channels having admin as the owner.
   let body = { token: admin.token, channelId: channel1, uId: user1.authUserId };
-  sendPost('channel/invite/v3', admin.token, body);
+  sendPost('channel/invite/v3', body);
 
   body = { token: admin.token, channelId: channel2, uId: user2.authUserId };
-  sendPost('channel/invite/v3', admin.token, body);
+  sendPost('channel/invite/v3', body);
 
   body = { token: admin.token, channelId: channel3, uId: user3.authUserId };
-  sendPost('channel/invite/v3', admin.token, body);
+  sendPost('channel/invite/v3', body);
 }
 
-export function sendPost(path:string, token:string, body: object) {
+type payloadObj = {
+  token?: string;
+  channelId?: number;
+  email?: string,
+  password?: string,
+  nameFirst?: string,
+  nameLast?: string,
+  name?: string,
+  isPublic?: boolean,
+  uId?: number,
+  length?: number,
+  message?: string,
+};
+
+export function sendPost(path:string, body: payloadObj) {
+  let headers = {};
+
+  // Check if token key exists in body
+  if (body.token !== undefined) {
+    headers = { token: body.token };
+    delete body.token;
+  }
+
   const res = request(
     'POST',
       `${url}:${port}/${path}`,
       {
         json: body,
-        headers: { token: token }
+        headers: headers,
       }
   );
 
   if (res.statusCode === 400 || res.statusCode === 403 || res.statusCode === 404 || res.statusCode === 500) {
     return res.statusCode;
   } else {
-    return JSON.parse(res.getBody() as string);
+    return JSON.parse(res.body as string);
   }
 }
 
@@ -129,35 +144,35 @@ describe('standup capabilities', () => {
     });
 
     test('invalid token, fail standup start', () => {
-      const body = { channelId: channel1, length: 2 };
-      expect(sendPost('standup/start/v1', '99999', body)).toBe(403);
+      const body = { token: '99999', channelId: channel1, length: 2 };
+      expect(sendPost('standup/start/v1', body)).toBe(403);
     });
 
     test('channelId does not refer to a valid channel, fail standup start', () => {
-      const body = { channelId: 99999, length: 2 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toBe(400);
+      const body = { token: user1.token, channelId: 99999, length: 2 };
+      expect(sendPost('standup/start/v1', body)).toBe(400);
     });
 
     test('length is a negative integer, fail standup start', () => {
-      const body = { channelId: channel1, length: -3 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toBe(400);
+      const body = { token: user1.token, channelId: channel1, length: -3 };
+      expect(sendPost('standup/start/v1', body)).toBe(400);
     });
 
     test('channelId valid but auth user is not a member of the channel, fail standup start', () => {
-      const body = { channelId: channel1, length: 3 };
-      expect(sendPost('standup/start/v1', user2.token, body)).toBe(403);
+      const body = { token: user2.token, channelId: channel1, length: 3 };
+      expect(sendPost('standup/start/v1', body)).toBe(403);
     });
 
     test('successful standup start', () => {
-      const body = { channelId: channel1, length: 3 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const body = { token: user1.token, channelId: channel1, length: 3 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
     });
 
     test('active standup currently running in channel, fail standup start', () => {
-      const body = { channelId: channel1, length: 3 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
-      const abody = { channelId: channel1, length: 3 };
-      expect(sendPost('standup/start/v1', user1.token, abody)).toBe(400);
+      const body = { token: user1.token, channelId: channel1, length: 3 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const abody = { token: user1.token, channelId: channel1, length: 3 };
+      expect(sendPost('standup/start/v1', abody)).toBe(400);
     });
   });
 
@@ -195,8 +210,8 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup active - standup in progress', () => {
-      const body = { channelId: channel1, length: 3 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const body = { token: user1.token, channelId: channel1, length: 3 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
       const testRequest = requestStandupActive(user1.token, channel1);
       expect(testRequest).toStrictEqual({
         isActive: true,
@@ -237,19 +252,19 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send none', async () => {
-      const body = { channelId: channel1, length: 1 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const body = { token: user1.token, channelId: channel1, length: 1 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
       await new Promise((r) => setTimeout(r, 1000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);
       expect(checkSent.bodyObj.messages).toStrictEqual([]);
     });
 
     test('successful standup send single', async () => {
-      const body = { channelId: channel1, length: 2 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const body = { token: user1.token, channelId: channel1, length: 2 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
 
-      const dbody = { channelId: channel1, message: 'single successful standup send' };
-      expect(sendPost('standup/send/v1', user1.token, dbody)).toStrictEqual({});
+      const dbody = { token: user1.token, channelId: channel1, message: 'single successful standup send' };
+      expect(sendPost('standup/send/v1', dbody)).toStrictEqual({});
 
       await new Promise((r) => setTimeout(r, 3000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);
@@ -257,17 +272,17 @@ describe('standup capabilities', () => {
     });
 
     test('successful standup send multiple', async () => {
-      const ubody = { channelId: channel1 };
-      sendPost('channel/join/v3', user2.token, ubody);
+      const ubody = { token: user2.token, channelId: channel1 };
+      sendPost('channel/join/v3', ubody);
 
-      const body = { channelId: channel1, length: 2 };
-      expect(sendPost('standup/start/v1', user1.token, body)).toStrictEqual({ timeFinish: expect.any(Number) });
+      const body = { token: user1.token, channelId: channel1, length: 2 };
+      expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
 
-      const dbody = { channelId: channel1, message: 'single successful standup send' };
-      expect(sendPost('standup/send/v1', user1.token, dbody)).toStrictEqual({});
+      const dbody = { token: user1.token, channelId: channel1, message: 'single successful standup send' };
+      expect(sendPost('standup/send/v1', dbody)).toStrictEqual({});
 
-      const abody = { channelId: channel1, message: 'single successful standup send' };
-      expect(sendPost('standup/send/v1', user2.token, abody)).toStrictEqual({});
+      const abody = { token: user2.token, channelId: channel1, message: 'single successful standup send' };
+      expect(sendPost('standup/send/v1', abody)).toStrictEqual({});
 
       await new Promise((r) => setTimeout(r, 3000));
       const checkSent = requestChannelMessages(user1.token, channel1, 0);

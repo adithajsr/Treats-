@@ -126,7 +126,7 @@ app.post('/dm/leave/v2', (req, res, next) => {
 });
 
 app.delete('/clear/v1', (req, res) => {
-  res.json(clearV1());
+  return res.json(clearV1());
 });
 
 app.get('/channel/details/v3', (req, res) => {

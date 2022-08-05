@@ -136,18 +136,20 @@ export function messageSendV2 (token: string, channelId: number, message: string
     }
   );
 //setting notification if tagged 
-
-  if (message.includes('@')) {
-    for (const element of data.channel[channelIndex].members) {
-      const uId = element.uId;
-      const userIndex = data.user.findIndex(a => a.uId = uId);
+    const length = data.channel[channelIndex].members.length;
+    console.log(data.channel[channelIndex].members)
+    for (let i = 0; i < length; i++) {
+      const uIdTemp = data.channel[channelIndex].members[i].uId;
+      const userIndex = data.user.findIndex(a => a.uId === uIdTemp);
       const userHandle = data.user[userIndex].handle;
-      if (message.includes('@' + userHandle)) {
+      const messageArray = message.split(" ");
+      console.log(userHandle + '||||||||||||||||' + messageArray);
+      if (messageArray.includes('@' + userHandle)) {
+        console.log('YES BITCH');
         const newNotification = {dmId: -1, channelId: channelId, notificationMessage: message.slice(0, 20)};
         data.user[userIndex].notifications.push(newNotification);
       }
     }
-  }
   setData(data);
   return { messageId: messageId };
 }

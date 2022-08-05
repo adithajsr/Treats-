@@ -283,7 +283,7 @@ app.put('/user/profile/handle/v2', (req, res, next) => {
 app.post('/message/send/v2', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
-  res.json(messageSendV2(token, channelId, message));
+  return res.json(messageSendV2(token, channelId, message));
 });
 
 app.put('/message/edit/v2', (req, res) => {

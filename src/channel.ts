@@ -207,7 +207,6 @@ Return Value:
 */
 export function channelInviteV3(token: string, channelId: number, uId: number): object {
   const authUserId = tokenConvert(token);
-  const data = getData();
   if (channelExists(channelId) === true && memberExists(channelId, authUserId) === false) {
     throw createHttpError(403, 'error');
   } else if (channelExists(channelId) === false ||
@@ -215,6 +214,10 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     memberExists(channelId, uId) === true) {
     throw createHttpError(400, 'error userPermission');
   } else {
+    // Add user to the channel
+    addUser(channelId, uId);
+
+    const data = getData();
     // Adding newNotification to user's notification array
     const channelIndex = data.channel.findIndex((data) => data.channelId === channelId);
     const channelName = data.channel[channelIndex].channelName;
@@ -224,11 +227,8 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     const newNotification = { channelId, dmId, notificationMessage };
     const userIndex = data.user.findIndex(a => a.uId === uId);
     data.user[userIndex].notifications.push(newNotification);
-    setData(data);
-    addUser(channelId, uId);
 
     // Update analytics metrics
-    const data = getData();
     const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
     const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
     const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;

@@ -289,6 +289,27 @@ export function dmCreateV2(token: string, uIds: number[]) {
   const dmMembers = createMembersListDMCreate(uIds, creatoruId);
   const dmName = createNameDMCreate(dmMembers);
 
+  // Update analytics metrics
+  const dmCreationTime = Math.floor((new Date()).getTime() / 1000);
+
+  for (const member of dmMembers) {
+    const userObj = data.user[data.user.findIndex(a => a.uId === member.uId)];
+    const oldnumDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+
+    userObj.dmsJoined.push({
+      numDmsJoined: oldnumDmsJoined + 1,
+      timeStamp: dmCreationTime,
+    });
+  }
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumDmsExist = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
+
+  workspaceObj.dmsExist.push({
+    numDmsExist: oldnumDmsExist + 1,
+    timeStamp: dmCreationTime,
+  });
+
   // Create a new DM
   data.dm.push({
     dmId: newDMId,
@@ -358,9 +379,37 @@ export function dmRemoveV2(token: string, dmId: number) {
   const tokenIndex = findTokenIndex(token);
 
   areArgumentsValidDMRemove(tokenIndex, dmId);
+  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
+
+  // Update analytics metrics
+  const dmRemoveTime = Math.floor((new Date()).getTime() / 1000);
+
+  for (const member of data.dm[dmIndex].members) {
+    const userObj = data.user[data.user.findIndex(a => a.uId === member.uId)];
+    const oldnumDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+
+    userObj.dmsJoined.push({
+      numDmsJoined: oldnumDmsJoined - 1,
+      timeStamp: dmRemoveTime,
+    });
+  }
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumDmsExist = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
+  workspaceObj.dmsExist.push({
+    numDmsExist: oldnumDmsExist - 1,
+    timeStamp: dmRemoveTime,
+  });
+
+  // When a DM is removed, all the messages in it are also removed
+  // and logged as one change in terms of analytics
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist - data.dm[dmIndex].messages.length,
+    timeStamp: dmRemoveTime,
+  });
 
   // Remove the DM from the database
-  const dmIndex = data.dm.findIndex(a => a.dmId === dmId);
   data.dm.splice(dmIndex, 1);
 
   setData(data);
@@ -427,6 +476,15 @@ export function dmLeaveV2(token: string, dmId: number) {
   if (memberIndex === -1) throw HTTPError(403, 'Unauthorised access to DM');
   // removes member from members array in DM array
   data.dm[dmIndex].members.splice(memberIndex, 1);
+
+  // Update analytics metrics
+  const dmLeaveTime = Math.floor((new Date()).getTime() / 1000);
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+  userObj.dmsJoined.push({
+    numDmsJoined: oldnumDmsJoined - 1,
+    timeStamp: dmLeaveTime,
+  });
 
   setData(data);
 

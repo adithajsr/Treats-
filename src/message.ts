@@ -127,6 +127,24 @@ export function messageSendV2 (token: string, channelId: number, message: string
   const messageId = Math.floor(Math.random() * 1000);
   const time = Math.floor((new Date()).getTime() / 1000);
 
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: time,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: time,
+  });
+
+  // Create a new message
   data.channel[channelIndex].messages.push(
     {
       messageId: messageId,
@@ -288,6 +306,15 @@ export function messageRemoveV2(token: string, messageId: number) {
     channel[channelIndex].messages.splice(messageIndex, 1);
   }
 
+  // Update analytics metrics
+  const msgRemoveTime = Math.floor((new Date()).getTime() / 1000);
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist - 1,
+    timeStamp: msgRemoveTime,
+  });
+
   setData(data);
   return {};
 }
@@ -347,6 +374,24 @@ export function messageSendDmV2 (token: string, dmId: number, message: string) {
     }
   }
 
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: time,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: time,
+  });
+
+  // Create a new message
   data.dm[i].messages.push(
     {
       messageId: messageId,
@@ -390,6 +435,23 @@ function pushMessage(channelIndex: number, messageId: number, uId: number, messa
       reacts: [],
     }
   );
+
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: timeSent,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: timeSent,
+  });
 
   setData(data);
   return {};
@@ -587,6 +649,24 @@ function pushMessageDM (dmIndex: number, messageId: number, uId: number, message
       reacts: [],
     }
   );
+
+  // Update analytics metrics
+  const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+  const oldnumMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  userObj.messagesSent.push({
+    numMessagesSent: oldnumMsgsSent + 1,
+    timeStamp: timeSent,
+  });
+
+  const workspaceObj = data.workspaceStats;
+  const oldnumMsgsExist = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  workspaceObj.messagesExist.push({
+    numMessagesExist: oldnumMsgsExist + 1,
+    timeStamp: timeSent,
+  });
+
   setData(data);
 }
 

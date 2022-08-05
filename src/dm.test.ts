@@ -75,7 +75,7 @@ function requestDMList(token: string) {
   };
 }
 
-function requestDMRemove(token: string, dmId: number) {
+export function requestDMRemove(token: string, dmId: number) {
   const res = request(
     'DELETE',
     `${url}:${port}/dm/remove/v2`,
@@ -105,7 +105,7 @@ export function requestDMDetails(token: string, dmId: number) {
   };
 }
 
-function requestDMLeave(token: string, dmId: number) {
+export function requestDMLeave(token: string, dmId: number) {
   const res = request(
     'POST',
     `${url}:${port}/dm/leave/v2`,

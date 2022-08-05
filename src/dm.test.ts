@@ -1,6 +1,11 @@
 import { requestDMCreate, requestDMMessages, requestMessageSendDM, requestDMList, requestDMLeave, requestDMDetails, requestDMRemove } from './test.helpers';
 import { requestClear, requestAuthRegister } from './test.helpers';
 
+import config from './config.json';
+ 
+const url = config.url;
+const port = config.port;
+
 const OK = 200;
 const INPUT_ERROR = 400;
 const INVALID_AUTH = 403;
@@ -132,7 +137,7 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-
+      console.log(testDetails.bodyObj)
       expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
       expect(testDetails.bodyObj.members).toStrictEqual([
         {
@@ -141,7 +146,7 @@ describe('dm capabilities', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: 'johndoe'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`
         },
         {
           uId: 2,
@@ -149,7 +154,7 @@ describe('dm capabilities', () => {
           nameFirst: 'Alice',
           nameLast: 'Schmoe',
           handleStr: 'aliceschmoe',
-          profileImgUrl: 'aliceschmoe'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`
         }
       ]);
     });
@@ -161,7 +166,7 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-
+      console.log(testDetails.bodyObj)
       expect(testDetails.bodyObj).toStrictEqual({
         name: 'aliceschmoe, johndoe, johndoe0, tomsmith',
         members: [
@@ -171,7 +176,7 @@ describe('dm capabilities', () => {
             nameFirst: 'John',
             nameLast: 'Doe',
             handleStr: 'johndoe',
-            profileImgUrl: 'johndoe'
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
           },
           {
             uId: 2,
@@ -179,7 +184,7 @@ describe('dm capabilities', () => {
             nameFirst: 'Alice',
             nameLast: 'Schmoe',
             handleStr: 'aliceschmoe',
-            profileImgUrl: 'aliceschmoe'
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
           },
           {
             uId: 3,
@@ -187,7 +192,7 @@ describe('dm capabilities', () => {
             nameFirst: 'Tom',
             nameLast: 'Smith',
             handleStr: 'tomsmith',
-            profileImgUrl: 'tomsmith'
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
           },
           {
             uId: 4,
@@ -195,7 +200,7 @@ describe('dm capabilities', () => {
             nameFirst: 'John',
             nameLast: 'Doe',
             handleStr: 'johndoe0',
-            profileImgUrl: 'johndoe0'
+            profileImgUrl: `${url}:${port}/imgurl/default.jpg`
           }
         ]
       });

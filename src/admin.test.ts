@@ -107,7 +107,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
         }
       ]);
       // retrieve user details user/profile
@@ -118,7 +118,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'Removed',
           nameLast: 'user',
           handleStr: '',
-          profileImgUrl: config.url + ':' + config.port + '/imgurl/default.jpg'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
         }
       );
       // retrieve channel details - requestChannelDetailsHelper - members
@@ -186,7 +186,7 @@ describe('admin/user/remove/v1 test', () => {
           nameFirst: 'John',
           nameLast: 'Doe',
           handleStr: 'johndoe',
-          profileImgUrl: 'johndoe'
+          profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
         }
       ]);
       // retrieve dm details - requestDMMessages - messages

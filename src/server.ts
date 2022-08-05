@@ -132,7 +132,7 @@ app.delete('/clear/v1', (req, res) => {
 app.get('/channel/details/v3', (req, res) => {
   const token = req.header('token');
   const channelId = req.query.channelId as string;
-  res.json(channelDetailsV3(token, parseInt(channelId)));
+  return res.json(channelDetailsV3(token, parseInt(channelId)));
 });
 
 app.delete('/admin/user/remove/v1', (req, res) => {
@@ -170,7 +170,7 @@ app.post('/auth/logout/v2', (req, res, next) => {
 
 app.post('/auth/passwordreset/request/v1', (req, res) => {
   const email = req.body.email;
-  res.json(passwordRequest(email));
+  return res.json(passwordRequest(email));
 });
 
 app.post('/auth/passwordreset/reset/v1', (req, res, next) => {
@@ -203,7 +203,7 @@ app.get('/channels/list/v3', (req, res, next) => {
 
 app.get('/channels/listall/v3', (req, res) => {
   const token = req.header('token');
-  res.json(channelsListallV3(token));
+  return res.json(channelsListallV3(token));
 });
 
 app.post('/channel/join/v3', (req, res, next) => {
@@ -298,25 +298,25 @@ app.put('/user/profile/sethandle/v2', (req, res, next) => {
 app.post('/message/send/v2', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
-  res.json(messageSendV2(token, channelId, message));
+  return res.json(messageSendV2(token, channelId, message));
 });
 
 app.put('/message/edit/v2', (req, res) => {
   const token = req.header('token');
   const { messageId, message } = req.body;
-  res.json(messageEditV2(token, messageId, message));
+  return res.json(messageEditV2(token, messageId, message));
 });
 
 app.delete('/message/remove/v2', (req, res) => {
   const token = req.header('token');
   const messageId = parseInt(req.query.messageId as string);
-  res.json(messageRemoveV2(token, messageId));
+  return res.json(messageRemoveV2(token, messageId));
 });
 
 app.post('/message/senddm/v2', (req, res) => {
   const token = req.header('token');
   const { dmId, message } = req.body;
-  res.json(messageSendDmV2(token, dmId, message));
+  return res.json(messageSendDmV2(token, dmId, message));
 });
 
 app.post('/message/share/v1', (req, res, next) => {
@@ -361,19 +361,19 @@ app.delete('/dm/remove/v2', (req, res, next) => {
 app.post('/standup/start/v1', (req, res) => {
   const token = req.header('token');
   const { channelId, length } = req.body;
-  res.json(standupStartV1(token, channelId, length));
+  return res.json(standupStartV1(token, channelId, length));
 });
 
 app.get('/standup/active/v1', (req, res) => {
   const token = req.header('token');
   const channelId = parseInt(req.query.channelId as string);
-  res.json(standupActiveV1(token, channelId));
+  return res.json(standupActiveV1(token, channelId));
 });
 
 app.post('/standup/send/v1', (req, res) => {
   const token = req.header('token');
   const { channelId, message } = req.body;
-  res.json(standupSendV1(token, channelId, message));
+  return res.json(standupSendV1(token, channelId, message));
 });
 
 app.post('/message/pin/v1', (req, res) => {
@@ -397,7 +397,6 @@ app.post('/message/react/v1', (req, res) => {
 app.post('/message/unreact/v1', (req, res) => {
   const token = req.header('token');
   const { messageId, reactId } = req.body;
-  // JSON.stringify(req.headers
   return res.json(unReact(token, messageId, reactId));
 });
 

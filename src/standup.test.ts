@@ -209,10 +209,11 @@ describe('standup capabilities', () => {
       });
     });
 
-    test('successful standup active - standup in progress', () => {
+    test('successful standup active - standup in progress', async () => {
       const body = { token: user1.token, channelId: channel1, length: 3 };
       expect(sendPost('standup/start/v1', body)).toStrictEqual({ timeFinish: expect.any(Number) });
       const testRequest = requestStandupActive(user1.token, channel1);
+      await new Promise((r) => setTimeout(r, 3000));
       expect(testRequest).toStrictEqual({
         isActive: true,
         timeFinish: expect.any(Number)

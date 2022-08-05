@@ -1,7 +1,6 @@
 import validator from 'validator';
-import { requestUserProfile, requestClear, requestAuthRegister, requestAuthLogin, requestAuthLogout, requestPasswordRequest, requestPasswordReset} from './test.helpers';
+import { requestUserProfile, requestClear, requestAuthRegister, requestAuthLogin, requestAuthLogout, requestPasswordRequest, requestPasswordReset } from './test.helpers';
 import { getData } from './dataStore';
-import request from 'sync-request';
 import config from './config.json';
 // eslint-disable-next-line
 // @ts-ignore

@@ -147,26 +147,26 @@ test('default case', () => {
     {
       messages: [
         {
-          messageId: 292,
+          messageId: expect.any(Number),
           uId: 1,
           message: 'omg hopefully he doesnt see this hehe',
-          timeSent: 1659700136,
+          timeSent: expect.any(Number),
           isPinned: 0,
           reacts: []
         },
         {
-          messageId: 40,
+          messageId: expect.any(Number),
           uId: 1,
           message: 'hehe',
-          timeSent: 1659700137,
+          timeSent: expect.any(Number),
           isPinned: 0,
           reacts: []
         },
         {
-          messageId: 27,
+          messageId: expect.any(Number),
           uId: 2,
           message: 'stfu bitch hehe',
-          timeSent: 1659700137,
+          timeSent: expect.any(Number),
           isPinned: 0,
           reacts: []
         }

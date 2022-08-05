@@ -45,7 +45,7 @@ export function userProfileV3(token: string, uId: number) {
   for (const element in data.user) {
     if (uId === data.user[element].uId) {
       return {
-        user: {        
+        user: {
           uId: data.user[element].uId,
           email: data.user[element].email,
           nameFirst: data.user[element].nameFirst,

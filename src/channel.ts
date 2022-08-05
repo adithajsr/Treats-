@@ -62,13 +62,6 @@ interface Database {
   dm: any[],
 }
 
-// interface Details {
-//   name: string,
-//   isPublic: boolean,
-//   ownerMembers: any[],
-//   allMembers: any[],
-// }
-
 /*
 Converts a token to its relevant uid
 
@@ -116,18 +109,11 @@ export function channelDetailsV3(token: string, channelId: number) {
 
   const { members } = channel[i];
   const { user } = data;
-  // const details: Details = {
-  //   name: channel[i].channelName,
-  //   isPublic: channel[i].isPublic,
-  //   ownerMembers: [],
-  //   allMembers: [],
-  // };
-  // find the member in the user array, then push details on
 
   const name = channel[i].channelName;
   const isPublic = channel[i].isPublic;
-  let ownerMembers = [];
-  let allMembers = [];
+  const ownerMembers = [];
+  const allMembers = [];
 
   for (const i in members) {
     const index = data.user.findIndex(a => a.uId === members[i].uId);
@@ -153,8 +139,7 @@ export function channelDetailsV3(token: string, channelId: number) {
     );
   }
 
-  return { name, isPublic, ownerMembers, allMembers}
-  // return { channelDetails: details };
+  return { name, isPublic, ownerMembers, allMembers };
 }
 
 // ======================================== Imports. ========================================

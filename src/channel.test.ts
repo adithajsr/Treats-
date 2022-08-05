@@ -210,29 +210,30 @@ describe('channel/details/v3 testing', () => {
 
   test('successful channel details return', () => {
     const testRequest = requestChannelDetailsHelper(testUser.bodyObj.token, testChannel.bodyObj.channelId);
-    console.log(testRequest)
-    expect(testRequest.channelDetails).toStrictEqual({
-      name: 'channelName',
-      isPublic: true,
-      ownerMembers: [
-        {
-          email: 'validemail@gmail.com',
-          handle: 'johndoe',
-          nameFirst: 'John',
-          nameLast: 'Doe',
-          uId: 1,
-        },
-      ],
-      allMembers: [
-        {
-          email: 'validemail@gmail.com',
-          handle: 'johndoe',
-          nameFirst: 'John',
-          nameLast: 'Doe',
-          uId: 1,
-        },
-      ],
-    });
+    expect(testRequest).toStrictEqual(
+      {
+        name: 'channelName',
+        isPublic: true,
+        ownerMembers: [
+          {
+            uId: 1,
+            email: 'validemail@gmail.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handle: 'johndoe'
+          }
+        ],
+        allMembers: [
+          {
+            uId: 1,
+            email: 'validemail@gmail.com',
+            nameFirst: 'John',
+            nameLast: 'Doe',
+            handle: 'johndoe'
+          }
+        ]
+      }
+    );
   });
 });
 

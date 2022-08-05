@@ -2,7 +2,7 @@ import { requestDMCreate, requestDMMessages, requestMessageSendDM, requestDMList
 import { requestClear, requestAuthRegister } from './test.helpers';
 
 import config from './config.json';
- 
+
 const url = config.url;
 const port = config.port;
 
@@ -137,7 +137,6 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      console.log(testDetails.bodyObj)
       expect(testDetails.bodyObj.name).toStrictEqual('aliceschmoe, johndoe');
       expect(testDetails.bodyObj.members).toStrictEqual([
         {
@@ -166,7 +165,6 @@ describe('dm capabilities', () => {
       expect(testDM.bodyObj).toStrictEqual({ dmId: expect.any(Number) });
 
       const testDetails = requestDMDetails(testUser1.bodyObj.token, testDM.bodyObj.dmId);
-      console.log(testDetails.bodyObj)
       expect(testDetails.bodyObj).toStrictEqual({
         name: 'aliceschmoe, johndoe, johndoe0, tomsmith',
         members: [

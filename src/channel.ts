@@ -3,8 +3,6 @@ import HTTPError from 'http-errors';
 import { getData, setData } from './dataStore';
 import { checkToken } from './message';
 
-// COMP1531 middleware - must use AFTER declaring your routes
-
 /*
 This function returns 50 messages in a specified channel from a specified startpoint
 
@@ -180,6 +178,18 @@ export function channelJoinV3(token: string, channelId: number): object {
     throw createHttpError(400, 'error');
   } else {
     addUser(channelId, authUserId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelJoinTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined + 1,
+      timeStamp: channelJoinTime,
+    });
+    setData(data);
+
     return {};
   }
 }
@@ -216,6 +226,18 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     data.user[userIndex].notifications.push(newNotification);
     setData(data);
     addUser(channelId, uId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelInviteTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === uId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined + 1,
+      timeStamp: channelInviteTime,
+    });
+    setData(data);
+
     return {};
   }
 }
@@ -238,6 +260,18 @@ export function channelLeaveV2(token: string, channelId: number): object {
     throw createHttpError(400, 'error');
   } else {
     leaveChannel(channelId, authUserId);
+
+    // Update analytics metrics
+    const data = getData();
+    const channelLeaveTime = Math.floor((new Date()).getTime() / 1000);
+    const userObj = data.user[data.user.findIndex(a => a.uId === authUserId)];
+    const oldnumChJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    userObj.channelsJoined.push({
+      numChannelsJoined: oldnumChJoined - 1,
+      timeStamp: channelLeaveTime,
+    });
+    setData(data);
+
     return {};
   }
 }

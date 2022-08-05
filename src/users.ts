@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import { doesEmailExist } from './auth';
+import { findTokenIndex } from './channels';
 import validator from 'validator';
 import HTTPError from 'http-errors';
 import request from 'sync-request';
@@ -296,3 +297,134 @@ export async function uploadPhoto(imgUrl: string, xStart: number, yStart: number
       };
     });
 }
+
+/*
+Fetch the required statistics about this user's use of UNSW Treats
+
+Arguments:
+    token (string)  - represents the session of the user fetching the stats
+
+Return Value:
+    Returns { userStats } if no error
+
+Errors:
+    Throws a 403 error on invalid token
+*/
+export function userStatsV1(token: string) {
+  const data = getData();
+
+  // Check token is valid
+  const tokenIndex = findTokenIndex(token);
+
+  // Find the user corresponding to the given token
+  const userId = data.token[tokenIndex].uId;
+  const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
+  const involvementRate = calculateInvolvement(userId);
+
+  return {
+    userStats: {
+      channelsJoined: userObj.channelsJoined,
+      dmsJoined: userObj.dmsJoined,
+      messagesSent: userObj.messagesSent,
+      involvementRate: involvementRate,
+    },
+  };
+}
+
+/*
+Fetch the required statistics about the workspace's use of UNSW Treats
+
+Arguments:
+    token (string)  - represents the session of the user fetching the stats
+
+Return Value:
+    Returns { workspaceStats } if no error
+
+Errors:
+    Throws a 403 error on invalid token
+*/
+export function usersStatsV1(token: string) {
+  const data = getData();
+
+  // Check token is valid
+  findTokenIndex(token);
+
+  const workspaceObj = data.workspaceStats;
+  const utilizationRate = calculateUtilization(token);
+
+  return {
+    workspaceStats: {
+      channelsExist: workspaceObj.channelsExist,
+      dmsExist: workspaceObj.dmsExist,
+      messagesExist: workspaceObj.messagesExist,
+      utilizationRate: utilizationRate,
+    },
+  };
+}
+
+/*
+Helper function: calculates the involvement rate of a user
+
+Arguments:
+    userId (number)     - uId of the user corresponding to the given token
+
+Return Value:
+    Returns involvementRate
+*/
+const calculateInvolvement = (userId: number) => {
+  const data = getData();
+  const userObj = data.user[data.user.findIndex(a => a.uId === userId)];
+  const workspaceObj = data.workspaceStats;
+
+  const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+  const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+  const numMsgsSent = userObj.messagesSent[userObj.messagesSent.length - 1].numMessagesSent;
+
+  const numChannels = workspaceObj.channelsExist[workspaceObj.channelsExist.length - 1].numChannelsExist;
+  const numDms = workspaceObj.dmsExist[workspaceObj.dmsExist.length - 1].numDmsExist;
+  const numMsgs = workspaceObj.messagesExist[workspaceObj.messagesExist.length - 1].numMessagesExist;
+
+  let involvementRate: number;
+
+  const involvementDenominator = numChannels + numDms + numMsgs;
+  if (involvementDenominator === 0) {
+    // If denominator is 0, involvement is 0
+    involvementRate = 0;
+  } else {
+    involvementRate = (numChannelsJoined + numDmsJoined + numMsgsSent) / (involvementDenominator);
+    if (involvementRate > 1) {
+      // If involvement is greater than 1, cap it at 1
+      involvementRate = 1;
+    }
+  }
+
+  return involvementRate;
+};
+
+/*
+Helper function: calculates the utilization rate of a workspace
+
+Arguments:
+    token (string)      - represents the session of the user fetching the stats
+
+Return Value:
+    Returns involvementRate
+*/
+const calculateUtilization = (token: string) => {
+  const data = getData();
+  const numUsers = usersAll(token).users.length;
+
+  let numUsersWhoAreInLeastOneChannelOrDm = 0;
+  for (const userObj of data.user) {
+    const numChannelsJoined = userObj.channelsJoined[userObj.channelsJoined.length - 1].numChannelsJoined;
+    const numDmsJoined = userObj.dmsJoined[userObj.dmsJoined.length - 1].numDmsJoined;
+
+    if (numChannelsJoined >= 1 || numDmsJoined >= 1) {
+      numUsersWhoAreInLeastOneChannelOrDm++;
+    }
+  }
+
+  const utilizationRate = numUsersWhoAreInLeastOneChannelOrDm / numUsers;
+
+  return utilizationRate;
+};

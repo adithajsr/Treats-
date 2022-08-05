@@ -1,7 +1,6 @@
 import request from 'sync-request';
 import config from './config.json';
-import { requestClear } from './users.test';
-import { requestAuthRegister } from './auth.test';
+import { requestClear, requestAuthRegister } from './test.helpers';
 // import {requestChannelsCreate} from './channel.test';
 import { requestChannelInvite } from './other.test';
 import { requestMessageSend } from './message.test';

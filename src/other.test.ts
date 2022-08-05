@@ -1,7 +1,6 @@
 import request from 'sync-request';
 import config from './config.json';
-import { requestAuthRegister } from './auth.test';
-import { requestClear, requestUserProfile } from './users.test';
+import { requestClear, requestAuthRegister, requestUserProfile } from './test.helpers';
 
 const OK = 200;
 const url = config.url;

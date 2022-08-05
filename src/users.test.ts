@@ -1,10 +1,9 @@
 import request, { HttpVerb } from 'sync-request';
 import config from './config.json';
 import fs from 'fs';
-import { requestAuthRegister } from './auth.test';
 import { requestChannelsCreate } from './channels.test';
 import { requestDMCreate, requestDMLeave, requestDMRemove } from './dm.test';
-import { requestUserProfileSetName, requestUserProfileSetEmail, requestUserProfileSetHandle, requestUploadPhoto, requestUsersAll, requestUserProfile, requestClear} from './test.helpers';
+import { requestUserProfileSetName, requestUserProfileSetEmail, requestUserProfileSetHandle, requestUploadPhoto, requestUsersAll, requestUserProfile, requestClear, requestAuthRegister } from './test.helpers';
 
 const OK = 200;
 const INVALID_TOKEN = 403;

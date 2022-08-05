@@ -18,5 +18,5 @@ export function notificationsGetV1(token: string) {
     notifications.push(data.user[userIndex].notifications[i]);
   }
 
-  return notifications;
+  return { notifications };
 }

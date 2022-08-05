@@ -1,3 +1,8 @@
+import request from 'sync-request';
+import config from './config.json';
+const port = config.port;
+const url = config.url;
+
 export function requestUserProfileSetName(token: string, nameFirst: string, nameLast: string) {
   const res = request(
     'PUT',
@@ -169,7 +174,7 @@ export function requestAuthLogin(email: string, password: string) {
   };
 }
 
-function requestAuthLogout(token: string) {
+export function requestAuthLogout(token: string) {
   const res = request(
     'POST',
     `${url}:${port}/auth/logout/v2`,
@@ -183,7 +188,7 @@ function requestAuthLogout(token: string) {
   };
 }
 
-function requestPasswordRequest(email: string) {
+export function requestPasswordRequest(email: string) {
   const res = request(
     'POST',
     `${url}:${port}/auth/passwordreset/request/v1`,
@@ -199,7 +204,7 @@ function requestPasswordRequest(email: string) {
   };
 }
 
-function requestPasswordReset(resetCode: string, newPassword: string) {
+export function requestPasswordReset(resetCode: string, newPassword: string) {
   const res = request(
     'POST',
     `${url}:${port}/auth/passwordreset/reset/v1`,

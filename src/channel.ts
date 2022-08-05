@@ -217,7 +217,6 @@ export function channelInviteV3(token: string, channelId: number, uId: number): 
     // Add user to the channel
     addUser(channelId, uId);
 
-    const data = getData();
     // Adding newNotification to user's notification array
     const data = getData();
     const channelIndex = data.channel.findIndex((data) => data.channelId === channelId);

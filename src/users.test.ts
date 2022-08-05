@@ -592,14 +592,6 @@ function requestStandupSend(token: string, channelId: number, message: string) {
 }
 
 describe('stats capabilities', () => {
-  beforeEach(() => {
-    requestClear();
-  });
-
-  afterEach(() => {
-    requestClear();
-  });
-
   describe('test /user/stats/v1', () => {
     let testUser1: wrapperOutput;
     let user1Token: string;
@@ -609,6 +601,8 @@ describe('stats capabilities', () => {
     let user2Id: number;
 
     beforeEach(() => {
+      requestClear();
+
       // Create test user 1 and generate the time their account as created
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       user1Token = testUser1.bodyObj.token;
@@ -618,6 +612,10 @@ describe('stats capabilities', () => {
       testUser2 = requestAuthRegister('student@unsw.com', 'password', 'Alice', 'Schmoe');
       user2Token = testUser2.bodyObj.token;
       user2Id = testUser2.bodyObj.authUserId;
+    });
+
+    afterEach(() => {
+      requestClear();
     });
 
     test('Fail fetch user\'s stats, invalid token', () => {
@@ -1010,9 +1008,15 @@ describe('stats capabilities', () => {
     let user1Token: string;
 
     beforeEach(() => {
+      requestClear();
+
       // Create test user 1
       testUser1 = requestAuthRegister('validemail@gmail.com', '123abc!@#', 'John', 'Doe');
       user1Token = testUser1.bodyObj.token;
+    });
+
+    afterEach(() => {
+      requestClear();
     });
 
     test('Fail fetch workspace\'s stats, invalid token', () => {

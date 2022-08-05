@@ -1,5 +1,6 @@
 import validator from 'validator';
 import { requestUserProfile } from './users.test';
+import { getData } from './dataStore';
 import request from 'sync-request';
 import config from './config.json';
 // eslint-disable-next-line
@@ -374,6 +375,7 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
   requestClear();
   test('Success user log out', () => {
     const testUser = requestAuthRegister('ithoughtsydneyhadgoodweather@gmail.com', '123abc!@#', 'John', 'Doe');
+    const testUid = testUser.bodyObj.authUserId;
 
     // has not logged out
     requestPasswordRequest('ithoughtsydneyhadgoodweather@gmail.com');
@@ -394,6 +396,19 @@ describe('test /auth/passwordreset/request/v1 & /auth/passwordreset/reset/v1', (
     const returnValue2 = requestPasswordReset(codec.encoder(String(generateV4uuid() + '-1'), 'base64'), 'therestwelve');
     expect(returnValue2.res.statusCode).toBe(400);
     expect(returnValue2.bodyObj.error).toStrictEqual({ message: 'resetCode is not a valid reset code' });
+
+    // find token and uuid
+    const dataSet = getData();
+    let workingResetCode;
+    for (const item of dataSet.token) {
+      if (item.uId === Number(`-${testUid}`)) {
+        workingResetCode = codec.encoder(String(item.token + String(item.uId)), 'base64');
+      }
+    }
+
+    const returnValue3 = requestPasswordReset(workingResetCode, 'therestwelve');
+    expect(returnValue3.res.statusCode).toBe(OK);
+    expect(returnValue3.bodyObj).toStrictEqual({});
 
     requestClear();
   });

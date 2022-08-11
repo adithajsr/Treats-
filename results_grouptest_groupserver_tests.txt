@@ -1,0 +1,601 @@
+npm verb cli /import/kamen/3/cs1531/.nvm/versions/node/v18.2.0/bin/node /import/kamen/3/cs1531/.nvm/versions/node/v18.2.0/bin/npm
+npm info using npm@8.9.0
+npm info using node@v18.2.0
+npm timing npm:load:whichnode Completed in 0ms
+npm timing config:load:defaults Completed in 4ms
+npm timing config:load:file:/import/kamen/3/cs1531/.nvm/versions/node/v18.2.0/lib/node_modules/npm/npmrc Completed in 2ms
+npm timing config:load:builtin Completed in 3ms
+npm timing config:load:cli Completed in 5ms
+npm timing config:load:env Completed in 1ms
+npm timing config:load:file:/import/kamen/3/cs1531/project-automarking/tempstore/.npmrc Completed in 0ms
+npm timing config:load:project Completed in 25ms
+npm timing config:load:file:/import/kamen/3/cs1531/.npmrc Completed in 0ms
+npm timing config:load:user Completed in 1ms
+npm timing config:load:file:/import/kamen/3/cs1531/.nvm/versions/node/v18.2.0/etc/npmrc Completed in 1ms
+npm timing config:load:global Completed in 1ms
+npm timing config:load:validate Completed in 0ms
+npm timing config:load:credentials Completed in 2ms
+npm timing config:load:setEnvs Completed in 3ms
+npm timing config:load Completed in 48ms
+npm timing npm:load:configload Completed in 48ms
+npm timing npm:load:mkdirpcache Completed in 3ms
+npm timing npm:load:mkdirplogs Completed in 1ms
+npm verb title npm run test **/?(*.)+(test).ts
+npm verb argv "run" "test" "--loglevel" "verbose" "--testMatch" "**/?(*.)+(test).ts"
+npm timing npm:load:setTitle Completed in 4ms
+npm timing config:load:flatten Completed in 8ms
+npm timing npm:load:display Completed in 15ms
+npm verb logfile logs-max:10 dir:/import/kamen/3/cs1531/.npm/_logs
+npm verb logfile /import/kamen/3/cs1531/.npm/_logs/2022-08-05T22_23_47_145Z-debug-0.log
+npm timing npm:load:logFile Completed in 14ms
+npm timing npm:load:timers Completed in 0ms
+npm timing npm:load:configScope Completed in 0ms
+npm timing npm:load Completed in 88ms
+
+> test
+> jest --detectOpenHandles "**/?(*.)+(test).ts"
+
+  Invalid testPattern **/?(*.)+(test).ts supplied. Running all tests instead.
+  Invalid testPattern **/?(*.)+(test).ts supplied. Running all tests instead.
+PASS src/admin.test.ts (40.943 s)
+FAIL src/notifications.test.ts (40.846 s)
+  ● User being added to multiple channels
+
+    expect(received).toMatchObject(expected)
+
+    Expected: [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}]
+    Received: {"notifications": [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}]}
+
+      49 |   const expectedValue1 = { channelId: samChannel, dmId: -1, notificationMessage: 'samuelschreyer added you to wallowingChannel' };
+      50 |   const expectedValue = [expectedValue0, expectedValue1];
+    > 51 |   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
+         |                                                       ^
+      52 |   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+      53 | });
+      54 |
+
+      at Object.<anonymous> (src/notifications.test.ts:51:55)
+
+  ● User being added to multiple dms - thirst trap boi
+
+    expect(received).toMatchObject(expected)
+
+    Expected: [{"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor, samuelschreyer"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}]
+    Received: {"notifications": [{"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor, samuelschreyer"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}]}
+
+      71 |   const maiyaExpectedValue = [expectedValue0, expectedValue1];
+      72 |   const samExpectedValue = [{ channelId: -1, dmId: danielDm, notificationMessage: 'danielyung added you to danielyung, maiyataylor, samuelschreyer' }];
+    > 73 |   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(maiyaExpectedValue);
+         |                                                       ^
+      74 |   expect(requestNotificationsGet(samToken).bodyObj).toMatchObject(samExpectedValue);
+      75 |   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+      76 | });
+
+      at Object.<anonymous> (src/notifications.test.ts:73:55)
+
+  ● User being added to multiple channels and dms
+
+    expect(received).toMatchObject(expected)
+
+    Expected: [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}, {"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}]
+    Received: {"notifications": [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}, {"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}]}
+
+       97 |   const expectedValue3 = { channelId: -1, dmId: samDm, notificationMessage: 'samuelschreyer added you to maiyataylor, samuelschreyer' }; // should be samuelschreyer, maiyataylor
+       98 |   const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3];
+    >  99 |   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
+          |                                                       ^
+      100 |   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+      101 | });
+      102 |
+
+      at Object.<anonymous> (src/notifications.test.ts:99:55)
+
+  ● User being tagged multiple times
+
+    expect(received).toMatchObject(expected)
+
+    Expected: [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor get onl"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor @maiyat"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor ok come"}]
+    Received: {"notifications": [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor get onl"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor @maiyat"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor ok come"}]}
+
+      121 |
+      122 |   const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3];
+    > 123 |   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
+          |                                                       ^
+      124 |   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+      125 | });
+      126 |
+
+      at Object.<anonymous> (src/notifications.test.ts:123:55)
+
+  ● User being added to channels, dms and getting tagged
+
+    expect(received).toMatchObject(expected)
+
+    Expected: [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}, {"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor get onl"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer tagged you in maiyataylor, samuelschreyer: @maiyataylor ignore "}]
+    Received: {"notifications": [{"channelId": 1, "dmId": -1, "notificationMessage": "danielyung added you to gamingChannel"}, {"channelId": 2, "dmId": -1, "notificationMessage": "samuelschreyer added you to wallowingChannel"}, {"channelId": -1, "dmId": 1, "notificationMessage": "danielyung added you to danielyung, maiyataylor"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer added you to maiyataylor, samuelschreyer"}, {"channelId": 1, "dmId": -1, "notificationMessage": "danielyung tagged you in gamingChannel: @maiyataylor get onl"}, {"channelId": -1, "dmId": 2, "notificationMessage": "samuelschreyer tagged you in maiyataylor, samuelschreyer: @maiyataylor ignore "}]}
+
+      152 |
+      153 |   const expectedValue = [expectedValue0, expectedValue1, expectedValue2, expectedValue3, expectedValue4, expectedValue5];
+    > 154 |   expect(requestNotificationsGet(maiyaToken).bodyObj).toMatchObject(expectedValue);
+          |                                                       ^
+      155 |   expect(requestNotificationsGet(maiyaToken).res.statusCode).toBe(OK);
+      156 | });
+      157 |
+
+      at Object.<anonymous> (src/notifications.test.ts:154:55)
+
+  ● testing reacts
+
+    TypeError: Cannot read properties of undefined (reading 'notificationMessage')
+
+      168 |   const body = { messageId: messageId, reactId: 1 };
+      169 |   sendPost('message/react/v1', maiyaToken, body);
+    > 170 |   expect(requestNotificationsGet(danielToken).bodyObj[0].notificationMessage).toBe('maiyataylor reacted to your message in gamingChannel');
+          |                                                         ^
+      171 |   expect(requestNotificationsGet(danielToken).res.statusCode).toBe(OK);
+      172 |   requestClear();
+      173 | });
+
+      at Object.<anonymous> (src/notifications.test.ts:170:57)
+
+FAIL src/auth.test.ts (5.606 s)
+  ● Testing for requestAuthRegister › Test 1 affirmitive
+
+    TypeError: Expected a string but received a undefined
+
+      50 |     };
+      51 |     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
+    > 52 |     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
+         |                      ^
+      53 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
+      54 |   });
+      55 |
+
+      at assertString (node_modules/validator/lib/util/assertString.js:17:11)
+      at Object.isEmail (node_modules/validator/lib/isEmail.js:78:29)
+      at Object.<anonymous> (src/auth.test.ts:52:22)
+
+  ● Testing for requestAuthRegister › Test 6 extra-long name
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "almost.having.fun@writing.tests.com",
+          "handleStr": "sebastianfitzagamemn",
+          "nameFirst": "Sebastian",
+          "nameLast": "Fitzagamemnon",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      116 |     const testUserId = returnObject.authUserId;
+      117 |     const testToken = returnObject.token;
+    > 118 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+          |                                                               ^
+      119 |       uId: 1,
+      120 |       email: testUserEmail,
+      121 |       nameFirst: testUserFN,
+
+      at Object.<anonymous> (src/auth.test.ts:118:63)
+
+  ● Testing for requestAuthRegister › Test 7 duplicate handles
+
+    TypeError: Expected a string but received a undefined
+
+      148 |     };
+      149 |     expect(isHandleValid(requestUserProfile(testToken, testUserId).bodyObj.handleStr)).toBe(true);
+    > 150 |     expect(validator.isEmail(requestUserProfile(testToken, testUserId).bodyObj.email)).toBe(true);
+          |                      ^
+      151 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
+      152 |   });
+      153 | });
+
+      at assertString (node_modules/validator/lib/util/assertString.js:17:11)
+      at Object.isEmail (node_modules/validator/lib/isEmail.js:78:29)
+      at Object.<anonymous> (src/auth.test.ts:150:22)
+
+  ● Testing for requestAuthLogin › Test 1 affirmitive
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "message": "invalid input details",
+    +   "message": "Expected a string but received a undefined",
+      }
+
+      176 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      177 |     };
+    > 178 |     expect(requestAuthRegister(requestUserProfile(testToken, testUserId).bodyObj.email, 'myownmumma', 'Jack', 'Fieldson').bodyObj.error).toStrictEqual({ message: 'invalid input details' });
+          |                                                                                                                                          ^
+      179 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(testUserObject);
+      180 |   });
+      181 |
+
+      at Object.<anonymous> (src/auth.test.ts:178:138)
+
+FAIL src/search.test.ts (42.835 s)
+  ● Console
+
+    console.log
+      {
+        messages: [
+          {
+            messageId: 43,
+            uId: 1,
+            message: 'omg hopefully he doesnt see this hehe',
+            timeSent: 1659738359,
+            isPinned: 0,
+            reacts: []
+          },
+          {
+            messageId: 55,
+            uId: 1,
+            message: 'hehe',
+            timeSent: 1659738359,
+            isPinned: 0,
+            reacts: []
+          },
+          {
+            messageId: 7,
+            uId: 2,
+            message: 'stfu bitch hehe',
+            timeSent: 1659738359,
+            isPinned: 0,
+            reacts: []
+          }
+        ]
+      }
+
+      at Object.<anonymous> (src/search.test.ts:145:11)
+
+  ● search string does not match any messages in channels or dms
+
+    expect(received).toMatchObject(expected)
+
+    Expected: []
+    Received: {"messages": []}
+
+       99 |
+      100 |   expect(requestSearch(danielToken, 'upcomingbenchpr').bodyObj).toMatchObject({messages: []});
+    > 101 |   expect(requestSearch(danielToken, 'Fourth message ').bodyObj).toMatchObject([]);
+          |                                                                 ^
+      102 |   expect(requestSearch(danielToken, 'upcomingbenchpr').res.statusCode).toBe(OK);
+      103 | });
+      104 |
+
+      at Object.<anonymous> (src/search.test.ts:101:65)
+
+PASS src/channels.test.ts
+PASS src/echo.test.ts
+PASS src/other.test.ts
+FAIL src/users.test.ts (24.837 s)
+  ● Testing default case
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "danielYung@gmail.com",
+          "handleStr": "danielyung",
+          "nameFirst": "Daniel",
+          "nameLast": "Yung",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 2,
+    +   },
+      }
+
+      53 |   };
+      54 |
+    > 55 |   expect(requestUserProfile(danielToken, danielId).bodyObj).toMatchObject(danielInfo);
+         |                                                             ^
+      56 |   const obj1 = requestUserProfile(maiyaToken, maiyaId);
+      57 |   expect(obj1.bodyObj).toMatchObject(maiyaInfo);
+      58 |   expect(obj1.res.statusCode).toBe(OK);
+
+      at Object.<anonymous> (src/users.test.ts:55:61)
+
+  ● Testing for requestUserProfileSetName › Test 1 affirmitive
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "Jonathan",
+          "nameLast": "Schmidt",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 3,
+    +   },
+      }
+
+      82 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      83 |     };
+    > 84 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+         |                                                               ^
+      85 |   });
+      86 |
+      87 |   test('Test 2 invalid nameFirst', () => {
+
+      at Object.<anonymous> (src/users.test.ts:84:63)
+
+  ● Testing for requestUserProfileSetName › Test 2 invalid nameFirst
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      93 |     expect(response.res.statusCode).toBe(400);
+      94 |     expect(response.bodyObj.error).toStrictEqual({ message: 'invalid input details' });
+    > 95 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+         |                                                               ^
+      96 |       email: 'who.is.joe@is.the.question.com',
+      97 |       uId: testUserId,
+      98 |       nameFirst: 'John',
+
+      at Object.<anonymous> (src/users.test.ts:95:63)
+
+  ● Testing for requestUserProfileSetName › Test 3 invalid nameLast
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      111 |     expect(response.res.statusCode).toBe(400);
+      112 |     expect(response.bodyObj.error).toStrictEqual({ message: 'invalid input details' });
+    > 113 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+          |                                                               ^
+      114 |       email: 'who.is.joe@is.the.question.com',
+      115 |       uId: testUserId,
+      116 |       nameFirst: 'John',
+
+      at Object.<anonymous> (src/users.test.ts:113:63)
+
+  ● Testing for requestUserProfileSetEmail › Test 1 affirmitive
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "something@gmail.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      142 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      143 |     };
+    > 144 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+          |                                                               ^
+      145 |   });
+      146 |
+      147 |   test('Test 2 invalid email', () => {
+
+      at Object.<anonymous> (src/users.test.ts:144:63)
+
+  ● Testing for requestUserProfileSetEmail › Test 2 invalid email
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      153 |     expect(response.res.statusCode).toBe(400);
+      154 |     expect(response.bodyObj.error).toStrictEqual({ message: 'invalid input details' });
+    > 155 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+          |                                                               ^
+      156 |       email: 'who.is.joe@is.the.question.com',
+      157 |       uId: testUserId,
+      158 |       nameFirst: 'John',
+
+      at Object.<anonymous> (src/users.test.ts:155:63)
+
+  ● Testing for requestUserProfileSetHandle › Test 1 affirmitive
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "BigChungas2000",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      184 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      185 |     };
+    > 186 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+          |                                                               ^
+      187 |   });
+      188 |
+      189 |   test('Test 2 invalid handle', () => {
+
+      at Object.<anonymous> (src/users.test.ts:186:63)
+
+  ● Testing for requestUserProfileSetHandle › Test 2 invalid handle
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      195 |     expect(response.res.statusCode).toBe(400);
+      196 |     expect(response.bodyObj.error).toStrictEqual({ message: 'invalid input details' });
+    > 197 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual({
+          |                                                               ^
+      198 |       email: 'who.is.joe@is.the.question.com',
+      199 |       uId: testUserId,
+      200 |       nameFirst: 'John',
+
+      at Object.<anonymous> (src/users.test.ts:197:63)
+
+  ● Testing for requestUserProfileSetHandle › Test 3 occupied handle
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 2,
+    +   },
+      }
+
+      221 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      222 |     };
+    > 223 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+          |                                                               ^
+      224 |   });
+      225 |
+      226 |   test('Test 4 negative non-existant token', () => {
+
+      at Object.<anonymous> (src/users.test.ts:223:63)
+
+  ● Testing for requestUserProfileSetHandle › Test 4 negative non-existant token
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Object {
+    +   "user": Object {
+          "email": "who.is.joe@is.the.question.com",
+          "handleStr": "johnsmith",
+          "nameFirst": "John",
+          "nameLast": "Smith",
+          "profileImgUrl": "http://127.0.0.1:48237/imgurl/default.jpg",
+          "uId": 1,
+    +   },
+      }
+
+      238 |       profileImgUrl: `${url}:${port}/imgurl/default.jpg`,
+      239 |     };
+    > 240 |     expect(requestUserProfile(testToken, testUserId).bodyObj).toStrictEqual(expectedObject);
+          |                                                               ^
+      241 |   });
+      242 | });
+      243 |
+
+      at Object.<anonymous> (src/users.test.ts:240:63)
+
+  ● Testing for requestUploadPhoto › Test 1 affirmitive
+
+    The URL/path must be a string.
+
+      322 |       testImgUrl = requestUserProfile(testToken, testUserId).bodyObj.profileImgUrl;
+      323 |     }
+    > 324 |     const res = request(
+          |                        ^
+      325 |       'GET',
+      326 |       testImgUrl
+      327 |     );
+
+      at extractValue (node_modules/sync-rpc/lib/index.js:165:19)
+      at node_modules/sync-rpc/lib/index.js:175:12
+      at request (node_modules/sync-request/lib/index.js:28:15)
+      at Object.<anonymous> (src/users.test.ts:324:24)
+
+FAIL src/standup.test.ts (57.535 s)
+  ● standup capabilities › standup/active/v1 test › successful standup active - standup in progress
+
+    expect(received).toStrictEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "isActive": true,
+    +   "isActive": false,
+        "timeFinish": Any<Number>,
+      }
+
+      215 |       const testRequest = requestStandupActive(user1.token, channel1);
+      216 |       await new Promise((r) => setTimeout(r, 3000));
+    > 217 |       expect(testRequest).toStrictEqual({
+          |                           ^
+      218 |         isActive: true,
+      219 |         timeFinish: expect.any(Number)
+      220 |       });
+
+      at src/standup.test.ts:217:27
+      at fulfilled (src/standup.test.ts:5:58)
+
